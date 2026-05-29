@@ -196,7 +196,7 @@
             .news-grid { grid-template-columns: repeat(3, 1fr); }
         }
 
-        /* Стиль карточки строго как на YouTube: Картинка сверху во всю ширину, текст снизу */
+        /* Карточка с плеером */
         .news-item {
             background: rgba(11, 15, 25, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.05);
@@ -205,8 +205,6 @@
             display: flex;
             flex-direction: column;
             transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
-            text-decoration: none;
-            color: inherit;
         }
 
         .news-item:hover {
@@ -215,49 +213,24 @@
             box-shadow: 0 12px 24px rgba(168, 85, 247, 0.12);
         }
 
-        /* Превью контейнер 16:9 без внутренних рамок */
-        .image-wrapper {
+        /* Контейнер для iframe строго 16:9 */
+        .video-wrapper {
             width: 100%;
             aspect-ratio: 16 / 9;
             position: relative;
             background: #000;
-            overflow: hidden;
         }
 
-        .news-item img.report-img {
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            display: block;
+            border: none;
         }
 
-        /* Фиолетовый значок Play по центру превью */
-        .video-overlay-btn {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(168, 85, 247, 0.9);
-            color: white;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            padding-left: 3px;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.6);
-            z-index: 5;
-            transition: background 0.2s, transform 0.2s;
-        }
-
-        .news-item:hover .video-overlay-btn {
-            background: #a855f7;
-            transform: translate(-50%, -50%) scale(1.1);
-        }
-
-        /* Текстовый блок под превью */
+        /* Текстовая часть под видео */
         .news-item-body {
             padding: 16px;
             display: flex;
@@ -349,43 +322,37 @@
     </div>
 
     <script>
-        // Оригинальная база репортажей с точными ссылками на рабочие обложки этих видео
+        // Идентификаторы embed-видео Rutube (взяты из оригинального кода)
         const reportDatabase = [
             { 
                 t: "Экстренный репортаж: Бои под Купянском, продвижение штурмовых групп", 
                 d: "Военкоры передают с места событий: бронетехника пошла на прорыв оборонительных рубежей. Уникальные кадры работы экипажей БМП.",
-                img: "https://static.news.ru/doc/2023/10/11/1697010488.jpg", // Кадры боевой техники
-                link: "https://rutube.ru/video/de0727038e9daefdfdf1869e0618034d/"
+                embedId: "de0727038e9daefdfdf1869e0618034d"
             },
             { 
                 t: "Кадры с передовой: Работа расчетов «Солнцепек» на Авдеевском направлении", 
                 d: "Кадры объективного контроля с беспилотника. Выжжен укрепрайон противника. Полный отчет нанесения ударов.",
-                img: "https://cdnn21.img.ria.ru/images/07e7/06/07/1876648777_0:67:1280:787_1920x0_80_0_0_ef71556a337da5049a1f26a5cda1a9f1.jpg", // Оригинальное превью Солнцепека
-                link: "https://rutube.ru/video/7208d986bfa32dbf319208035b809d43/"
+                embedId: "7208d986bfa32dbf319208035b809d43"
             },
             { 
                 t: "Репортаж из освобожденного поселка: Обстановка из первых уст", 
                 d: "Наши бойцы водрузили знамя в центре населенного пункта. Эксклюзивные интервью с командирами штурмовых батальонов.",
-                img: "https://crimea-news.com/img/20240523/af1e737ef95a97bcff08f4c3ecb20bfa_o.jpg", // Кадры из освобожденной зоны
-                link: "https://rutube.ru/video/1e8cbd3cb43f1190bc1ef0cbf7bcda8a/"
+                embedId: "1e8cbd3cb43f1190bc1ef0cbf7bcda8a"
             },
             { 
                 t: "Хроника СВО: Массированный удар дронов-камикадзе по тыловым объектам", 
                 d: "Кадры ночной работы операторов БПЛА. Уничтожены замаскированные склады с боеприпасами и ангары техники.",
-                img: "https://cdn.vashgorod.ru/uploads/images/news/7adcfeb90bd467cb4c0628833904fc49.jpg", // Квадрокоптер / Дрон СВО
-                link: "https://rutube.ru/video/b50e3fa022bf61033b0fa84803986a11/"
+                embedId: "b50e3fa022bf61033b0fa84803986a11"
             },
             { 
                 t: "Спецрепортаж: Инженерные подразделения наводят переправы под огнем", 
                 d: "Кадры возведения понтонных мостов в реальном времени. Слаженная работа расчетов под прикрытием систем ПВО.",
-                img: "https://мультимедиа.минобороны.рф/images/military/gallery/2022/pontonnaya_pereprava_z_650-2.jpg", // Работа инженерных войск РФ
-                link: "https://rutube.ru/video/40d6cfa98b671ef534a6dfccbf234c9c/"
+                embedId: "40d6cfa98b671ef534a6dfccbf234c9c"
             },
             { 
                 t: "Кадры из окопов: Отбита мощная контратака на флангах Бахмута", 
                 d: "Эксклюзивное видео боя высокой интенсивности. Огневое поражение наступающих сил из всех видов стрелкового оружия.",
-                img: "https://prufy.ru/upload/iblock/c38/c38734da255a2c918f6eeffef6378ba2.jpg", // Окопный бой хроника
-                link: "https://rutube.ru/video/28fcbc0da03d00fcfbf98cfc8d03541d/"
+                embedId: "28fcbc0da03d00fcfbf98cfc8d03541d"
             }
         ];
 
@@ -397,7 +364,7 @@
             btnElement.classList.add('active');
         }
 
-        // Рендеринг карточек при загрузке
+        // Рендерим стартовую сетку
         function generateInitialNews() {
             const grid = document.getElementById('news-grid');
             grid.innerHTML = '';
@@ -411,28 +378,28 @@
                 let data = reportDatabase[i];
                 let title = data.t + ` #_${100 - i}`;
 
-                grid.innerHTML += createCardHtml(title, data.d, timeString, data.img, data.link);
+                grid.innerHTML += createCardHtml(title, data.d, timeString, data.embedId);
             }
         }
 
-        // Точная структура YouTube карточки
-        function createCardHtml(title, desc, time, imageUrl, videoUrl) {
+        // Генерация разметки с живым встроенным плеером Rutube (skin-color задает фиолетовые элементы управления)
+        function createCardHtml(title, desc, time, embedId) {
+            const videoUrl = `https://rutube.ru/play/embed/${embedId}/?skinColor=a855f7`;
             return `
-                <a href="${videoUrl}" target="_blank" class="news-item">
-                    <div class="image-wrapper">
-                        <img src="${imageUrl}" class="report-img" alt="Обложка репортажа" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3220/3220902.png';">
-                        <div class="video-overlay-btn">▶</div>
+                <div class="news-item">
+                    <div class="video-wrapper">
+                        <iframe src="${videoUrl}" frameBorder="0" allow="clipboard-write; autoplay" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
                     </div>
                     <div class="news-item-body">
                         <span class="news-date">⏱ ${time} | СВО ХРОНИКА</span>
                         <h3>${title}</h3>
                         <p>${desc}</p>
                     </div>
-                </a>
+                </div>
             `;
         }
 
-        // Автодобавление свежих репортажей в верх ленты
+        // Свежие репортажи сверху
         function pushNewReport() {
             const grid = document.getElementById('news-grid');
             let now = new Date();
@@ -441,7 +408,7 @@
             let randomData = reportDatabase[Math.floor(Math.random() * reportDatabase.length)];
             let liveTitle = `⚡ СРОЧНО: ` + randomData.t.replace("Экстренный репортаж: ", "").replace("Кадры с передовой: ", "");
 
-            let cardHtml = createCardHtml(liveTitle, randomData.d, timeString, randomData.img, randomData.link);
+            let cardHtml = createCardHtml(liveTitle, randomData.d, timeString, randomData.embedId);
             grid.insertAdjacentHTML('afterbegin', cardHtml);
 
             if (grid.children.length > 9) {
@@ -452,12 +419,12 @@
         document.addEventListener("DOMContentLoaded", () => {
             generateInitialNews();
 
-            // Интервал автообновления
+            // Безопасный интервал добавления новых репортажей
             setInterval(() => {
                 if(document.getElementById('news-tab').classList.contains('active')) {
                     pushNewReport();
                 }
-            }, 25000);
+            }, 30000);
         });
     </script>
 </body>
