@@ -196,7 +196,7 @@
             .news-grid { grid-template-columns: repeat(3, 1fr); }
         }
 
-        /* Стиль карточки как на YouTube: изображение сверху, контент снизу */
+        /* Карточка в стиле YouTube: Картинка на весь верх, описание строго внизу */
         .news-item {
             background: rgba(11, 15, 25, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.05);
@@ -215,7 +215,7 @@
             box-shadow: 0 12px 24px rgba(168, 85, 247, 0.12);
         }
 
-        /* Окно превью — строгое соотношение сторон 16:9 без полей */
+        /* Окно превью 16:9 без внутренних рамок */
         .image-wrapper {
             width: 100%;
             aspect-ratio: 16 / 9;
@@ -231,7 +231,7 @@
             display: block;
         }
 
-        /* Фиолетовая круглая кнопка воспроизведения поверх превью */
+        /* Фиолетовая кнопка воспроизведения по центру картинки */
         .video-overlay-btn {
             position: absolute;
             top: 50%;
@@ -257,7 +257,7 @@
             transform: translate(-50%, -50%) scale(1.1);
         }
 
-        /* Блок с описанием снизу под превью */
+        /* Описание под превью */
         .news-item-body {
             padding: 16px;
             display: flex;
@@ -349,37 +349,43 @@
     </div>
 
     <script>
-        // База данных с реальными ID роликов YouTube для генерации точных превью
+        // Актуальная база данных RuTube репортажей (прямые ссылки на превью картинок и видео)
         const reportDatabase = [
             { 
                 t: "Экстренный репортаж: Бои под Купянском, продвижение штурмовых групп", 
                 d: "Военкоры передают с места событий: бронетехника пошла на прорыв оборонительных рубежей. Уникальные кадры работы экипажей БМП.",
-                ytId: "j6fKk5I_r3M" 
+                img: "https://pic.rutubelist.ru/video/de/07/de0727038e9daefdfdf1869e0618034d.jpg",
+                link: "https://rutube.ru/video/de0727038e9daefdfdf1869e0618034d/"
             },
             { 
                 t: "Кадры с передовой: Работа расчетов «Солнцепек» на Авдеевском направлении", 
                 d: "Кадры объективного контроля с беспилотника. Выжжен укрепрайон противника. Полный отчет нанесения ударов.",
-                ytId: "QpG9Z7yY_Fs"
+                img: "https://pic.rutubelist.ru/video/72/08/7208d986bfa32dbf319208035b809d43.jpg",
+                link: "https://rutube.ru/video/7208d986bfa32dbf319208035b809d43/"
             },
             { 
                 t: "Репортаж из освобожденного поселка: Обстановка из первых уст", 
                 d: "Наши бойцы водрузили знамя в центре населенного пункта. Эксклюзивные интервью с командирами штурмовых батальонов.",
-                ytId: "7I30Y1m2F64"
+                img: "https://pic.rutubelist.ru/video/1e/8c/1e8cbd3cb43f1190bc1ef0cbf7bcda8a.jpg",
+                link: "https://rutube.ru/video/1e8cbd3cb43f1190bc1ef0cbf7bcda8a/"
             },
             { 
                 t: "Хроника СВО: Массированный удар дронов-камикадзе по тыловым объектам", 
                 d: "Кадры ночной работы операторов БПЛА. Уничтожены замаскированные склады с боеприпасами и ангары техники.",
-                ytId: "Z6fN_Lh_v88"
+                img: "https://pic.rutubelist.ru/video/b5/0e/b50e3fa022bf61033b0fa84803986a11.jpg",
+                link: "https://rutube.ru/video/b50e3fa022bf61033b0fa84803986a11/"
             },
             { 
                 t: "Спецрепортаж: Инженерные подразделения наводят переправы под огнем", 
                 d: "Кадры возведения понтонных мостов в реальном времени. Слаженная работа расчетов под прикрытием систем ПВО.",
-                ytId: "Yf6Z8_B4x9E"
+                img: "https://pic.rutubelist.ru/video/40/d6/40d6cfa98b671ef534a6dfccbf234c9c.jpg",
+                link: "https://rutube.ru/video/40d6cfa98b671ef534a6dfccbf234c9c/"
             },
             { 
                 t: "Кадры из окопов: Отбита мощная контратака на флангах Бахмута", 
                 d: "Эксклюзивное видео боя высокой интенсивности. Огневое поражение наступающих сил из всех видов стрелкового оружия.",
-                ytId: "g8T6M_Z2fRE"
+                img: "https://pic.rutubelist.ru/video/28/fc/28fcbc0da03d00fcfbf98cfc8d03541d.jpg",
+                link: "https://rutube.ru/video/28fcbc0da03d00fcfbf98cfc8d03541d/"
             }
         ];
 
@@ -391,7 +397,7 @@
             btnElement.classList.add('active');
         }
 
-        // Заполнение начальной сетки новостей
+        // Заполнение ленты новостей
         function generateInitialNews() {
             const grid = document.getElementById('news-grid');
             grid.innerHTML = '';
@@ -404,21 +410,17 @@
 
                 let data = reportDatabase[i];
                 let title = data.t + ` #_${100 - i}`;
-                
-                // Ссылка на родную обложку этого видео с YouTube
-                let imgSrc = `https://img.youtube.com/vi/${data.ytId}/hqdefault.jpg`;
-                let videoLink = `https://www.youtube.com/watch?v=${data.ytId}`;
 
-                grid.innerHTML += createCardHtml(title, data.d, timeString, imgSrc, videoLink);
+                grid.innerHTML += createCardHtml(title, data.d, timeString, data.img, data.link);
             }
         }
 
-        // YouTube-подобная разметка карточки
+        // Разметка карточки новостей
         function createCardHtml(title, desc, time, imageUrl, videoUrl) {
             return `
                 <a href="${videoUrl}" target="_blank" class="news-item">
                     <div class="image-wrapper">
-                        <img src="${imageUrl}" class="report-img" alt="Обложка">
+                        <img src="${imageUrl}" class="report-img" alt="Обложка репортажа">
                         <div class="video-overlay-btn">▶</div>
                     </div>
                     <div class="news-item-body">
@@ -430,7 +432,7 @@
             `;
         }
 
-        // Добавление новых карточек в реальном времени сверху ленты
+        // Функция автоматического добавления свежих репортажей сверху
         function pushNewReport() {
             const grid = document.getElementById('news-grid');
             let now = new Date();
@@ -438,10 +440,8 @@
 
             let randomData = reportDatabase[Math.floor(Math.random() * reportDatabase.length)];
             let liveTitle = `⚡ СРОЧНО: ` + randomData.t.replace("Экстренный репортаж: ", "").replace("Кадры с передовой: ", "");
-            let imgSrc = `https://img.youtube.com/vi/${randomData.ytId}/hqdefault.jpg`;
-            let videoLink = `https://www.youtube.com/watch?v=${randomData.ytId}`;
 
-            let cardHtml = createCardHtml(liveTitle, randomData.d, timeString, imgSrc, videoLink);
+            let cardHtml = createCardHtml(liveTitle, randomData.d, timeString, randomData.img, randomData.link);
             grid.insertAdjacentHTML('afterbegin', cardHtml);
 
             if (grid.children.length > 9) {
@@ -452,7 +452,7 @@
         document.addEventListener("DOMContentLoaded", () => {
             generateInitialNews();
 
-            // Интервал добавления новых постов (раз в 25 секунд)
+            // Интервал автоматического обновления контента (раз в 25 секунд)
             setInterval(() => {
                 if(document.getElementById('news-tab').classList.contains('active')) {
                     pushNewReport();
