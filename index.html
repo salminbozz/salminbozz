@@ -134,7 +134,7 @@
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 15px;
+            padding: 20px;
             border-radius: 16px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         }
@@ -142,19 +142,81 @@
         .news-card h2 {
             font-size: 20px;
             color: #e2e8f0;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        /* Контейнер новостной ленты URA.RU */
-        .feed-wrapper {
-            width: 100%;
-            height: 650px;
-            border-radius: 12px;
-            overflow-y: auto;
+        /* Сетка для множества окон новостей */
+        .news-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 650px) {
+            .news-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .news-item {
+            background: rgba(11, 15, 25, 0.6);
             border: 1px solid rgba(168, 85, 247, 0.15);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .news-item:hover {
+            transform: translateY(-2px);
+            border-color: rgba(168, 85, 247, 0.4);
+        }
+
+        .news-item img {
+            width: 100%;
+            height: 190px;
+            object-fit: cover;
+            background: #151d2f;
+        }
+
+        .news-item-body {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-grow: 1;
+            justify-content: space-between;
+        }
+
+        .news-item-body h3 {
+            font-size: 16px;
+            color: #f1f5f9;
+            line-height: 1.4;
+            font-weight: 600;
+        }
+
+        .news-item-body p {
+            font-size: 13px;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+
+        .news-date {
+            font-size: 11px;
+            color: #a855f7;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .loading-text {
+            text-align: center;
+            color: #94a3b8;
+            padding: 20px;
+            font-size: 14px;
         }
 
         .footer-badge {
@@ -206,9 +268,9 @@
             <div class="news-container">
                 
                 <div class="news-card">
-                    <h2>🔥 Новости СВО | URA.RU</h2>
-                    <div class="feed-wrapper">
-                        <iframe width="100%" height="100%" src="https://rss.app/embed/v1/wall/t9Y6b54Z6m5kO6mF" frameborder="0"></iframe>
+                    <h2>🔥 Новости СВО | URA.RU (Лента онлайн)</h2>
+                    <div class="news-grid" id="ura-news-grid">
+                        <div class="loading-text">Загрузка свежих новостей СВО...</div>
                     </div>
                 </div>
 
@@ -232,7 +294,79 @@
             });
             document.getElementById(tabId).classList.add('active');
             event.currentTarget.classList.add('active');
+            
+            // Если открыли новости, сразу же обновляем их
+            if(tabId === 'news-tab') {
+                loadUraNews();
+            }
         }
+
+        // Функция автоматического парсинга живой ленты URA.RU
+        async function loadUraNews() {
+            const grid = document.getElementById('ura-news-grid');
+            
+            // Ссылка на официальный RSS поток URA.RU (раздел СВО / спецпроекты) через CORS-декодер
+            const rssUrl = 'https://ura.news/rss/special/71'; 
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`;
+
+            try {
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
+                
+                // Читаем XML данные
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+                const items = xmlDoc.getElementsByTagName('item');
+                
+                grid.innerHTML = ''; // Очищаем текст загрузки
+
+                // Выводим первые 10 самых свежих новостей (окон)
+                for (let i = 0; i < Math.min(items.length, 10); i++) {
+                    const item = items[i];
+                    
+                    const title = item.getElementsByTagName('title')[0]?.textContent || '';
+                    const description = item.getElementsByTagName('description')[0]?.textContent || '';
+                    const link = item.getElementsByTagName('link')[0]?.textContent || '#';
+                    
+                    // Форматируем дату публикации
+                    const pubDateStr = item.getElementsByTagName('pubDate')[0]?.textContent || '';
+                    const pubDate = pubDateStr ? new Date(pubDateStr).toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'}) : 'Свежее';
+
+                    // Извлекаем картинку из тега enclosure или прямо из описания
+                    let imgUrl = 'https://ura.news/images/og-image.png'; // Дефолтная заглушка URA.ru
+                    const enclosure = item.getElementsByTagName('enclosure')[0];
+                    if (enclosure && enclosure.getAttribute('type')?.includes('image')) {
+                        imgUrl = enclosure.getAttribute('url');
+                    }
+
+                    // Чистим текст от HTML-тегов, если они пришли из RSS
+                    const cleanDesc = description.replace(/<\/?[^>]+(>|$)/g, "").substring(0, 140) + '...';
+
+                    // Создаем карточку новости
+                    const newsHtml = `
+                        <div class="news-item" onclick="window.open('${link}', '_blank')">
+                            <img src="${imgUrl}" alt="Иллюстрация" onerror="this.src='https://ura.news/images/og-image.png'">
+                            <div class="news-item-body">
+                                <div>
+                                    <span class="news-date">⏱ ${pubDate}</span>
+                                    <h3 style="margin-top: 5px;">${title}</h3>
+                                </div>
+                                <p style="margin-top: 8px;">${cleanDesc}</p>
+                            </div>
+                        </div>
+                    `;
+                    grid.innerHTML += newsHtml;
+                }
+            } catch (error) {
+                grid.innerHTML = '<div class="loading-text" style="color: #ef4444;">Не удалось обновить ленту. Пожалуйста, попробуйте позже.</div>';
+                console.error('Ошибка загрузки новостей:', error);
+            }
+        }
+
+        // Первичный запуск при открытии страницы
+        document.addEventListener("DOMContentLoaded", () => {
+            loadUraNews();
+        });
     </script>
 
 </body>
