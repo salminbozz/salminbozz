@@ -217,4 +217,134 @@
         .loading-text {
             text-align: center;
             color: #94a3b8;
-            padding:
+            padding: 20px;
+            font-size: 14px;
+        }
+
+        .footer-badge {
+            background-color: #1e1b4b;
+            border: 1px solid #312e81;
+            padding: 8px 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            margin-top: 30px;
+        }
+
+        .footer-badge span {
+            color: #a78bfa;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .shield-icon {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-banner">
+        <img src="banner.jpg">
+    </div>
+
+    <div class="nav-menu">
+        <button class="nav-btn active" onclick="openTab('main-tab')">Главная</button>
+        <button class="nav-btn" onclick="openTab('news-tab')">Новости</button>
+    </div>
+
+    <div class="main-content">
+        
+        <div id="main-tab" class="tab-content active">
+            <div class="status-card">
+                <h1>Сайт в разработке</h1>
+                <p>Привет! Сейчас я активно настраиваю модули и верстку. Совсем скоро здесь откроется полноценный функционал профиля.</p>
+            </div>
+        </div>
+
+        <div id="news-tab" class="tab-content">
+            <div class="news-container">
+                <div class="news-card">
+                    <h2 id="news-title">🔥 Главные Новости | Загрузка...</h2>
+                    <div class="news-grid" id="news-grid">
+                        <div class="loading-text">Загрузка свежих новостей...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-badge">
+        <span class="shield-icon">🛡️</span>
+        <span>Ваши данные защищены</span>
+    </div>
+
+    <script>
+        function openTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+            
+            if(tabId === 'news-tab') {
+                loadNews();
+            }
+        }
+
+        async function loadNews() {
+            const grid = document.getElementById('news-grid');
+            if (grid.children.length > 1 || !grid.innerHTML.includes('Загрузка')) return;
+
+            const sources = [
+                { url: 'https://ura.news/rss', name: 'URA.RU' },
+                { url: 'https://lenta.ru/rss/news', name: 'Lenta.ru' }
+            ];
+            
+            let success = false;
+
+            for (const source of sources) {
+                if (success) break;
+                const encodedUrl = encodeURIComponent(source.url);
+                const proxies = [
+                    `https://api.rss2json.com/v1/api.json?rss_url=${encodedUrl}`,
+                    `https://api.allorigins.win/get?url=${encodedUrl}`
+                ];
+
+                for (const proxy of proxies) {
+                    if (success) break;
+                    try {
+                        const response = await fetch(proxy);
+                        const data = await response.json();
+
+                        if (data.status === 'ok' && data.items && data.items.length > 0) {
+                            document.getElementById('news-title').innerHTML = `🔥 Главные Новости | ${source.name}`;
+                            renderNews(data.items, grid, 'json');
+                            success = true;
+                        } else if (data.contents) {
+                            const parser = new DOMParser();
+                            const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+                            const items = xmlDoc.getElementsByTagName('item');
+                            if (items.length > 0) {
+                                document.getElementById('news-title').innerHTML = `🔥 Главные Новости | ${source.name}`;
+                                renderNews(items, grid, 'xml');
+                                success = true;
+                            }
+                        }
+                    } catch (e) {}
+                }
+            }
+
+            if (!success) {
+                grid.innerHTML = '<div class="loading-text" style="color: #ef4444;">Серверы новостей блокируют подключение. Пожалуйста, попробуйте позже.</div>';
+                document.getElementById('news-title').innerHTML = `🔥 Главные Новости`;
+            }
+        }
+
+        function renderNews(items, grid, type) {
+            grid.innerHTML = '';
+            const limit = Math.min(items.length, 30);
