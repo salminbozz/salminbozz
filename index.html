@@ -148,7 +148,6 @@
             gap: 8px;
         }
 
-        /* Сетка для множества окон новостей */
         .news-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -169,6 +168,7 @@
             display: flex;
             flex-direction: column;
             transition: transform 0.2s ease, border-color 0.2s ease;
+            cursor: pointer;
         }
 
         .news-item:hover {
@@ -266,14 +266,12 @@
 
         <div id="news-tab" class="tab-content">
             <div class="news-container">
-                
                 <div class="news-card">
-                    <h2>🔥 Новости СВО | URA.RU (Лента онлайн)</h2>
+                    <h2>🔥 Новости СВО | URA.RU</h2>
                     <div class="news-grid" id="ura-news-grid">
-                        <div class="loading-text">Загрузка свежих новостей СВО...</div>
+                        <div class="loading-text">Загрузка свежих новостей...</div>
                     </div>
                 </div>
-
             </div>
         </div>
 
@@ -295,75 +293,54 @@
             document.getElementById(tabId).classList.add('active');
             event.currentTarget.classList.add('active');
             
-            // Если открыли новости, сразу же обновляем их
             if(tabId === 'news-tab') {
                 loadUraNews();
             }
         }
 
-        // Функция автоматического парсинга живой ленты URA.RU
         async function loadUraNews() {
             const grid = document.getElementById('ura-news-grid');
-            
-            // Ссылка на официальный RSS поток URA.RU (раздел СВО / спецпроекты) через CORS-декодер
-            const rssUrl = 'https://ura.news/rss/special/71'; 
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`;
+            const apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fura.news%2Frss%2Fspecial%2F71';
 
             try {
-                const response = await fetch(proxyUrl);
+                const response = await fetch(apiUrl);
                 const data = await response.json();
-                
-                // Читаем XML данные
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(data.contents, "text/xml");
-                const items = xmlDoc.getElementsByTagName('item');
-                
-                grid.innerHTML = ''; // Очищаем текст загрузки
 
-                // Выводим первые 10 самых свежих новостей (окон)
-                for (let i = 0; i < Math.min(items.length, 10); i++) {
+                if (data.status !== 'ok') throw new Error('API Error');
+
+                grid.innerHTML = '';
+                const items = data.items;
+
+                for (let i = 0; i < Math.min(items.length, 20); i++) {
                     const item = items[i];
+                    const title = item.title;
+                    const link = item.link;
+                    const pubDate = new Date(item.pubDate).toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'});
                     
-                    const title = item.getElementsByTagName('title')[0]?.textContent || '';
-                    const description = item.getElementsByTagName('description')[0]?.textContent || '';
-                    const link = item.getElementsByTagName('link')[0]?.textContent || '#';
-                    
-                    // Форматируем дату публикации
-                    const pubDateStr = item.getElementsByTagName('pubDate')[0]?.textContent || '';
-                    const pubDate = pubDateStr ? new Date(pubDateStr).toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'}) : 'Свежее';
+                    let description = item.description.replace(/<\/?[^>]+(>|$)/g, "");
+                    if (description.length > 140) description = description.substring(0, 140) + '...';
 
-                    // Извлекаем картинку из тега enclosure или прямо из описания
-                    let imgUrl = 'https://ura.news/images/og-image.png'; // Дефолтная заглушка URA.ru
-                    const enclosure = item.getElementsByTagName('enclosure')[0];
-                    if (enclosure && enclosure.getAttribute('type')?.includes('image')) {
-                        imgUrl = enclosure.getAttribute('url');
-                    }
+                    let imgUrl = item.thumbnail || item.enclosure?.link || 'https://ura.news/images/og-image.png';
 
-                    // Чистим текст от HTML-тегов, если они пришли из RSS
-                    const cleanDesc = description.replace(/<\/?[^>]+(>|$)/g, "").substring(0, 140) + '...';
-
-                    // Создаем карточку новости
                     const newsHtml = `
                         <div class="news-item" onclick="window.open('${link}', '_blank')">
-                            <img src="${imgUrl}" alt="Иллюстрация" onerror="this.src='https://ura.news/images/og-image.png'">
+                            <img src="${imgUrl}" onerror="this.src='https://ura.news/images/og-image.png'">
                             <div class="news-item-body">
                                 <div>
                                     <span class="news-date">⏱ ${pubDate}</span>
                                     <h3 style="margin-top: 5px;">${title}</h3>
                                 </div>
-                                <p style="margin-top: 8px;">${cleanDesc}</p>
+                                <p style="margin-top: 8px;">${description}</p>
                             </div>
                         </div>
                     `;
                     grid.innerHTML += newsHtml;
                 }
             } catch (error) {
-                grid.innerHTML = '<div class="loading-text" style="color: #ef4444;">Не удалось обновить ленту. Пожалуйста, попробуйте позже.</div>';
-                console.error('Ошибка загрузки новостей:', error);
+                grid.innerHTML = '<div class="loading-text" style="color: #ef4444;">Ошибка загрузки новостей. Пожалуйста, попробуйте позже.</div>';
             }
         }
 
-        // Первичный запуск при открытии страницы
         document.addEventListener("DOMContentLoaded", () => {
             loadUraNews();
         });
