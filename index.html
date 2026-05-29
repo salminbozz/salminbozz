@@ -221,7 +221,7 @@
             box-shadow: 0 10px 20px rgba(168, 85, 247, 0.15);
         }
 
-        .news-item .img-wrapper {
+        .news-item .video-wrapper {
             width: 100%;
             height: 190px;
             position: relative;
@@ -229,40 +229,40 @@
             overflow: hidden;
         }
 
-        .news-item img {
+        .news-item video {
             width: 100%;
             height: 100%;
             object-fit: cover;
             transition: transform 0.5s ease;
         }
 
-        .news-item:hover img {
-            transform: scale(1.05);
+        .news-item:hover video {
+            transform: scale(1.04);
         }
 
         .video-play-btn {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            top: 15px;
+            right: 15px;
             background: rgba(168, 85, 247, 0.9);
             color: white;
-            width: 50px;
-            height: 50px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            padding-left: 4px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+            font-size: 14px;
+            padding-left: 2px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
             transition: all 0.3s ease;
+            z-index: 2;
         }
 
         .news-item:hover .video-play-btn {
             background: #b55fe6;
-            transform: translate(-50%, -50%) scale(1.1);
-            box-shadow: 0 0 20px #a855f7;
+            transform: scale(1.1);
+            box-shadow: 0 0 15px #a855f7;
         }
 
         .news-item-body {
@@ -347,8 +347,8 @@
             <div class="news-container">
                 <div class="news-card">
                     <h2>
-                        <span>🎬 Военная хроника | Репортажи</span>
-                        <div class="live-indicator"><div class="live-dot"></div>Лента Прямого Эфира</div>
+                        <span>🎬 Военная хроника | Видеорепортажи</span>
+                        <div class="live-indicator"><div class="live-dot"></div>Прямой эфир</div>
                     </h2>
                     <div class="news-grid" id="news-grid"></div>
                 </div>
@@ -363,19 +363,16 @@
     </div>
 
     <script>
-        // База уникальных картинок для военной хроники
-        const militaryImages = [
-            'https://images.unsplash.com/photo-1590079019458-0eb5b40a3371?auto=format&fit=crop&w=600&q=80',
-            'https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=600&q=80',
-            'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=600&q=80',
-            'https://images.unsplash.com/photo-1517059224940-d4af9eec41b7?auto=format&fit=crop&w=600&q=80',
-            'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
-            'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80',
-            'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=600&q=80',
-            'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=80'
+        // Постоянные, стабильные стриминг-ссылки на цикличные фоновые видеохроники СВО (без сбоев прокси)
+        const militaryVideos = [
+            'https://assets.mixkit.co/videos/preview/mixkit-military-jet-taking-off-from-an-airfield-41680-large.mp4',
+            'https://assets.mixkit.co/videos/preview/mixkit-radar-screen-scanning-in-a-dark-room-41686-large.mp4',
+            'https://assets.mixkit.co/videos/preview/mixkit-soldier-holding-a-radio-transmitter-41682-large.mp4',
+            'https://assets.mixkit.co/videos/preview/mixkit-war-zone-with-explosions-and-smoke-41676-large.mp4',
+            'https://assets.mixkit.co/videos/preview/mixkit-hands-of-a-soldier-holding-a-map-41681-large.mp4',
+            'https://assets.mixkit.co/videos/preview/mixkit-military-helicopter-flying-in-the-sky-41684-large.mp4'
         ];
 
-        // Пул оперативных данных для генерации свежих репортажей
         const reportDatabase = [
             { t: "Экстренный репортаж: Бои под Купянском, продвижение штурмовых групп", d: "Военкоры передают с места событий: бронетехника пошла на прорыв оборонительных рубежей. Смотрите уникальные кадры из кабин БМП." },
             { t: "Кадры с передовой: Работа расчетов «Солнцепек» на Авдеевском направлении", d: "Кадры объективного контроля с беспилотника. Выжжен укрепрайон противника. Полный видеоотчет работы тяжелых огнеметов." },
@@ -395,7 +392,7 @@
             btnElement.classList.add('active');
         }
 
-        // Генерация красивой начальной сетки окон (15 штук)
+        // Первичная генерация 15 видеоокон
         function generateInitialNews() {
             const grid = document.getElementById('news-grid');
             grid.innerHTML = '';
@@ -403,33 +400,31 @@
             let now = new Date();
 
             for (let i = 0; i < 15; i++) {
-                // Создаем разницу во времени для старых новостей
-                let minutesAgo = (i * 12) + Math.floor(Math.random() * 8);
+                let minutesAgo = (i * 15) + Math.floor(Math.random() * 5);
                 let reportTime = new Date(now.getTime() - minutesAgo * 60000);
                 let timeString = reportTime.toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'});
 
-                // Берем шаблоны по кругу, чтобы данные были разнообразными
                 let dataIndex = i % reportDatabase.length;
                 let title = reportDatabase[dataIndex].t + ` #_${100 - i}`;
                 let desc = reportDatabase[dataIndex].d;
-                let img = militaryImages[i % militaryImages.length];
+                let videoSrc = militaryVideos[i % militaryVideos.length];
 
-                grid.innerHTML += createCardHtml(title, desc, timeString, img);
+                grid.innerHTML += createCardHtml(title, desc, timeString, videoSrc);
             }
         }
 
-        // Создание HTML-структуры карточки новости
-        function createCardHtml(title, desc, time, img) {
+        // HTML структура карточки с активным видеоплеером вместо фото
+        function createCardHtml(title, desc, time, videoUrl) {
             let videoLink = `https://yandex.ru/video/preview/?text=${encodeURIComponent(title + ' СВО видео')}`;
             return `
                 <a href="${videoLink}" target="_blank" class="news-item">
-                    <div class="img-wrapper">
-                        <img src="${img}">
+                    <div class="video-wrapper">
+                        <video src="${videoUrl}" autoplay loop muted playsinline></video>
                         <div class="video-play-btn">▶</div>
                     </div>
                     <div class="news-item-body">
                         <div>
-                            <span class="news-date">⏱ ${time} | LIVE</span>
+                            <span class="news-date">⏱ ${time} | РЕПОРТАЖ</span>
                             <h3 style="margin-top: 8px;">${title}</h3>
                         </div>
                         <p style="margin-top: 8px;">${desc}</p>
@@ -438,38 +433,34 @@
             `;
         }
 
-        // Функция появления новой новости, когда "новостник её выкладывает"
+        // Автоматическое добавление нового видео-окна "от новостника" в реальном времени
         function pushNewReport() {
             const grid = document.getElementById('news-grid');
             
             let now = new Date();
             let timeString = now.toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'});
 
-            // Случайный выбор контента и уникального фото
             let randomReport = reportDatabase[Math.floor(Math.random() * reportDatabase.length)];
-            let randomImg = militaryImages[Math.floor(Math.random() * militaryImages.length)];
+            let randomVideo = militaryVideos[Math.floor(Math.random() * militaryVideos.length)];
             
-            // Уникализируем заголовок под текущую секунду
             let liveTitle = `⚡ СРОЧНО: ` + randomReport.t.replace("Экстренный репортаж: ", "").replace("Кадры с передовой: ", "");
 
-            let cardHtml = createCardHtml(liveTitle, randomReport.d, timeString, randomImg);
+            let cardHtml = createCardHtml(liveTitle, randomReport.d, timeString, randomVideo);
 
-            // Плавно вставляем новость на первое место (в самый верх)
+            // Мягко пушим новость в самое начало ленты
             grid.insertAdjacentHTML('afterbegin', cardHtml);
 
-            // Держим лимит окон, чтобы страница летала (максимум 24 окна)
-            if (grid.children.length > 24) {
+            // Ограничение на количество активных плееров на странице, чтобы телефон не тормозил
+            if (grid.children.length > 21) {
                 grid.removeChild(grid.lastChild);
             }
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            // Мгновенно заполняем сетку из 15 окон при загрузке
             generateInitialNews();
 
-            // Имитация работы военкора: каждые 15 секунд в ленту автоматически падает свежее видео-окно
+            // Интервал автоматического добавления новых видео окон (каждые 15 секунд)
             setInterval(() => {
-                // Добавляем только если вкладка новостей активна (для оптимизации)
                 if(document.getElementById('news-tab').classList.contains('active')) {
                     pushNewReport();
                 }
