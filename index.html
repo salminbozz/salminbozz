@@ -298,7 +298,8 @@
 
         async function loadNews() {
             const grid = document.getElementById('news-grid');
-            if (grid.children.length > 1 || !grid.innerHTML.includes('Загрузка')) return;
+            grid.innerHTML = '<div class="loading-text">Загрузка свежих новостей...</div>';
+            document.getElementById('news-title').innerHTML = `🔥 Главные Новости | Загрузка...`;
 
             const sources = [
                 { url: 'https://ura.news/rss', name: 'URA.RU' },
@@ -348,3 +349,37 @@
         function renderNews(items, grid, type) {
             grid.innerHTML = '';
             const limit = Math.min(items.length, 30);
+            const defaultImg = 'https://images.unsplash.com/photo-1495020689067-958852a7765e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+
+            for (let i = 0; i < limit; i++) {
+                let title = '', link = '', pubDate = '', description = '', imgUrl = defaultImg;
+
+                if (type === 'json') {
+                    const item = items[i];
+                    title = item.title;
+                    link = item.link;
+                    pubDate = new Date(item.pubDate.replace(' ', 'T')).toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'});
+                    description = item.description;
+                    imgUrl = item.enclosure?.link || item.thumbnail || defaultImg;
+                } else {
+                    const item = items[i];
+                    title = item.getElementsByTagName('title')[0]?.textContent || '';
+                    link = item.getElementsByTagName('link')[0]?.textContent || '#';
+                    const dateStr = item.getElementsByTagName('pubDate')[0]?.textContent;
+                    pubDate = dateStr ? new Date(dateStr).toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'}) : '';
+                    description = item.getElementsByTagName('description')[0]?.textContent || '';
+                    const enclosure = item.getElementsByTagName('enclosure')[0];
+                    if (enclosure && enclosure.getAttribute('type')?.includes('image')) {
+                        imgUrl = enclosure.getAttribute('url');
+                    }
+                }
+
+                let cleanDesc = description.replace(/<\/?[^>]+(>|$)/g, "");
+                if (cleanDesc.length > 140) cleanDesc = cleanDesc.substring(0, 140) + '...';
+
+                grid.innerHTML += `
+                    <a href="${link}" target="_blank" class="news-item">
+                        <img src="${imgUrl}" onerror="this.src='${defaultImg}'">
+                        <div class="news-item-body">
+                            <div>
+                                <span class="news-date">⏱ ${pubDate}</span>
