@@ -220,7 +220,7 @@
             box-shadow: 0 10px 20px rgba(168, 85, 247, 0.15);
         }
 
-        .video-wrapper {
+        .image-wrapper {
             width: 100%;
             height: 190px;
             position: relative;
@@ -228,11 +228,16 @@
             overflow: hidden;
         }
 
-        .news-item video {
+        .news-item img.report-img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
+            transition: transform 0.5s ease;
+        }
+
+        .news-item:hover img.report-img {
+            transform: scale(1.05);
         }
 
         .video-overlay-btn {
@@ -311,7 +316,7 @@
 <body>
 
     <div class="header-banner">
-        <img src="banner.jpg">
+        <img src="banner.jpg" alt="Banner">
     </div>
 
     <div class="nav-menu">
@@ -332,7 +337,7 @@
             <div class="news-container">
                 <div class="news-card">
                     <h2>
-                        <span>🎬 Военная хроника | Текстовые & Видео Окна</span>
+                        <span>🎬 Военная хроника | Репортажи</span>
                         <div class="live-indicator"><div class="live-dot"></div>Прямой эфир</div>
                     </h2>
                     <div class="news-grid" id="news-grid"></div>
@@ -348,25 +353,19 @@
     </div>
 
     <script>
-        // Высокоскоростные медиа-файлы с бесперебойных CDN (архивные военные хроники, радары, полеты)
-        const militaryVideos = [
-            'https://player.vimeo.com/external/371433846.sd.mp4?s=236da2f3c054273b985c3e5e4e138ae6f429af7c&profile_id=165&oauth2_token_id=57447761',
-            'https://player.vimeo.com/external/435674703.sd.mp4?s=694892c90c37ad74044a5682cbcc61ae2be03df8&profile_id=165&oauth2_token_id=57447761',
-            'https://player.vimeo.com/external/510850877.sd.mp4?s=d3c1146603a660a9244033ecf5fbe9cb0117098e&profile_id=165&oauth2_token_id=57447761',
-            'https://player.vimeo.com/external/394333851.sd.mp4?s=bf78546b3fcf5f7ff7224212fc1160a28fdf4e28&profile_id=165&oauth2_token_id=57447761',
-            'https://player.vimeo.com/external/409217031.sd.mp4?s=d0db586b62788e001c905f9fbcf53896dfbb4c84&profile_id=165&oauth2_token_id=57447761'
-        ];
-
-        // Качественные заглушки, заменяющие черный экран в момент буферизации
-        const posterImages = [
-            'https://images.unsplash.com/photo-1590079019458-0eb5b40a3371?auto=format&fit=crop&w=500&q=80',
-            'https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=500&q=80',
-            'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=500&q=80'
+        // Быстрые, стабильные изображения высокого качества (военная техника, штабы, дроны, радары)
+        const militaryImages = [
+            'https://images.unsplash.com/photo-1580137189272-c9379f8864fd?auto=format&fit=crop&w=600&q=80', // Радар / Технологии
+            'https://images.unsplash.com/photo-1590079019458-0eb5b40a3371?auto=format&fit=crop&w=600&q=80', // Вертолет / Авиация
+            'https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=600&q=80', // Мониторы управления
+            'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80', // Спутниковая карта
+            'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=600&q=80', // Абстрактный цифровой интерфейс
+            'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=600&q=80'  // Командный пункт
         ];
 
         const reportDatabase = [
             { t: "Экстренный репортаж: Бои под Купянском, продвижение штурмовых групп", d: "Военкоры передают с места событий: бронетехника пошла на прорыв оборонительных рубежей. Уникальные кадры работы экипажей БМП." },
-            { t: "Кадры с передовой: Работа расчетов «Солнцепек» на Авдеевском направлении", d: "Кадры объективного контроля с беспилотника. Выжжен укрепрайон противника. Полный видеоотчет нанесения ударов." },
+            { t: "Кадры с передовой: Работа расчетов «Солнцепек» на Авдеевском направлении", d: "Кадры объективного контроля с беспилотника. Выжжен укрепрайон противника. Полный отчет нанесения ударов." },
             { t: "Репортаж из освобожденного поселка: Обстановка из первых уст", d: "Наши бойцы водрузили знамя в центре населенного пункта. Эксклюзивные интервью с командирами штурмовых батальонов." },
             { t: "Хроника СВО: Массированный удар дронов-камикадзе по тыловым объектам", d: "Кадры ночной работы операторов БПЛА. Уничтожены замаскированные склады с боеприпасами и ангары техники." },
             { t: "Спецрепортаж: Инженерные подразделения наводят переправы под огнем", d: "Кадры возведения понтонных мостов в реальном времени. Слаженная работа расчетов под прикрытием систем ПВО." },
@@ -383,7 +382,7 @@
             btnElement.classList.add('active');
         }
 
-        // Стартовая сборка окон ленты (15 штук)
+        // Стартовая сборка окон ленты новостей
         function generateInitialNews() {
             const grid = document.getElementById('news-grid');
             grid.innerHTML = '';
@@ -397,27 +396,24 @@
                 let dataIndex = i % reportDatabase.length;
                 let title = reportDatabase[dataIndex].t + ` #_${100 - i}`;
                 let desc = reportDatabase[dataIndex].d;
-                let videoSrc = militaryVideos[i % militaryVideos.length];
-                let posterSrc = posterImages[i % posterImages.length];
+                let imgSrc = militaryImages[i % militaryImages.length];
 
-                grid.innerHTML += createCardHtml(title, desc, timeString, videoSrc, posterSrc);
+                grid.innerHTML += createCardHtml(title, desc, timeString, imgSrc);
             }
         }
 
-        // Валидный HTML5 код плеера с автозапуском, отключенным звуком и обработкой постера
-        function createCardHtml(title, desc, time, videoUrl, posterUrl) {
-            let searchLink = `https://yandex.ru/video/preview/?text=${encodeURIComponent(title + ' СВО видео')}`;
+        // HTML структура карточки с быстрым и адаптивным фото вместо видео
+        function createCardHtml(title, desc, time, imageUrl) {
+            let searchLink = `https://yandex.ru/video/preview/?text=${encodeURIComponent(title + ' СВО')}`;
             return `
                 <a href="${searchLink}" target="_blank" class="news-item">
-                    <div class="video-wrapper">
-                        <video poster="${posterUrl}" autoplay loop muted playsinline preload="auto">
-                            <source src="${videoUrl}" type="video/mp4">
-                        </video>
-                        <div class="video-overlay-btn">▶</div>
+                    <div class="image-wrapper">
+                        <img src="${imageUrl}" class="report-img" alt="Репортаж">
+                        <div class="video-overlay-btn">👁️</div>
                     </div>
                     <div class="news-item-body">
                         <div>
-                            <span class="news-date">⏱ ${time} | ХРОНИКА</span>
+                            <span class="news-date">⏱ ${time} | СВО ХРОНИКА</span>
                             <h3 style="margin-top: 8px;">${title}</h3>
                         </div>
                         <p style="margin-top: 8px;">${desc}</p>
@@ -426,23 +422,22 @@
             `;
         }
 
-        // Функция автоматического добавления новых постов сверху
+        // Функция автоматического добавления новых постов в реальном времени сверху
         function pushNewReport() {
             const grid = document.getElementById('news-grid');
             let now = new Date();
             let timeString = now.toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'});
 
             let randomReport = reportDatabase[Math.floor(Math.random() * reportDatabase.length)];
-            let randomVideo = militaryVideos[Math.floor(Math.random() * militaryVideos.length)];
-            let randomPoster = posterImages[Math.floor(Math.random() * posterImages.length)];
+            let randomImg = militaryImages[Math.floor(Math.random() * militaryImages.length)];
             
             let liveTitle = `⚡ СРОЧНО: ` + randomReport.t.replace("Экстренный репортаж: ", "").replace("Кадры с передовой: ", "");
 
-            let cardHtml = createCardHtml(liveTitle, randomReport.d, timeString, randomVideo, randomPoster);
+            let cardHtml = createCardHtml(liveTitle, randomReport.d, timeString, randomImg);
 
             grid.insertAdjacentHTML('afterbegin', cardHtml);
 
-            // Ограничение на количество тяжелых окон на странице во избежание сбоев в работе браузера телефона
+            // Ограничение на количество карточек, чтобы страница не кушала память
             if (grid.children.length > 18) {
                 grid.removeChild(grid.lastChild);
             }
@@ -451,7 +446,7 @@
         document.addEventListener("DOMContentLoaded", () => {
             generateInitialNews();
 
-            // Автообновление раз в 15 секунд плавно докидывает новые карточки с репортажами
+            // Автообновление раз в 15 секунд — плавно генерирует новые карточки сверху ленты
             setInterval(() => {
                 if(document.getElementById('news-tab').classList.contains('active')) {
                     pushNewReport();
