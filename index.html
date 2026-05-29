@@ -126,6 +126,7 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+            width: 100%;
         }
 
         .news-card {
@@ -133,7 +134,7 @@
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 25px;
+            padding: 20px;
             border-radius: 16px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         }
@@ -141,41 +142,25 @@
         .news-card h2 {
             font-size: 20px;
             color: #e2e8f0;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .source-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            background: #1e293b;
-            border: 1px solid #334155;
-            color: #f8fafc;
-            padding: 12px 20px;
-            border-radius: 10px;
-            text-decoration: none;
-            font-weight: 500;
-            margin-top: 15px;
-            transition: all 0.2s ease;
+        .widget-wrapper {
             width: 100%;
+            height: 550px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(168, 85, 247, 0.15);
+            background: #111827;
         }
 
-        .source-link:hover {
-            background: #273549;
-            border-color: #475569;
-        }
-
-        .source-link.tg {
-            background: #0284c7;
-            border-color: #38bdf8;
-        }
-
-        .source-link.tg:hover {
-            background: #0369a1;
+        .widget-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
 
         .footer-badge {
@@ -226,15 +211,11 @@
         <div id="news-tab" class="tab-content">
             <div class="news-container">
                 <div class="news-card">
-                    <h2>🇷🇺 СВО: Сводки и аналитика</h2>
-                    <p>Для отслеживания актуальной и детальной информации о ходе Специальной военной операции с российской стороны доступны официальные ресурсы и крупнейшие аналитические каналы с картами боевых действий.</p>
+                    <h2>🇷🇺 Хроника Минобороны РФ</h2>
                     
-                    <a href="https://t.me/mod_russia" target="_blank" class="source-link tg">
-                        📢 Минобороны России (Telegram)
-                    </a>
-                    <a href="https://t.me/rybar" target="_blank" class="source-link tg">
-                        🗺️ Рыбарь: Сводки и Карты (Telegram)
-                    </a>
+                    <div class="widget-wrapper">
+                        <iframe src="https://tgstat.ru/channel/@mod_russia/embed?dark=1" allowfullscreen></iframe>
+                    </div>
                 </div>
             </div>
         </div>
