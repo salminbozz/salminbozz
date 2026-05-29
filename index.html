@@ -253,8 +253,8 @@
     </div>
 
     <div class="nav-menu">
-        <button class="nav-btn active" onclick="openTab('main-tab')">Главная</button>
-        <button class="nav-btn" onclick="openTab('news-tab')">Новости</button>
+        <button class="nav-btn active" onclick="openTab(this, 'main-tab')">Главная</button>
+        <button class="nav-btn" onclick="openTab(this, 'news-tab')">Новости</button>
     </div>
 
     <div class="main-content">
@@ -285,11 +285,12 @@
     </div>
 
     <script>
-        function openTab(tabId) {
+        function openTab(btnElement, tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            
             document.getElementById(tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
+            btnElement.classList.add('active');
             
             if(tabId === 'news-tab') {
                 loadNews();
@@ -298,8 +299,10 @@
 
         async function loadNews() {
             const grid = document.getElementById('news-grid');
-            grid.innerHTML = '<div class="loading-text">Загрузка свежих новостей...</div>';
-            document.getElementById('news-title').innerHTML = `🔥 Главные Новости | Загрузка...`;
+            
+            if (grid.children.length > 1 && !grid.innerHTML.includes('Загрузка')) {
+                return;
+            }
 
             const sources = [
                 { url: 'https://ura.news/rss', name: 'URA.RU' },
@@ -383,3 +386,18 @@
                         <div class="news-item-body">
                             <div>
                                 <span class="news-date">⏱ ${pubDate}</span>
+                                <h3 style="margin-top: 5px;">${title}</h3>
+                            </div>
+                            <p style="margin-top: 8px;">${cleanDesc}</p>
+                        </div>
+                    </a>
+                `;
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadNews();
+        });
+    </script>
+</body>
+</html>
