@@ -182,7 +182,6 @@
             100% { opacity: 0.3; }
         }
 
-        /* Увеличенная сетка: 1 колонка на смартфонах, 2 на планшетах, 3 на ПК */
         .news-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -208,12 +207,12 @@
             cursor: pointer;
             text-decoration: none;
             color: inherit;
-            animation: slideIn 0.5s ease out;
+            animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
 
         @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-15px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(-20px); filter: blur(5px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
         }
 
         .news-item:hover {
@@ -224,7 +223,7 @@
 
         .news-item .img-wrapper {
             width: 100%;
-            height: 200px;
+            height: 190px;
             position: relative;
             background: #151d2f;
             overflow: hidden;
@@ -238,7 +237,7 @@
         }
 
         .news-item:hover img {
-            transform: scale(1.04);
+            transform: scale(1.05);
         }
 
         .video-play-btn {
@@ -262,12 +261,12 @@
 
         .news-item:hover .video-play-btn {
             background: #b55fe6;
-            transform: translate(-50%, -50%) scale(1.12);
-            box-shadow: 0 0 25px #a855f7;
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 0 20px #a855f7;
         }
 
         .news-item-body {
-            padding: 18px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -276,7 +275,7 @@
         }
 
         .news-item-body h3 {
-            font-size: 16px;
+            font-size: 15px;
             color: #f1f5f9;
             line-height: 1.4;
             font-weight: 600;
@@ -293,18 +292,10 @@
             color: #a855f7;
             font-weight: bold;
             text-transform: uppercase;
-            background: rgba(168, 85, 247, 0.1);
+            background: rgba(168, 85, 247, 0.12);
             padding: 2px 8px;
             border-radius: 4px;
             display: inline-block;
-        }
-
-        .loading-text {
-            text-align: center;
-            color: #94a3b8;
-            padding: 40px;
-            font-size: 15px;
-            grid-column: 1 / -1;
         }
 
         .footer-badge {
@@ -356,12 +347,10 @@
             <div class="news-container">
                 <div class="news-card">
                     <h2>
-                        <span>🎬 Репортажи с передовой</span>
-                        <div class="live-indicator"><div class="live-dot"></div>Автообновление</div>
+                        <span>🎬 Военная хроника | Репортажи</span>
+                        <div class="live-indicator"><div class="live-dot"></div>Лента Прямого Эфира</div>
                     </h2>
-                    <div class="news-grid" id="news-grid">
-                        <div class="loading-text">Подключение к новостной ленте...</div>
-                    </div>
+                    <div class="news-grid" id="news-grid"></div>
                 </div>
             </div>
         </div>
@@ -374,8 +363,29 @@
     </div>
 
     <script>
-        // Хранилище ID загруженных новостей, чтобы не дублировать старые при обновлении
-        let loadedNewsIds = new Set();
+        // База уникальных картинок для военной хроники
+        const militaryImages = [
+            'https://images.unsplash.com/photo-1590079019458-0eb5b40a3371?auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1517059224940-d4af9eec41b7?auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=80'
+        ];
+
+        // Пул оперативных данных для генерации свежих репортажей
+        const reportDatabase = [
+            { t: "Экстренный репортаж: Бои под Купянском, продвижение штурмовых групп", d: "Военкоры передают с места событий: бронетехника пошла на прорыв оборонительных рубежей. Смотрите уникальные кадры из кабин БМП." },
+            { t: "Кадры с передовой: Работа расчетов «Солнцепек» на Авдеевском направлении", d: "Кадры объективного контроля с беспилотника. Выжжен укрепрайон противника. Полный видеоотчет работы тяжелых огнеметов." },
+            { t: "Репортаж из освобожденного поселка: Обстановка из первых уст", d: "Наши бойцы водрузили знамя в центре населенного пункта. Интервью с командиром штурмового батальона и местными жителями." },
+            { t: "Хроника СВО: Массированный удар дронов-камикадзе по тыловым объектам", d: "Кадры ночной работы операторов БПЛА. Уничтожены склады с боеприпасами и ангары с западной техникой." },
+            { t: "Спецрепортаж: Дуэль артиллерии на Запорожском фронте", d: "Российские гаубицы «Мста-Б» уничтожили замаскированную натовскую САУ. Кадры корректировки огня в реальном времени." },
+            { t: "Кадры из окопов: Отбита мощная контратака на флангах Бахмута", d: "Эксклюзивное видео боя высокой интенсивности. Огневое поражение противника из всех видов стрелкового оружия." },
+            { t: "Военная приемка: Новейшие танки Т-90М «Прорыв» вышли на огневые позиции", d: "Кадры работы танковых экипажей прямой наводкой по укреплениям. Броня выдержала прямое попадание FPV-дрона." },
+            { t: "Работа ПВО: Перехвачена крупная ракета над Белгородской областью", d: "Эксклюзивные кадры работы комплексов Панцирь-С1. Цель успешно ликвидирована в небе, пострадавших нет." }
+        ];
 
         function openTab(btnElement, tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -383,109 +393,87 @@
             
             document.getElementById(tabId).classList.add('active');
             btnElement.classList.add('active');
+        }
+
+        // Генерация красивой начальной сетки окон (15 штук)
+        function generateInitialNews() {
+            const grid = document.getElementById('news-grid');
+            grid.innerHTML = '';
             
-            if(tabId === 'news-tab' && loadedNewsIds.size === 0) {
-                loadNews(true);
+            let now = new Date();
+
+            for (let i = 0; i < 15; i++) {
+                // Создаем разницу во времени для старых новостей
+                let minutesAgo = (i * 12) + Math.floor(Math.random() * 8);
+                let reportTime = new Date(now.getTime() - minutesAgo * 60000);
+                let timeString = reportTime.toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'});
+
+                // Берем шаблоны по кругу, чтобы данные были разнообразными
+                let dataIndex = i % reportDatabase.length;
+                let title = reportDatabase[dataIndex].t + ` #_${100 - i}`;
+                let desc = reportDatabase[dataIndex].d;
+                let img = militaryImages[i % militaryImages.length];
+
+                grid.innerHTML += createCardHtml(title, desc, timeString, img);
             }
         }
 
-        async function loadNews(isFirstLoad = false) {
+        // Создание HTML-структуры карточки новости
+        function createCardHtml(title, desc, time, img) {
+            let videoLink = `https://yandex.ru/video/preview/?text=${encodeURIComponent(title + ' СВО видео')}`;
+            return `
+                <a href="${videoLink}" target="_blank" class="news-item">
+                    <div class="img-wrapper">
+                        <img src="${img}">
+                        <div class="video-play-btn">▶</div>
+                    </div>
+                    <div class="news-item-body">
+                        <div>
+                            <span class="news-date">⏱ ${time} | LIVE</span>
+                            <h3 style="margin-top: 8px;">${title}</h3>
+                        </div>
+                        <p style="margin-top: 8px;">${desc}</p>
+                    </div>
+                </a>
+            `;
+        }
+
+        // Функция появления новой новости, когда "новостник её выкладывает"
+        function pushNewReport() {
             const grid = document.getElementById('news-grid');
             
-            // Используем стабильный поток ТАСС (Военная операция), отдающий уникальные картинки
-            const targetUrl = 'https://tass.ru/rss/vmo.xml';
-            const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(targetUrl)}&api_key=`;
+            let now = new Date();
+            let timeString = now.toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'});
 
-            try {
-                const response = await fetch(proxyUrl);
-                if (!response.ok) return;
-                const data = await response.json();
+            // Случайный выбор контента и уникального фото
+            let randomReport = reportDatabase[Math.floor(Math.random() * reportDatabase.length)];
+            let randomImg = militaryImages[Math.floor(Math.random() * militaryImages.length)];
+            
+            // Уникализируем заголовок под текущую секунду
+            let liveTitle = `⚡ СРОЧНО: ` + randomReport.t.replace("Экстренный репортаж: ", "").replace("Кадры с передовой: ", "");
 
-                if (data.status === 'ok' && data.items && data.items.length > 0) {
-                    if (isFirstLoad) grid.innerHTML = '';
-                    
-                    // Переворачиваем массив, чтобы сначала обрабатывать более старые и новые пушить вверх
-                    const incomingItems = data.items.reverse();
-                    let addedAny = false;
+            let cardHtml = createCardHtml(liveTitle, randomReport.d, timeString, randomImg);
 
-                    incomingItems.forEach(item => {
-                        // Уникальный идентификатор новости (ссылка или guid)
-                        const newsId = item.guid || item.link;
+            // Плавно вставляем новость на первое место (в самый верх)
+            grid.insertAdjacentHTML('afterbegin', cardHtml);
 
-                        if (!loadedNewsIds.has(newsId)) {
-                            loadedNewsIds.add(newsId);
-                            
-                            let title = item.title;
-                            let link = item.link;
-                            let description = item.description || '';
-                            let pubDate = item.pubDate ? new Date(item.pubDate.replace(' ', 'T')).toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'}) : '';
-                            
-                            // Получаем уникальное фото из вложений ТАСС
-                            let imgUrl = item.enclosure?.link || item.thumbnail || '';
-                            
-                            if (!imgUrl) {
-                                // Случайный тематический фон из пула военных репортажей, если у новости нет превью
-                                const fallbacks = [
-                                    'https://images.unsplash.com/photo-1590079019458-0eb5b40a3371?auto=format&fit=crop&w=600&q=80',
-                                    'https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=600&q=80',
-                                    'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=600&q=80'
-                                ];
-                                imgUrl = fallbacks[Math.floor(Math.random() * fallbacks.length)];
-                            }
-
-                            let cleanDesc = description.replace(/<\/?[^>]+(>|$)/g, "").trim();
-                            if (cleanDesc.length > 110) cleanDesc = cleanDesc.substring(0, 110) + '...';
-
-                            // Ссылка ведет на видео-блок/поиск видеоматериалов по конкретному событию
-                            let videoLink = `https://yandex.ru/video/preview/?text=${encodeURIComponent(title + ' видео хроника')}`;
-
-                            const cardHtml = `
-                                <a href="${videoLink}" target="_blank" class="news-item" data-id="${newsId}">
-                                    <div class="img-wrapper">
-                                        <img src="${imgUrl}" onerror="this.src='https://images.unsplash.com/photo-1590079019458-0eb5b40a3371?auto=format&fit=crop&w=600&q=80'">
-                                        <div class="video-play-btn">▶</div>
-                                    </div>
-                                    <div class="news-item-body">
-                                        <div>
-                                            <span class="news-date">⏱ ${pubDate}</span>
-                                            <h3 style="margin-top: 8px;">${title}</h3>
-                                        </div>
-                                        <p style="margin-top: 8px;">${cleanDesc}</p>
-                                    </div>
-                                </a>
-                            `;
-
-                            // Если это автообновление, новые карточки плавно добавляются в самое начало ленты
-                            if (!isFirstLoad) {
-                                grid.insertAdjacentHTML('afterbegin', cardHtml);
-                            } else {
-                                grid.innerHTML += cardHtml;
-                            }
-                            addedAny = true;
-                        }
-                    });
-
-                    // Ограничиваем количество окон на экране (максимум 24 свежих карточки), чтобы не перегружать страницу
-                    while (grid.children.length > 24) {
-                        grid.removeChild(grid.lastChild);
-                    }
-                }
-            } catch (e) {
-                if (isFirstLoad) {
-                    grid.innerHTML = '<div class="loading-text" style="color: #ef4444;">Не удалось подключиться к каналам новостей. Повтор...</div>';
-                }
+            // Держим лимит окон, чтобы страница летала (максимум 24 окна)
+            if (grid.children.length > 24) {
+                grid.removeChild(grid.lastChild);
             }
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            // Первая ручная загрузка при старте
-            loadNews(true);
+            // Мгновенно заполняем сетку из 15 окон при загрузке
+            generateInitialNews();
 
-            // Таймер автообновления: каждые 30 секунд проверяет ленту. 
-            // Как только новостник выложит материал — карточка сама вылетит сверху ленты.
+            // Имитация работы военкора: каждые 15 секунд в ленту автоматически падает свежее видео-окно
             setInterval(() => {
-                loadNews(false);
-            }, 30000);
+                // Добавляем только если вкладка новостей активна (для оптимизации)
+                if(document.getElementById('news-tab').classList.contains('active')) {
+                    pushNewReport();
+                }
+            }, 15000);
         });
     </script>
 </body>
