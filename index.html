@@ -339,8 +339,10 @@
             const encodedUrl = encodeURIComponent(streamUrl);
             
             const proxies = [
+                `https://api.allorigins.win/get?url=${encodedUrl}`,
                 `https://api.rss2json.com/v1/api.json?rss_url=${encodedUrl}`,
-                `https://api.allorigins.win/get?url=${encodedUrl}`
+                `https://corsproxy.io/?${encodedUrl}`,
+                `https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=600&url=${encodedUrl}`
             ];
             
             let success = false;
@@ -349,23 +351,38 @@
                 if (success) break;
                 try {
                     const response = await fetch(proxy);
-                    const data = await response.json();
+                    if (!response.ok) continue;
 
-                    if (data.status === 'ok' && data.items && data.items.length > 0) {
-                        document.getElementById('news-title').innerHTML = `🎬 Репортажи с передовой | Первый канал`;
-                        renderNews(data.items, grid, 'json');
-                        success = true;
-                    } else if (data.contents) {
-                        const parser = new DOMParser();
-                        const xmlDoc = parser.parseFromString(data.contents, "text/xml");
-                        const items = xmlDoc.getElementsByTagName('item');
-                        if (items.length > 0) {
+                    if (proxy.includes('rss2json')) {
+                        const data = await response.json();
+                        if (data.status === 'ok' && data.items && data.items.length > 0) {
                             document.getElementById('news-title').innerHTML = `🎬 Репортажи с передовой | Первый канал`;
-                            renderNews(items, grid, 'xml');
+                            renderNews(data.items, grid, 'json');
                             success = true;
                         }
+                    } else {
+                        let xmlText = '';
+                        if (proxy.includes('allorigins')) {
+                            const data = await response.json();
+                            xmlText = data.contents;
+                        } else {
+                            xmlText = await response.text();
+                        }
+
+                        if (xmlText && xmlText.includes('<item>')) {
+                            const parser = new DOMParser();
+                            const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+                            const items = xmlDoc.getElementsByTagName('item');
+                            if (items.length > 0) {
+                                document.getElementById('news-title').innerHTML = `🎬 Репортажи с передовой | Первый канал`;
+                                renderNews(items, grid, 'xml');
+                                success = true;
+                            }
+                        }
                     }
-                } catch (e) {}
+                } catch (e) {
+                    console.log('Proxy failed, switching to next...');
+                }
             }
 
             if (!success) {
@@ -386,7 +403,7 @@
                     const item = items[i];
                     title = item.title;
                     link = item.link;
-                    pubDate = new Date(item.pubDate.replace(' ', 'T')).toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'});
+                    pubDate = item.pubDate ? new Date(item.pubDate.replace(' ', 'T')).toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'}) : '';
                     description = item.description || '';
                     imgUrl = item.enclosure?.link || item.thumbnail || '';
                 } else {
