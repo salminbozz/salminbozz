@@ -328,14 +328,13 @@
             }
         }
 
-        // Функция для быстрого перевода текста через бесплатное API без ключей
         async function translateText(text) {
             try {
                 const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ru&dt=t&q=${encodeURIComponent(text)}`);
                 const data = await res.json();
                 return data[0].map(item => item[0]).join('');
             } catch (e) {
-                return text; // Если перевод упал, вернет оригинал
+                return text;
             }
         }
 
@@ -346,7 +345,6 @@
                 return;
             }
 
-            // Стабильная мировая лента (раздел Новости о России/Конфликтах), которую прокси не забанят
             const targetUrl = 'https://www.aljazeera.com/xml/rss/all.xml';
             const encodedUrl = encodeURIComponent(targetUrl);
             const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodedUrl}`;
@@ -356,52 +354,110 @@
                 const data = await response.json();
 
                 if (data.status === 'ok' && data.items && data.items.length > 0) {
-                    document.getElementById('news-title').innerHTML = `🎬 Военные репортажи | Обновлено`;
+                    document.getElementById('news-title').innerHTML = `🎬 Военные репортажи | Лента обновлена`;
                     
-                    // Фильтруем новости, чтобы оставить только те, что связаны с кризисом/Россией/СВО
                     const filteredItems = data.items.filter(item => {
                         const txt = (item.title + item.description).toLowerCase();
-                        return txt.includes('russia') || txt.includes('ukraine') || txt.includes('war') || txt.includes('military') || txt.includes('attack');
+                        return txt.includes('russia') || txt.includes('ukraine') || txt.includes('war') || txt.includes('military') || txt.includes('attack') || txt.includes('army');
                     });
 
-                    // Если специфичных новостей мало, берем просто главные мировые репортажи
                     const finalItems = filteredItems.length > 0 ? filteredItems : data.items;
-                    
-                    renderNews(finalItems.slice(0, 12), grid);
+                    renderNews(finalItems.slice(0, 12), grid, data.feed?.url ? 'json' : 'json', data.items);
                 } else {
-                    throw new Error('Empty data');
+                    throw new Error('Fallback to raw XML');
                 }
             } catch (e) {
-                grid.innerHTML = '<div class="loading-text" style="color: #ef4444;">Ошибка обновления ленты. Пожалуйста, проверьте интернет-соединение.</div>';
-                document.getElementById('news-title').innerHTML = `🎬 Военные репортажи`;
+                // Если rss2json не отработал, пробуем забрать сырой XML через AllOrigins
+                try {
+                    const xmlResponse = await fetch(`https://api.allorigins.win/get?url=${encodedUrl}`);
+                    const xmlData = await xmlResponse.json();
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(xmlData.contents, "text/xml");
+                    const items = Array.from(xmlDoc.getElementsByTagName('item'));
+                    
+                    if(items.length > 0) {
+                        document.getElementById('news-title').innerHTML = `🎬 Военные репортажи | Актуально`;
+                        renderNews(items.slice(0, 12), grid, 'xml');
+                    } else {
+                        throw new Error();
+                    }
+                } catch(err) {
+                    grid.innerHTML = '<div class="loading-text" style="color: #ef4444;">Ошибка обновления ленты. Пожалуйста, попробуйте позже.</div>';
+                    document.getElementById('news-title').innerHTML = `🎬 Военные репортажи`;
+                }
             }
         }
 
-        async function renderNews(items, grid) {
+        async function renderNews(items, grid, type) {
             grid.innerHTML = '';
-            const fallbackImg = 'https://images.unsplash.com/photo-1590079019458-0eb5b40a3371?auto=format&fit=crop&w=600&q=80';
+            
+            // Разнообразные фоновые заглушки на случай сбоя картинки в самом потоке
+            const fallbacks = [
+                'https://images.unsplash.com/photo-1590079019458-0eb5b40a3371?auto=format&fit=crop&w=600&q=80',
+                'https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=600&q=80',
+                'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=600&q=80',
+                'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80'
+            ];
 
             for (let i = 0; i < items.length; i++) {
                 const item = items[i];
-                
-                // Переводим заголовок и описание на русский язык
-                const ruTitle = await translateText(item.title);
-                let cleanDesc = (item.description || '').replace(/<\/?[^>]+(>|$)/g, "").trim();
-                const ruDesc = cleanDesc ? await translateText(cleanDesc) : '';
+                let title = '', link = '', pubDate = '', description = '', imgUrl = '';
 
-                let pubDate = item.pubDate ? new Date(item.pubDate.replace(' ', 'T')).toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'}) : '';
-                let imgUrl = item.enclosure?.link || item.thumbnail || fallbackImg;
+                if (type === 'json') {
+                    title = item.title;
+                    link = item.link;
+                    pubDate = item.pubDate ? new Date(item.pubDate.replace(' ', 'T')).toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'}) : '';
+                    description = item.description || '';
+                    
+                    // Поиск картинок в JSON структуре
+                    imgUrl = item.enclosure?.link || item.thumbnail || '';
+                    if(!imgUrl && item.description && item.description.includes('<img')) {
+                        const m = item.description.match(/src="([^"]+)"/);
+                        if(m) imgUrl = m[1];
+                    }
+                } else {
+                    // Парсинг напрямую из XML с учетом медиа пространств имен
+                    title = item.getElementsByTagName('title')[0]?.textContent || '';
+                    link = item.getElementsByTagName('link')[0]?.textContent || '#';
+                    const dateStr = item.getElementsByTagName('pubDate')[0]?.textContent;
+                    pubDate = dateStr ? new Date(dateStr).toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'}) : '';
+                    description = item.getElementsByTagName('description')[0]?.textContent || '';
+                    
+                    // Ищем стандартный enclosure
+                    let enc = item.getElementsByTagName('enclosure')[0];
+                    if (enc) imgUrl = enc.getAttribute('url');
+                    
+                    // Если пусто, ищем медиа-теги по названию (для Al Jazeera)
+                    if (!imgUrl) {
+                        let mediaContent = item.getElementsByTagName('media:content')[0] || item.getElementsByTagName('content')[0];
+                        if(mediaContent) imgUrl = mediaContent.getAttribute('url');
+                    }
+                    if (!imgUrl) {
+                        let mediaThumb = item.getElementsByTagName('media:thumbnail')[0] || item.getElementsByTagName('thumbnail')[0];
+                        if(mediaThumb) imgUrl = mediaThumb.getAttribute('url');
+                    }
+                }
+
+                // Перевод данных
+                const ruTitle = await translateText(title);
+                let cleanDesc = description.replace(/<\/?[^>]+(>|$)/g, "").trim();
+                const ruDesc = cleanDesc ? await translateText(cleanDesc) : '';
 
                 let finalDesc = ruDesc;
                 if (finalDesc.length > 120) finalDesc = finalDesc.substring(0, 120) + '...';
+                
+                // Если картинка не определилась, ставим чередующиеся уникальные фоны
+                if (!imgUrl || imgUrl.trim() === '') {
+                    imgUrl = fallbacks[i % fallbacks.length];
+                }
 
-                // Ссылка ведет на видео-поиск Яндекса по названию переведенной статьи
-                let videoLink = `https://yandex.ru/video/preview/?text=${encodeURIComponent(ruTitle + ' СВО репортаж')}`;
+                // Ссылка генерирует видео-поиск репортажей на основе заголовка
+                let videoLink = `https://yandex.ru/video/preview/?text=${encodeURIComponent(ruTitle + ' репортаж')}`;
 
                 grid.innerHTML += `
                     <a href="${videoLink}" target="_blank" class="news-item">
                         <div class="img-wrapper">
-                            <img src="${imgUrl}" onerror="this.src='${fallbackImg}'">
+                            <img src="${imgUrl}" onerror="this.src='${fallbacks[i % fallbacks.length]}'">
                             <div class="video-play-btn">▶</div>
                         </div>
                         <div class="news-item-body">
