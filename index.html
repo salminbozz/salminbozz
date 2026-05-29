@@ -300,7 +300,7 @@
         <div id="news-tab" class="tab-content">
             <div class="news-container">
                 <div class="news-card">
-                    <h2 id="news-title">🎬 Репортажи с передовой | Загрузка...</h2>
+                    <h2 id="news-title">🎬 Военные репортажи | Загрузка...</h2>
                     <div class="news-grid" id="news-grid">
                         <div class="loading-text">Загрузка свежих видеорепортажей...</div>
                     </div>
@@ -335,14 +335,14 @@
                 return;
             }
 
-            const streamUrl = 'https://www.1tv.ru/news/rss/svoreportazhisperedovoy.xml';
-            const encodedUrl = encodeURIComponent(streamUrl);
+            // Стабильный поток РИА Новости (СВО)
+            const targetUrl = 'https://ria.ru/export/rss/defense_safety/index.xml';
+            const encodedUrl = encodeURIComponent(targetUrl);
             
             const proxies = [
                 `https://api.allorigins.win/get?url=${encodedUrl}`,
-                `https://api.rss2json.com/v1/api.json?rss_url=${encodedUrl}`,
                 `https://corsproxy.io/?${encodedUrl}`,
-                `https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=600&url=${encodedUrl}`
+                `https://api.rss2json.com/v1/api.json?rss_url=${encodedUrl}`
             ];
             
             let success = false;
@@ -356,7 +356,7 @@
                     if (proxy.includes('rss2json')) {
                         const data = await response.json();
                         if (data.status === 'ok' && data.items && data.items.length > 0) {
-                            document.getElementById('news-title').innerHTML = `🎬 Репортажи с передовой | Первый канал`;
+                            document.getElementById('news-title').innerHTML = `🎬 Военные репортажи | РИА`;
                             renderNews(data.items, grid, 'json');
                             success = true;
                         }
@@ -374,27 +374,31 @@
                             const xmlDoc = parser.parseFromString(xmlText, "text/xml");
                             const items = xmlDoc.getElementsByTagName('item');
                             if (items.length > 0) {
-                                document.getElementById('news-title').innerHTML = `🎬 Репортажи с передовой | Первый канал`;
+                                document.getElementById('news-title').innerHTML = `🎬 Военные репортажи | РИА`;
                                 renderNews(items, grid, 'xml');
                                 success = true;
                             }
                         }
                     }
-                } catch (e) {
-                    console.log('Proxy failed, switching to next...');
-                }
+                } catch (e) {}
             }
 
             if (!success) {
-                grid.innerHTML = '<div class="loading-text" style="color: #ef4444;">Не удалось загрузить видеорепортажи. Пожалуйста, попробуйте позже.</div>';
-                document.getElementById('news-title').innerHTML = `🎬 Репортажи с передовой`;
+                grid.innerHTML = '<div class="loading-text" style="color: #ef4444;">Ошибка обновления ленты. Пожалуйста, попробуйте позже.</div>';
+                document.getElementById('news-title').innerHTML = `🎬 Военные репортажи`;
             }
         }
 
         function renderNews(items, grid, type) {
             grid.innerHTML = '';
             const limit = Math.min(items.length, 20);
-            const fallbackImg = 'https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=800&q=80';
+            
+            // Военные уникальные заставки, если в статье вдруг нет фото
+            const fallbacks = [
+                'https://images.unsplash.com/photo-1590079019458-0eb5b40a3371?auto=format&fit=crop&w=600&q=80',
+                'https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=600&q=80',
+                'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=600&q=80'
+            ];
 
             for (let i = 0; i < limit; i++) {
                 let title = '', link = '', pubDate = '', description = '', imgUrl = '';
@@ -420,14 +424,20 @@
                     }
                 }
 
+                // Автоматическое перенаправление на видео-раздел по теме статьи
+                let videoSearchLink = `https://ria.ru/search/?query=${encodeURIComponent(title)}&media=video`;
+
                 let cleanDesc = description.replace(/<\/?[^>]+(>|$)/g, "").trim();
-                if (cleanDesc.length > 130) cleanDesc = cleanDesc.substring(0, 130) + '...';
-                if (!imgUrl) imgUrl = fallbackImg;
+                if (cleanDesc.length > 120) cleanDesc = cleanDesc.substring(0, 120) + '...';
+                
+                if (!imgUrl) {
+                    imgUrl = fallbacks[i % fallbacks.length];
+                }
 
                 grid.innerHTML += `
-                    <a href="${link}" target="_blank" class="news-item">
+                    <a href="${videoSearchLink}" target="_blank" class="news-item">
                         <div class="img-wrapper">
-                            <img src="${imgUrl}" onerror="this.src='${fallbackImg}'">
+                            <img src="${imgUrl}" onerror="this.src='${fallbacks[0]}'">
                             <div class="video-play-btn">▶</div>
                         </div>
                         <div class="news-item-body">
