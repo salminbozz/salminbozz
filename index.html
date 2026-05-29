@@ -169,6 +169,8 @@
             flex-direction: column;
             transition: transform 0.2s ease, border-color 0.2s ease;
             cursor: pointer;
+            text-decoration: none;
+            color: inherit;
         }
 
         .news-item:hover {
@@ -215,106 +217,4 @@
         .loading-text {
             text-align: center;
             color: #94a3b8;
-            padding: 20px;
-            font-size: 14px;
-        }
-
-        .footer-badge {
-            background-color: #1e1b4b;
-            border: 1px solid #312e81;
-            padding: 8px 16px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            margin-top: 30px;
-        }
-
-        .footer-badge span {
-            color: #a78bfa;
-            font-size: 12px;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .shield-icon {
-            font-size: 14px;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="header-banner">
-        <img src="banner.jpg">
-    </div>
-
-    <div class="nav-menu">
-        <button class="nav-btn active" onclick="openTab('main-tab')">Главная</button>
-        <button class="nav-btn" onclick="openTab('news-tab')">Новости</button>
-    </div>
-
-    <div class="main-content">
-        
-        <div id="main-tab" class="tab-content active">
-            <div class="status-card">
-                <h1>Сайт в разработке</h1>
-                <p>Привет! Сейчас я активно настраиваю модули и верстку. Совсем скоро здесь откроется полноценный функционал профиля.</p>
-            </div>
-        </div>
-
-        <div id="news-tab" class="tab-content">
-            <div class="news-container">
-                <div class="news-card">
-                    <h2>🔥 Главные Новости | URA.RU</h2>
-                    <div class="news-grid" id="ura-news-grid">
-                        <div class="loading-text">Загрузка свежих новостей...</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="footer-badge">
-        <span class="shield-icon">🛡️</span>
-        <span>Ваши данные защищены</span>
-    </div>
-
-    <script>
-        function openTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.getElementById(tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
-            
-            if(tabId === 'news-tab') {
-                loadUraNews();
-            }
-        }
-
-        async function loadUraNews() {
-            const grid = document.getElementById('ura-news-grid');
-            const apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fura.news%2Frss';
-
-            try {
-                const response = await fetch(apiUrl);
-                const data = await response.json();
-
-                if (data.status !== 'ok') {
-                    throw new Error('API Error');
-                }
-
-                grid.innerHTML = '';
-                const items = data.items;
-
-                for (let i = 0; i < Math.min(items.length, 30); i++) {
-                    const item = items[i];
-                    const title = item.title;
-                    const link = item.link;
-                    const pubDate = new Date(item.pubDate.replace(' ', 'T')).toLocaleDateString('ru-RU', {hour:
+            padding:
