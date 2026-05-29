@@ -267,7 +267,7 @@
         <div id="news-tab" class="tab-content">
             <div class="news-container">
                 <div class="news-card">
-                    <h2>🔥 Новости СВО | URA.RU</h2>
+                    <h2>🔥 Главные Новости | URA.RU</h2>
                     <div class="news-grid" id="ura-news-grid">
                         <div class="loading-text">Загрузка свежих новостей...</div>
                     </div>
@@ -300,51 +300,21 @@
 
         async function loadUraNews() {
             const grid = document.getElementById('ura-news-grid');
-            const apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fura.news%2Frss%2Fspecial%2F71';
+            const apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fura.news%2Frss';
 
             try {
                 const response = await fetch(apiUrl);
                 const data = await response.json();
 
-                if (data.status !== 'ok') throw new Error('API Error');
+                if (data.status !== 'ok') {
+                    throw new Error('API Error');
+                }
 
                 grid.innerHTML = '';
                 const items = data.items;
 
-                for (let i = 0; i < Math.min(items.length, 20); i++) {
+                for (let i = 0; i < Math.min(items.length, 30); i++) {
                     const item = items[i];
                     const title = item.title;
                     const link = item.link;
-                    const pubDate = new Date(item.pubDate).toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'});
-                    
-                    let description = item.description.replace(/<\/?[^>]+(>|$)/g, "");
-                    if (description.length > 140) description = description.substring(0, 140) + '...';
-
-                    let imgUrl = item.thumbnail || item.enclosure?.link || 'https://ura.news/images/og-image.png';
-
-                    const newsHtml = `
-                        <div class="news-item" onclick="window.open('${link}', '_blank')">
-                            <img src="${imgUrl}" onerror="this.src='https://ura.news/images/og-image.png'">
-                            <div class="news-item-body">
-                                <div>
-                                    <span class="news-date">⏱ ${pubDate}</span>
-                                    <h3 style="margin-top: 5px;">${title}</h3>
-                                </div>
-                                <p style="margin-top: 8px;">${description}</p>
-                            </div>
-                        </div>
-                    `;
-                    grid.innerHTML += newsHtml;
-                }
-            } catch (error) {
-                grid.innerHTML = '<div class="loading-text" style="color: #ef4444;">Ошибка загрузки новостей. Пожалуйста, попробуйте позже.</div>';
-            }
-        }
-
-        document.addEventListener("DOMContentLoaded", () => {
-            loadUraNews();
-        });
-    </script>
-
-</body>
-</html>
+                    const pubDate = new Date(item.pubDate.replace(' ', 'T')).toLocaleDateString('ru-RU', {hour:
