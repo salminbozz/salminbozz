@@ -353,14 +353,12 @@
     </div>
 
     <script>
-        // Быстрые, стабильные изображения высокого качества (военная техника, штабы, дроны, радары)
+        // Оригинальные обложки из новостных источников (поезд, квадрокоптер и др.)
         const militaryImages = [
-            'https://images.unsplash.com/photo-1580137189272-c9379f8864fd?auto=format&fit=crop&w=600&q=80', // Радар / Технологии
-            'https://images.unsplash.com/photo-1590079019458-0eb5b40a3371?auto=format&fit=crop&w=600&q=80', // Вертолет / Авиация
-            'https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=600&q=80', // Мониторы управления
-            'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80', // Спутниковая карта
-            'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=600&q=80', // Абстрактный цифровой интерфейс
-            'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=600&q=80'  // Командный пункт
+            'https://d1e00ek4ebabms.cloudfront.net/production/89b78826-6b22-441d-b873-19cb9e944d18.jpg', // Поезд / Состав на путях
+            'https://img.freepik.com/free-photo/quadcopter-flying-in-the-sky_1157-41829.jpg', // Квадрокоптер / БПЛА
+            'https://d1e00ek4ebabms.cloudfront.net/production/3be5cc14-b673-4556-8a03-750d5a4d33eb.jpg', // Техника / Кадры хроники
+            'https://img.freepik.com/free-photo/military-helicopter-flying-in-sky_1157-41825.jpg'  // Вертолет / Авиация
         ];
 
         const reportDatabase = [
@@ -402,14 +400,14 @@
             }
         }
 
-        // HTML структура карточки с быстрым и адаптивным фото вместо видео
+        // HTML структура карточки с оригинальной обложкой
         function createCardHtml(title, desc, time, imageUrl) {
             let searchLink = `https://yandex.ru/video/preview/?text=${encodeURIComponent(title + ' СВО')}`;
             return `
                 <a href="${searchLink}" target="_blank" class="news-item">
                     <div class="image-wrapper">
                         <img src="${imageUrl}" class="report-img" alt="Репортаж">
-                        <div class="video-overlay-btn">👁️</div>
+                        <div class="video-overlay-btn">▶</div>
                     </div>
                     <div class="news-item-body">
                         <div>
@@ -437,7 +435,7 @@
 
             grid.insertAdjacentHTML('afterbegin', cardHtml);
 
-            // Ограничение на количество карточек, чтобы страница не кушала память
+            // Ограничение на количество карточек на странице
             if (grid.children.length > 18) {
                 grid.removeChild(grid.lastChild);
             }
