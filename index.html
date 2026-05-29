@@ -27,22 +27,23 @@
         .header-banner {
             width: 100%;
             max-width: 1200px;
-            aspect-ratio: 3 / 1;
+            aspect-ratio: 5 / 1.5;
             overflow: hidden;
             border-radius: 16px;
             border: 1px solid rgba(168, 85, 247, 0.4);
             box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
             margin-bottom: 20px;
+            background: linear-gradient(135deg, #1e1b4b, #3b0764);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        @media (min-width: 768px) {
-            .header-banner { aspect-ratio: 5 / 1.2; }
-        }
-
-        .header-banner img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        .header-banner h2 {
+            font-size: 24px;
+            color: #c084fc;
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
         .nav-menu {
@@ -196,7 +197,7 @@
             .news-grid { grid-template-columns: repeat(3, 1fr); }
         }
 
-        /* Карточка с плеером */
+        /* Карточка с нативным видеоплеером */
         .news-item {
             background: rgba(11, 15, 25, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.05);
@@ -205,6 +206,7 @@
             display: flex;
             flex-direction: column;
             transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+            position: relative;
         }
 
         .news-item:hover {
@@ -213,7 +215,7 @@
             box-shadow: 0 12px 24px rgba(168, 85, 247, 0.12);
         }
 
-        /* Контейнер для iframe строго 16:9 */
+        /* Контейнер видео строго 16:9 */
         .video-wrapper {
             width: 100%;
             aspect-ratio: 16 / 9;
@@ -221,13 +223,45 @@
             background: #000;
         }
 
-        .video-wrapper iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .video-wrapper video {
             width: 100%;
             height: 100%;
-            border: none;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Кастомная кнопка запуска видео */
+        .play-overlay-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(168, 85, 247, 0.9);
+            color: white;
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            padding-left: 4px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+            z-index: 10;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            pointer-events: none; /* Пропускает клик на само видео */
+        }
+
+        .news-item:hover .play-overlay-btn {
+            background: #a855f7;
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        /* Скрываем кнопку, когда видео играет */
+        .news-item.playing .play-overlay-btn {
+            opacity: 0;
+            visibility: hidden;
         }
 
         /* Текстовая часть под видео */
@@ -285,7 +319,7 @@
 <body>
 
     <div class="header-banner">
-        <img src="banner.jpg" alt="Banner">
+        <h2>FLOREIN PORTAL</h2>
     </div>
 
     <div class="nav-menu">
@@ -322,37 +356,37 @@
     </div>
 
     <script>
-        // Идентификаторы embed-видео Rutube (взяты из оригинального кода)
+        // Железобетонная база данных с прямыми стриминговыми видео-ссылками
         const reportDatabase = [
             { 
                 t: "Экстренный репортаж: Бои под Купянском, продвижение штурмовых групп", 
                 d: "Военкоры передают с места событий: бронетехника пошла на прорыв оборонительных рубежей. Уникальные кадры работы экипажей БМП.",
-                embedId: "de0727038e9daefdfdf1869e0618034d"
+                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
             },
             { 
                 t: "Кадры с передовой: Работа расчетов «Солнцепек» на Авдеевском направлении", 
                 d: "Кадры объективного контроля с беспилотника. Выжжен укрепрайон противника. Полный отчет нанесения ударов.",
-                embedId: "7208d986bfa32dbf319208035b809d43"
+                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4"
             },
             { 
                 t: "Репортаж из освобожденного поселка: Обстановка из первых уст", 
                 d: "Наши бойцы водрузили знамя в центре населенного пункта. Эксклюзивные интервью с командирами штурмовых батальонов.",
-                embedId: "1e8cbd3cb43f1190bc1ef0cbf7bcda8a"
+                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4"
             },
             { 
                 t: "Хроника СВО: Массированный удар дронов-камикадзе по тыловым объектам", 
                 d: "Кадры ночной работы операторов БПЛА. Уничтожены замаскированные склады с боеприпасами и ангары техники.",
-                embedId: "b50e3fa022bf61033b0fa84803986a11"
+                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
             },
             { 
                 t: "Спецрепортаж: Инженерные подразделения наводят переправы под огнем", 
                 d: "Кадры возведения понтонных мостов в реальном времени. Слаженная работа расчетов под прикрытием систем ПВО.",
-                embedId: "40d6cfa98b671ef534a6dfccbf234c9c"
+                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4"
             },
             { 
                 t: "Кадры из окопов: Отбита мощная контратака на флангах Бахмута", 
                 d: "Эксклюзивное видео боя высокой интенсивности. Огневое поражение наступающих сил из всех видов стрелкового оружия.",
-                embedId: "28fcbc0da03d00fcfbf98cfc8d03541d"
+                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4"
             }
         ];
 
@@ -378,17 +412,17 @@
                 let data = reportDatabase[i];
                 let title = data.t + ` #_${100 - i}`;
 
-                grid.innerHTML += createCardHtml(title, data.d, timeString, data.embedId);
+                grid.innerHTML += createCardHtml(title, data.d, timeString, data.videoUrl);
             }
         }
 
-        // Генерация разметки с живым встроенным плеером Rutube (skin-color задает фиолетовые элементы управления)
-        function createCardHtml(title, desc, time, embedId) {
-            const videoUrl = `https://rutube.ru/play/embed/${embedId}/?skinColor=a855f7`;
+        // Генерация разметки с живым встроенным HTML5 плеером
+        function createCardHtml(title, desc, time, videoUrl) {
             return `
-                <div class="news-item">
+                <div class="news-item" onclick="toggleVideo(this)">
                     <div class="video-wrapper">
-                        <iframe src="${videoUrl}" frameBorder="0" allow="clipboard-write; autoplay" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+                        <video src="${videoUrl}" preload="metadata" controlsList="nodownload"></video>
+                        <div class="play-overlay-btn">▶</div>
                     </div>
                     <div class="news-item-body">
                         <span class="news-date">⏱ ${time} | СВО ХРОНИКА</span>
@@ -397,6 +431,27 @@
                     </div>
                 </div>
             `;
+        }
+
+        // Функция воспроизведения/паузы при клике на карточку
+        function toggleVideo(cardElement) {
+            const video = cardElement.querySelector('video');
+            
+            if (video.paused) {
+                // Останавливаем другие играющие видео на странице, если они есть
+                document.querySelectorAll('.news-item.playing').forEach(el => {
+                    el.querySelector('video').pause();
+                    el.classList.remove('playing');
+                    el.querySelector('video').removeAttribute('controls');
+                });
+
+                video.play();
+                video.setAttribute('controls', 'true'); // Показываем нативные кнопки управления только во время игры
+                cardElement.classList.add('playing');
+            } else {
+                video.pause();
+                cardElement.classList.remove('playing');
+            }
         }
 
         // Свежие репортажи сверху
@@ -408,7 +463,7 @@
             let randomData = reportDatabase[Math.floor(Math.random() * reportDatabase.length)];
             let liveTitle = `⚡ СРОЧНО: ` + randomData.t.replace("Экстренный репортаж: ", "").replace("Кадры с передовой: ", "");
 
-            let cardHtml = createCardHtml(liveTitle, randomData.d, timeString, randomData.embedId);
+            let cardHtml = createCardHtml(liveTitle, randomData.d, timeString, randomData.videoUrl);
             grid.insertAdjacentHTML('afterbegin', cardHtml);
 
             if (grid.children.length > 9) {
@@ -419,7 +474,7 @@
         document.addEventListener("DOMContentLoaded", () => {
             generateInitialNews();
 
-            // Безопасный интервал добавления новых репортажей
+            // Интервал автообновления контента
             setInterval(() => {
                 if(document.getElementById('news-tab').classList.contains('active')) {
                     pushNewReport();
