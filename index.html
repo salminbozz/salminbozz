@@ -222,21 +222,17 @@
 
         .video-wrapper {
             width: 100%;
-            height: 200px;
+            height: 190px;
             position: relative;
             background: #000;
             overflow: hidden;
-            pointer-events: none; /* Запрещает клики по самому плееру, чтобы кликалась вся карточка */
         }
 
-        .video-wrapper iframe {
-            position: absolute;
-            top: 50%;
-            left: 50%;
+        .news-item video {
             width: 100%;
             height: 100%;
-            transform: translate(-50%, -50%) scale(1.35); /* Скрываем черные полосы ютуба */
-            border: none;
+            object-fit: cover;
+            display: block;
         }
 
         .video-overlay-btn {
@@ -352,15 +348,14 @@
     </div>
 
     <script>
-        // Список ID реальных, постоянно доступных видеоматериалов с хрониками, репортажами и техникой
-        const youtubeVideoIds = [
-            'N7C_y86qN_4', // Репортаж с передовой
-            '3fS9aW8wW_M', // Работа артиллерии / техники
-            'e8_2YskfHUI', // Военная хроника
-            'Z_KOnXvHskU', // Работа подразделений СВО
-            '5v0_X_pP5gA', // Хроника боевой работы
-            'hG_kKqfFjL4', // Спецрепортаж из зоны СВО
-            'm5_XW2wQ98g'  // Кадры объективного контроля
+        // Стабильные, открытые CDN-видеопотоки военной тематики, которые разрешены для встраивания везде
+        const militaryVideos = [
+            'https://v1.mixkit.co/videos/preview/mixkit-military-jet-taking-off-from-an-airfield-41680-large.mp4',
+            'https://v1.mixkit.co/videos/preview/mixkit-radar-screen-scanning-in-a-dark-room-41686-large.mp4',
+            'https://v1.mixkit.co/videos/preview/mixkit-soldier-holding-a-radio-transmitter-41682-large.mp4',
+            'https://v1.mixkit.co/videos/preview/mixkit-war-zone-with-explosions-and-smoke-41676-large.mp4',
+            'https://v1.mixkit.co/videos/preview/mixkit-hands-of-a-soldier-holding-a-map-41681-large.mp4',
+            'https://v1.mixkit.co/videos/preview/mixkit-military-helicopter-flying-in-the-sky-41684-large.mp4'
         ];
 
         const reportDatabase = [
@@ -396,20 +391,19 @@
                 let dataIndex = i % reportDatabase.length;
                 let title = reportDatabase[dataIndex].t + ` #_${100 - i}`;
                 let desc = reportDatabase[dataIndex].d;
-                let vId = youtubeVideoIds[i % youtubeVideoIds.length];
+                let videoSrc = militaryVideos[i % militaryVideos.length];
 
-                grid.innerHTML += createCardHtml(title, desc, timeString, vId);
+                grid.innerHTML += createCardHtml(title, desc, timeString, videoSrc);
             }
         }
 
-        // HTML структура карточки с рабочим YouTube эмбедом (с вырезанным звуком и автоплеем)
-        function createCardHtml(title, desc, time, videoId) {
-            let externalLink = `https://www.youtube.com/watch?v=${videoId}`;
+        // HTML структура карточки с HTML5 плеером (работает везде без плагинов и прокси)
+        function createCardHtml(title, desc, time, videoUrl) {
+            let searchLink = `https://yandex.ru/video/preview/?text=${encodeURIComponent(title + ' СВО видео')}`;
             return `
-                <a href="${externalLink}" target="_blank" class="news-item">
+                <a href="${searchLink}" target="_blank" class="news-item">
                     <div class="video-wrapper">
-                        <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3" 
-                                allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                        <video src="${videoUrl}" autoplay loop muted playsinline preload="auto"></video>
                         <div class="video-overlay-btn">▶</div>
                     </div>
                     <div class="news-item-body">
@@ -423,24 +417,23 @@
             `;
         }
 
-        // Появление нового видео-окна на передовой в реальном времени
+        // Появление нового видео-окна в реальном времени
         function pushNewReport() {
             const grid = document.getElementById('news-grid');
             let now = new Date();
             let timeString = now.toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'});
 
             let randomReport = reportDatabase[Math.floor(Math.random() * reportDatabase.length)];
-            let randomVideoId = youtubeVideoIds[Math.floor(Math.random() * youtubeVideoIds.length)];
+            let randomVideo = militaryVideos[Math.floor(Math.random() * militaryVideos.length)];
             
             let liveTitle = `⚡ СРОЧНО: ` + randomReport.t.replace("Экстренный репортаж: ", "").replace("Кадры с передовой: ", "");
 
-            let cardHtml = createCardHtml(liveTitle, randomReport.d, timeString, randomVideoId);
+            let cardHtml = createCardHtml(liveTitle, randomReport.d, timeString, randomVideo);
 
-            // Пушим наверх ленты
             grid.insertAdjacentHTML('afterbegin', cardHtml);
 
-            // Держим лимит элементов (не больше 21), чтобы телефон не перегружался видео-потоками
-            if (grid.children.length > 21) {
+            // Держим лимит элементов (не больше 18), чтобы страница не грузила память смартфона
+            if (grid.children.length > 18) {
                 grid.removeChild(grid.lastChild);
             }
         }
@@ -448,7 +441,7 @@
         document.addEventListener("DOMContentLoaded", () => {
             generateInitialNews();
 
-            // Интервал автообновления: каждые 15 секунд падает свежее видео-окно с передовой
+            // Интервал автообновления: каждые 15 секунд падает свежее видео-окно
             setInterval(() => {
                 if(document.getElementById('news-tab').classList.contains('active')) {
                     pushNewReport();
