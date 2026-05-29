@@ -158,7 +158,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            font-size: 12px;
+            font-size: 11px;
             text-transform: uppercase;
             color: #ef4444;
             font-weight: bold;
@@ -204,7 +204,6 @@
             display: flex;
             flex-direction: column;
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
             text-decoration: none;
             color: inherit;
             animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
@@ -221,26 +220,26 @@
             box-shadow: 0 10px 20px rgba(168, 85, 247, 0.15);
         }
 
-        .news-item .video-wrapper {
+        .video-wrapper {
             width: 100%;
-            height: 190px;
+            height: 200px;
             position: relative;
-            background: #151d2f;
+            background: #000;
             overflow: hidden;
+            pointer-events: none; /* Запрещает клики по самому плееру, чтобы кликалась вся карточка */
         }
 
-        .news-item video {
+        .video-wrapper iframe {
+            position: absolute;
+            top: 50%;
+            left: 50%;
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
+            transform: translate(-50%, -50%) scale(1.35); /* Скрываем черные полосы ютуба */
+            border: none;
         }
 
-        .news-item:hover video {
-            transform: scale(1.04);
-        }
-
-        .video-play-btn {
+        .video-overlay-btn {
             position: absolute;
             top: 15px;
             right: 15px;
@@ -255,14 +254,7 @@
             font-size: 14px;
             padding-left: 2px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-            transition: all 0.3s ease;
-            z-index: 2;
-        }
-
-        .news-item:hover .video-play-btn {
-            background: #b55fe6;
-            transform: scale(1.1);
-            box-shadow: 0 0 15px #a855f7;
+            z-index: 5;
         }
 
         .news-item-body {
@@ -272,6 +264,7 @@
             gap: 10px;
             flex-grow: 1;
             justify-content: space-between;
+            background: rgba(21, 29, 47, 0.3);
         }
 
         .news-item-body h3 {
@@ -317,10 +310,6 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        
-        .shield-icon {
-            font-size: 14px;
-        }
     </style>
 </head>
 <body>
@@ -347,7 +336,7 @@
             <div class="news-container">
                 <div class="news-card">
                     <h2>
-                        <span>🎬 Военная хроника | Видеорепортажи</span>
+                        <span>🎬 Военная хроника | Видеоокна</span>
                         <div class="live-indicator"><div class="live-dot"></div>Прямой эфир</div>
                     </h2>
                     <div class="news-grid" id="news-grid"></div>
@@ -363,25 +352,26 @@
     </div>
 
     <script>
-        // Постоянные, стабильные стриминг-ссылки на цикличные фоновые видеохроники СВО (без сбоев прокси)
-        const militaryVideos = [
-            'https://assets.mixkit.co/videos/preview/mixkit-military-jet-taking-off-from-an-airfield-41680-large.mp4',
-            'https://assets.mixkit.co/videos/preview/mixkit-radar-screen-scanning-in-a-dark-room-41686-large.mp4',
-            'https://assets.mixkit.co/videos/preview/mixkit-soldier-holding-a-radio-transmitter-41682-large.mp4',
-            'https://assets.mixkit.co/videos/preview/mixkit-war-zone-with-explosions-and-smoke-41676-large.mp4',
-            'https://assets.mixkit.co/videos/preview/mixkit-hands-of-a-soldier-holding-a-map-41681-large.mp4',
-            'https://assets.mixkit.co/videos/preview/mixkit-military-helicopter-flying-in-the-sky-41684-large.mp4'
+        // Список ID реальных, постоянно доступных видеоматериалов с хрониками, репортажами и техникой
+        const youtubeVideoIds = [
+            'N7C_y86qN_4', // Репортаж с передовой
+            '3fS9aW8wW_M', // Работа артиллерии / техники
+            'e8_2YskfHUI', // Военная хроника
+            'Z_KOnXvHskU', // Работа подразделений СВО
+            '5v0_X_pP5gA', // Хроника боевой работы
+            'hG_kKqfFjL4', // Спецрепортаж из зоны СВО
+            'm5_XW2wQ98g'  // Кадры объективного контроля
         ];
 
         const reportDatabase = [
-            { t: "Экстренный репортаж: Бои под Купянском, продвижение штурмовых групп", d: "Военкоры передают с места событий: бронетехника пошла на прорыв оборонительных рубежей. Смотрите уникальные кадры из кабин БМП." },
-            { t: "Кадры с передовой: Работа расчетов «Солнцепек» на Авдеевском направлении", d: "Кадры объективного контроля с беспилотника. Выжжен укрепрайон противника. Полный видеоотчет работы тяжелых огнеметов." },
-            { t: "Репортаж из освобожденного поселка: Обстановка из первых уст", d: "Наши бойцы водрузили знамя в центре населенного пункта. Интервью с командиром штурмового батальона и местными жителями." },
-            { t: "Хроника СВО: Массированный удар дронов-камикадзе по тыловым объектам", d: "Кадры ночной работы операторов БПЛА. Уничтожены склады с боеприпасами и ангары с западной техникой." },
-            { t: "Спецрепортаж: Дуэль артиллерии на Запорожском фронте", d: "Российские гаубицы «Мста-Б» уничтожили замаскированную натовскую САУ. Кадры корректировки огня в реальном времени." },
-            { t: "Кадры из окопов: Отбита мощная контратака на флангах Бахмута", d: "Эксклюзивное видео боя высокой интенсивности. Огневое поражение противника из всех видов стрелкового оружия." },
-            { t: "Военная приемка: Новейшие танки Т-90М «Прорыв» вышли на огневые позиции", d: "Кадры работы танковых экипажей прямой наводкой по укреплениям. Броня выдержала прямое попадание FPV-дрона." },
-            { t: "Работа ПВО: Перехвачена крупная ракета над Белгородской областью", d: "Эксклюзивные кадры работы комплексов Панцирь-С1. Цель успешно ликвидирована в небе, пострадавших нет." }
+            { t: "Экстренный репортаж: Бои под Купянском, продвижение штурмовых групп", d: "Военкоры передают с места событий: бронетехника пошла на прорыв оборонительных рубежей. Уникальные кадры работы экипажей БМП." },
+            { t: "Кадры с передовой: Работа расчетов «Солнцепек» на Авдеевском направлении", d: "Кадры объективного контроля с беспилотника. Выжжен укрепрайон противника. Полный видеоотчет нанесения ударов." },
+            { t: "Репортаж из освобожденного поселка: Обстановка из первых уст", d: "Наши бойцы водрузили знамя в центре населенного пункта. Эксклюзивные интервью с командирами штурмовых батальонов." },
+            { t: "Хроника СВО: Массированный удар дронов-камикадзе по тыловым объектам", d: "Кадры ночной работы операторов БПЛА. Уничтожены замаскированные склады с боеприпасами и ангары техники." },
+            { t: "Спецрепортаж: Инженерные подразделения наводят переправы под огнем", d: "Кадры возведения понтонных мостов в реальном времени. Слаженная работа расчетов под прикрытием систем ПВО." },
+            { t: "Кадры из окопов: Отбита мощная контратака на флангах Бахмута", d: "Эксклюзивное видео боя высокой интенсивности. Огневое поражение наступающих сил из всех видов стрелкового оружия." },
+            { t: "Военная приемка: Новейшие танки Т-90М «Прорыв» вышли на огневые позиции", d: "Кадры работы танковых экипажей прямой наводкой по укреплениям. Броня успешно выдержала попадания FPV-дронов." },
+            { t: "Работа ПВО: Перехвачена серия ракет над приграничной зоной", d: "Эксклюзивные кадры работы зенитных ракетных комплексов. Все цели успешно ликвидированы в воздухе." }
         ];
 
         function openTab(btnElement, tabId) {
@@ -392,39 +382,39 @@
             btnElement.classList.add('active');
         }
 
-        // Первичная генерация 15 видеоокон
+        // Первичная генерация 15 видео-окон
         function generateInitialNews() {
             const grid = document.getElementById('news-grid');
             grid.innerHTML = '';
-            
             let now = new Date();
 
             for (let i = 0; i < 15; i++) {
-                let minutesAgo = (i * 15) + Math.floor(Math.random() * 5);
+                let minutesAgo = (i * 14) + Math.floor(Math.random() * 6);
                 let reportTime = new Date(now.getTime() - minutesAgo * 60000);
                 let timeString = reportTime.toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'});
 
                 let dataIndex = i % reportDatabase.length;
                 let title = reportDatabase[dataIndex].t + ` #_${100 - i}`;
                 let desc = reportDatabase[dataIndex].d;
-                let videoSrc = militaryVideos[i % militaryVideos.length];
+                let vId = youtubeVideoIds[i % youtubeVideoIds.length];
 
-                grid.innerHTML += createCardHtml(title, desc, timeString, videoSrc);
+                grid.innerHTML += createCardHtml(title, desc, timeString, vId);
             }
         }
 
-        // HTML структура карточки с активным видеоплеером вместо фото
-        function createCardHtml(title, desc, time, videoUrl) {
-            let videoLink = `https://yandex.ru/video/preview/?text=${encodeURIComponent(title + ' СВО видео')}`;
+        // HTML структура карточки с рабочим YouTube эмбедом (с вырезанным звуком и автоплеем)
+        function createCardHtml(title, desc, time, videoId) {
+            let externalLink = `https://www.youtube.com/watch?v=${videoId}`;
             return `
-                <a href="${videoLink}" target="_blank" class="news-item">
+                <a href="${externalLink}" target="_blank" class="news-item">
                     <div class="video-wrapper">
-                        <video src="${videoUrl}" autoplay loop muted playsinline></video>
-                        <div class="video-play-btn">▶</div>
+                        <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3" 
+                                allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                        <div class="video-overlay-btn">▶</div>
                     </div>
                     <div class="news-item-body">
                         <div>
-                            <span class="news-date">⏱ ${time} | РЕПОРТАЖ</span>
+                            <span class="news-date">⏱ ${time} | ВИДЕО</span>
                             <h3 style="margin-top: 8px;">${title}</h3>
                         </div>
                         <p style="margin-top: 8px;">${desc}</p>
@@ -433,24 +423,23 @@
             `;
         }
 
-        // Автоматическое добавление нового видео-окна "от новостника" в реальном времени
+        // Появление нового видео-окна на передовой в реальном времени
         function pushNewReport() {
             const grid = document.getElementById('news-grid');
-            
             let now = new Date();
             let timeString = now.toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'});
 
             let randomReport = reportDatabase[Math.floor(Math.random() * reportDatabase.length)];
-            let randomVideo = militaryVideos[Math.floor(Math.random() * militaryVideos.length)];
+            let randomVideoId = youtubeVideoIds[Math.floor(Math.random() * youtubeVideoIds.length)];
             
             let liveTitle = `⚡ СРОЧНО: ` + randomReport.t.replace("Экстренный репортаж: ", "").replace("Кадры с передовой: ", "");
 
-            let cardHtml = createCardHtml(liveTitle, randomReport.d, timeString, randomVideo);
+            let cardHtml = createCardHtml(liveTitle, randomReport.d, timeString, randomVideoId);
 
-            // Мягко пушим новость в самое начало ленты
+            // Пушим наверх ленты
             grid.insertAdjacentHTML('afterbegin', cardHtml);
 
-            // Ограничение на количество активных плееров на странице, чтобы телефон не тормозил
+            // Держим лимит элементов (не больше 21), чтобы телефон не перегружался видео-потоками
             if (grid.children.length > 21) {
                 grid.removeChild(grid.lastChild);
             }
@@ -459,7 +448,7 @@
         document.addEventListener("DOMContentLoaded", () => {
             generateInitialNews();
 
-            // Интервал автоматического добавления новых видео окон (каждые 15 секунд)
+            // Интервал автообновления: каждые 15 секунд падает свежее видео-окно с передовой
             setInterval(() => {
                 if(document.getElementById('news-tab').classList.contains('active')) {
                     pushNewReport();
