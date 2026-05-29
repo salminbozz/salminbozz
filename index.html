@@ -203,7 +203,8 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+            text-decoration: none;
             color: inherit;
             animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
@@ -219,19 +220,49 @@
             box-shadow: 0 10px 20px rgba(168, 85, 247, 0.15);
         }
 
-        .video-wrapper {
+        .image-wrapper {
             width: 100%;
             height: 190px;
             position: relative;
-            background: #000;
+            background: #111625;
             overflow: hidden;
         }
 
-        .video-wrapper iframe {
+        .news-item img.report-img {
             width: 100%;
             height: 100%;
-            border: none;
+            object-fit: cover;
             display: block;
+            transition: transform 0.5s ease;
+        }
+
+        .news-item:hover img.report-img {
+            transform: scale(1.05);
+        }
+
+        .video-overlay-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(168, 85, 247, 0.85);
+            color: white;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            padding-left: 3px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            z-index: 5;
+            transition: background 0.3s, transform 0.3s;
+        }
+
+        .news-item:hover .video-overlay-btn {
+            background: #a855f7;
+            transform: translate(-50%, -50%) scale(1.1);
         }
 
         .news-item-body {
@@ -329,37 +360,31 @@
     </div>
 
     <script>
-        // База данных с рабочими видеороликами по тематике хроники
+        // Стабильная база данных репортажей с проверенными изображениями и целевыми ссылками
         const reportDatabase = [
             { 
                 t: "Экстренный репортаж: Бои под Купянском, продвижение штурмовых групп", 
                 d: "Военкоры передают с места событий: бронетехника пошла на прорыв оборонительных рубежей. Уникальные кадры работы экипажей БМП.",
-                ytId: "M7lc1UVf-VE" // Сюда подставится ID нужного видеоролика
+                img: "https://picsum.photos/id/1025/400/250", // Качественное базовое фото (соответствует сетке)
+                link: "https://yandex.ru/video/preview/?text=Бои+под+Купянском+продвижение+штурмовых+групп+военная+хроника"
             },
             { 
                 t: "Кадры с передовой: Работа расчетов «Солнцепек» на Авдеевском направлении", 
                 d: "Кадры объективного контроля с беспилотника. Выжжен укрепрайон противника. Полный отчет нанесения ударов.",
-                ytId: "j6fKk5I_r3M"
+                img: "https://picsum.photos/id/1043/400/250",
+                link: "https://yandex.ru/video/preview/?text=Работа+расчетов+Солнцепек+на+Авдеевском+направлении+военная+хроника"
             },
             { 
                 t: "Репортаж из освобожденного поселка: Обстановка из первых уст", 
                 d: "Наши бойцы водрузили знамя в центре населенного пункта. Эксклюзивные интервью с командирами штурмовых батальонов.",
-                ytId: "QpG9Z7yY_Fs"
+                img: "https://picsum.photos/id/1050/400/250",
+                link: "https://yandex.ru/video/preview/?text=Репортаж+из+освобожденного+поселка+обстановка+военная+хроника"
             },
             { 
                 t: "Хроника СВО: Массированный удар дронов-камикадзе по тыловым объектам", 
                 d: "Кадры ночной работы операторов БПЛА. Уничтожены замаскированные склады с боеприпасами и ангары техники.",
-                ytId: "Z6fN_Lh_v88"
-            },
-            { 
-                t: "Спецрепортаж: Инженерные подразделения наводят переправы под огнем", 
-                d: "Кадры возведения понтонных мостов в реальном времени. Слаженная работа расчетов под прикрытием систем ПВО.",
-                ytId: "Yf6Z8_B4x9E"
-            },
-            { 
-                t: "Кадры из окопов: Отбита мощная контратака на флангах Бахмута", 
-                d: "Эксклюзивное видео боя высокой интенсивности. Огневое поражение наступающих сил из всех видов стрелкового оружия.",
-                ytId: "g8T6M_Z2fRE"
+                img: "https://picsum.photos/id/1069/400/250",
+                link: "https://yandex.ru/video/preview/?text=Массированный+удар+дронов+камикадзе+по+тыловым+объектам+хроника"
             }
         ];
 
@@ -371,34 +396,31 @@
             btnElement.classList.add('active');
         }
 
-        // Стартовая сборка ленты новостей со встроенными плеерами
+        // Первоначальный рендеринг сетки с красивыми чистыми обложками
         function generateInitialNews() {
             const grid = document.getElementById('news-grid');
             grid.innerHTML = '';
             let now = new Date();
 
             for (let i = 0; i < 6; i++) {
-                let minutesAgo = (i * 25) + Math.floor(Math.random() * 5);
+                let minutesAgo = (i * 18) + Math.floor(Math.random() * 5);
                 let reportTime = new Date(now.getTime() - minutesAgo * 60000);
                 let timeString = reportTime.toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'});
 
                 let data = reportDatabase[i % reportDatabase.length];
                 let title = data.t + ` #_${100 - i}`;
 
-                grid.innerHTML += createCardHtml(title, data.d, timeString, data.ytId);
+                grid.innerHTML += createCardHtml(title, data.d, timeString, data.img, data.link);
             }
         }
 
-        // Создание карточки с рабочим iframe плеером
-        function createCardHtml(title, desc, time, ytId) {
+        // HTML структура карточки с чистым тегом img, без iframe плееров
+        function createCardHtml(title, desc, time, imageUrl, videoUrl) {
             return `
-                <div class="news-item">
-                    <div class="video-wrapper">
-                        <iframe 
-                            src="https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1" 
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                            allowfullscreen>
-                        </iframe>
+                <a href="${videoUrl}" target="_blank" class="news-item">
+                    <div class="image-wrapper">
+                        <img src="${imageUrl}" class="report-img" alt="Превью репортажа">
+                        <div class="video-overlay-btn">▶</div>
                     </div>
                     <div class="news-item-body">
                         <div>
@@ -407,11 +429,11 @@
                         </div>
                         <p style="margin-top: 8px;">${desc}</p>
                     </div>
-                </div>
+                </a>
             `;
         }
 
-        // Функция добавления новой карточки в реальном времени сверху ленты
+        // Добавление новых карточек сверху при обновлении в реальном времени
         function pushNewReport() {
             const grid = document.getElementById('news-grid');
             let now = new Date();
@@ -420,11 +442,10 @@
             let randomData = reportDatabase[Math.floor(Math.random() * reportDatabase.length)];
             let liveTitle = `⚡ СРОЧНО: ` + randomData.t.replace("Экстренный репортаж: ", "").replace("Кадры с передовой: ", "");
 
-            let cardHtml = createCardHtml(liveTitle, randomData.d, timeString, randomData.ytId);
+            let cardHtml = createCardHtml(liveTitle, randomData.d, timeString, randomData.img, randomData.link);
             grid.insertAdjacentHTML('afterbegin', cardHtml);
 
-            // Ограничение элементов на странице, чтобы разгрузить память браузера
-            if (grid.children.length > 9) {
+            if (grid.children.length > 12) {
                 grid.removeChild(grid.lastChild);
             }
         }
@@ -432,15 +453,13 @@
         document.addEventListener("DOMContentLoaded", () => {
             generateInitialNews();
 
-            // Новое видео добавляется в начало раз в 30 секунд
+            // Автодобавление новостей без перезагрузки страницы
             setInterval(() => {
                 if(document.getElementById('news-tab').classList.contains('active')) {
                     pushNewReport();
                 }
-            }, 30000);
+            }, 25000);
         });
     </script>
 </body>
 </html>
-
-```
