@@ -148,66 +148,17 @@
             gap: 8px;
         }
 
-        .video-wrapper {
-            position: relative;
-            padding-bottom: 56.25%;
-            height: 0;
-            overflow: hidden;
-            border-radius: 12px;
-            border: 1px solid rgba(168, 85, 247, 0.2);
-            background: #000;
-            margin-bottom: 15px;
-        }
-
-        .video-wrapper iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: 0;
-        }
-
-        .news-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        @media (min-width: 600px) {
-            .news-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        .news-item {
-            background: rgba(11, 15, 25, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        /* Контейнер для автоматического виджета новостей */
+        #vk_groups {
+            width: 100% !important;
+            background: transparent;
             border-radius: 12px;
             overflow: hidden;
         }
 
-        .news-item img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-        }
-
-        .news-item-body {
-            padding: 15px;
-        }
-
-        .news-item-body h3 {
-            font-size: 16px;
-            margin-bottom: 8px;
-            color: #f1f5f9;
-        }
-
-        .news-item-body p {
-            font-size: 13px;
-            color: #94a3b8;
-            line-height: 1.5;
+        #vk_groups iframe {
+            width: 100% !important;
+            border-radius: 12px;
         }
 
         .footer-badge {
@@ -234,6 +185,7 @@
             font-size: 14px;
         }
     </style>
+    <script type="text/javascript" src="https://vk.com/js/api/openapi.js?169"></script>
 </head>
 <body>
 
@@ -259,30 +211,8 @@
             <div class="news-container">
                 
                 <div class="news-card">
-                    <h2>🇷🇺 Сводки и брифинги Минобороны РФ</h2>
-                    <div class="video-wrapper">
-                        <iframe src="https://vk.com/video_ext.php?oid=-133441491&id=456275720&hash=8b51d45763cb6f4e" allow="autoplay; encrypted-media; fullscreen; picture-in-picture;" frameborder="0" allowfullscreen></iframe>
-                    </div>
-                </div>
-
-                <div class="news-card">
-                    <h2>📸 Хроника событий и фоторепортажи</h2>
-                    <div class="news-grid">
-                        <div class="news-item">
-                            <img src="https://i.postimg.cc/mD8gM84Q/svo1.jpg">
-                            <div class="news-item-body">
-                                <h3>Боевая подготовка подразделений</h3>
-                                <p>Официальные кадры практических действий экипажей бронетехники и штурмовых групп на полигонах в зоне проведения операции.</p>
-                            </div>
-                        </div>
-                        <div class="news-item">
-                            <img src="https://i.postimg.cc/vB2XgZ3M/svo2.jpg">
-                            <div class="news-item-body">
-                                <h3>Материально-техническое обеспечение</h3>
-                                <p>Кадры несения дежурства, подвоза необходимых материальных средств, боеприпасов и развертывания пунктов помощи.</p>
-                            </div>
-                        </div>
-                    </div>
+                    <h2>🇷🇺 Лента новостей Минобороны РФ</h2>
+                    <div id="vk_groups"></div>
                 </div>
 
             </div>
@@ -306,6 +236,16 @@
             document.getElementById(tabId).classList.add('active');
             event.currentTarget.classList.add('active');
         }
+
+        // Инициализация живой ленты Минобороны (ID группы: mod_russia)
+        VK.Widgets.Group("vk_groups", {
+            mode: 4, // Режим вывода только стены (новостей)
+            width: "auto", // Авто-ширина под мобильные телефоны
+            height: "600", // Высота блока новостей
+            color1: "151D2F", // Цвет фона под стиль твоего сайта
+            color2: "F8FAFC", // Цвет текста
+            color3: "A855F7"  // Цвет ссылок под твои фиолетовые кнопки
+        }, 133441491);
     </script>
 
 </body>
