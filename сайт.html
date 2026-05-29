@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Florein | В разработке</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0b0f19;
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Шапка-баннер */
+        .header-banner {
+            width: 100%;
+            max-width: 800px;
+            aspect-ratio: 3 / 1.2;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header-banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Плавное затемнение нижней части баннера */
+        .header-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background: linear-gradient(transparent, #0b0f19);
+        }
+
+        /* Блок по центру экрана */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .status-card {
+            background: rgba(21, 29, 47, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            padding: 30px 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 25px rgba(168, 85, 247, 0.05);
+        }
+
+        .status-card h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: linear-gradient(45deg, #e9d5ff, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .status-card p {
+            color: #94a3b8;
+            font-size: 15px;
+        }
+
+        /* Маленькая прямоугольная сносочка внизу */
+        .footer-badge {
+            background-color: #1e1b4b;
+            border: 1px solid #312e81;
+            padding: 8px 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .footer-badge span {
+            color: #a78bfa;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .shield-icon {
+            color: #10b981;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-banner">
+        <img src="https://i.ibb.co/s9HQzm2d/IMG-20260529-100202.jpg">
+    </div>
+
+    <div class="main-content">
+        <div class="status-card">
+            <h1>Сайт в разработке</h1>
+            <p>Скоро здесь появится кое-что крутое...</p>
+        </div>
+    </div>
+
+    <div class="footer-badge">
+        <span class="shield-icon">🤡️</span>
+        <span>Ваши данные уже на даркнете</span>
+    </div>
+
+</body>
+</html>
