@@ -26,13 +26,17 @@
 
         .header-banner {
             width: 100%;
-            max-width: 800px;
-            aspect-ratio: 3 / 1.2;
+            max-width: 1200px;
+            aspect-ratio: 3 / 1;
             overflow: hidden;
             border-radius: 16px;
             border: 1px solid rgba(168, 85, 247, 0.4);
             box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
             margin-bottom: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .header-banner { aspect-ratio: 5 / 1.2; }
         }
 
         .header-banner img {
@@ -76,7 +80,7 @@
             justify-content: center;
             align-items: center;
             width: 100%;
-            max-width: 800px;
+            max-width: 1200px;
             padding: 10px 0;
         }
 
@@ -104,6 +108,8 @@
             border-radius: 20px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
             text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
         }
 
         .status-card h1 {
@@ -145,19 +151,50 @@
             margin-bottom: 20px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: space-between;
         }
 
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #ef4444;
+            font-weight: bold;
+            background: rgba(239, 68, 68, 0.1);
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            animation: blink 1.2s infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+
+        /* Увеличенная сетка: 1 колонка на смартфонах, 2 на планшетах, 3 на ПК */
         .news-grid {
             display: grid;
             grid-template-columns: 1fr;
             gap: 20px;
         }
 
-        @media (min-width: 650px) {
-            .news-grid {
-                grid-template-columns: 1fr 1fr;
-            }
+        @media (min-width: 768px) {
+            .news-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (min-width: 1024px) {
+            .news-grid { grid-template-columns: repeat(3, 1fr); }
         }
 
         .news-item {
@@ -167,20 +204,27 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            transition: transform 0.2s ease, border-color 0.2s ease;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease;
             cursor: pointer;
             text-decoration: none;
             color: inherit;
+            animation: slideIn 0.5s ease out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .news-item:hover {
-            transform: translateY(-2px);
-            border-color: rgba(168, 85, 247, 0.4);
+            transform: translateY(-4px);
+            border-color: rgba(168, 85, 247, 0.5);
+            box-shadow: 0 10px 20px rgba(168, 85, 247, 0.15);
         }
 
         .news-item .img-wrapper {
             width: 100%;
-            height: 190px;
+            height: 200px;
             position: relative;
             background: #151d2f;
             overflow: hidden;
@@ -190,6 +234,11 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .news-item:hover img {
+            transform: scale(1.04);
         }
 
         .video-play-btn {
@@ -197,30 +246,31 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(168, 85, 247, 0.85);
+            background: rgba(168, 85, 247, 0.9);
             color: white;
-            width: 46px;
-            height: 46px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
-            padding-left: 3px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            transition: all 0.2s ease;
+            font-size: 20px;
+            padding-left: 4px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+            transition: all 0.3s ease;
         }
 
         .news-item:hover .video-play-btn {
-            background: #a855f7;
-            transform: translate(-50%, -50%) scale(1.1);
+            background: #b55fe6;
+            transform: translate(-50%, -50%) scale(1.12);
+            box-shadow: 0 0 25px #a855f7;
         }
 
         .news-item-body {
-            padding: 15px;
+            padding: 18px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
             flex-grow: 1;
             justify-content: space-between;
         }
@@ -243,13 +293,18 @@
             color: #a855f7;
             font-weight: bold;
             text-transform: uppercase;
+            background: rgba(168, 85, 247, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
         }
 
         .loading-text {
             text-align: center;
             color: #94a3b8;
-            padding: 20px;
-            font-size: 14px;
+            padding: 40px;
+            font-size: 15px;
+            grid-column: 1 / -1;
         }
 
         .footer-badge {
@@ -300,9 +355,12 @@
         <div id="news-tab" class="tab-content">
             <div class="news-container">
                 <div class="news-card">
-                    <h2 id="news-title">🎬 Военные репортажи | Загрузка...</h2>
+                    <h2>
+                        <span>🎬 Репортажи с передовой</span>
+                        <div class="live-indicator"><div class="live-dot"></div>Автообновление</div>
+                    </h2>
                     <div class="news-grid" id="news-grid">
-                        <div class="loading-text">Загрузка свежих видеорепортажей...</div>
+                        <div class="loading-text">Подключение к новостной ленте...</div>
                     </div>
                 </div>
             </div>
@@ -316,6 +374,9 @@
     </div>
 
     <script>
+        // Хранилище ID загруженных новостей, чтобы не дублировать старые при обновлении
+        let loadedNewsIds = new Set();
+
         function openTab(btnElement, tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -323,157 +384,108 @@
             document.getElementById(tabId).classList.add('active');
             btnElement.classList.add('active');
             
-            if(tabId === 'news-tab') {
-                loadNews();
+            if(tabId === 'news-tab' && loadedNewsIds.size === 0) {
+                loadNews(true);
             }
         }
 
-        async function translateText(text) {
-            try {
-                const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ru&dt=t&q=${encodeURIComponent(text)}`);
-                const data = await res.json();
-                return data[0].map(item => item[0]).join('');
-            } catch (e) {
-                return text;
-            }
-        }
-
-        async function loadNews() {
+        async function loadNews(isFirstLoad = false) {
             const grid = document.getElementById('news-grid');
             
-            if (grid.children.length > 1 && !grid.innerHTML.includes('Загрузка')) {
-                return;
-            }
+            // Используем стабильный поток ТАСС (Военная операция), отдающий уникальные картинки
+            const targetUrl = 'https://tass.ru/rss/vmo.xml';
+            const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(targetUrl)}&api_key=`;
 
-            const targetUrl = 'https://www.aljazeera.com/xml/rss/all.xml';
-            const encodedUrl = encodeURIComponent(targetUrl);
-            const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodedUrl}`;
-            
             try {
                 const response = await fetch(proxyUrl);
+                if (!response.ok) return;
                 const data = await response.json();
 
                 if (data.status === 'ok' && data.items && data.items.length > 0) {
-                    document.getElementById('news-title').innerHTML = `🎬 Военные репортажи | Лента обновлена`;
+                    if (isFirstLoad) grid.innerHTML = '';
                     
-                    const filteredItems = data.items.filter(item => {
-                        const txt = (item.title + item.description).toLowerCase();
-                        return txt.includes('russia') || txt.includes('ukraine') || txt.includes('war') || txt.includes('military') || txt.includes('attack') || txt.includes('army');
+                    // Переворачиваем массив, чтобы сначала обрабатывать более старые и новые пушить вверх
+                    const incomingItems = data.items.reverse();
+                    let addedAny = false;
+
+                    incomingItems.forEach(item => {
+                        // Уникальный идентификатор новости (ссылка или guid)
+                        const newsId = item.guid || item.link;
+
+                        if (!loadedNewsIds.has(newsId)) {
+                            loadedNewsIds.add(newsId);
+                            
+                            let title = item.title;
+                            let link = item.link;
+                            let description = item.description || '';
+                            let pubDate = item.pubDate ? new Date(item.pubDate.replace(' ', 'T')).toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'}) : '';
+                            
+                            // Получаем уникальное фото из вложений ТАСС
+                            let imgUrl = item.enclosure?.link || item.thumbnail || '';
+                            
+                            if (!imgUrl) {
+                                // Случайный тематический фон из пула военных репортажей, если у новости нет превью
+                                const fallbacks = [
+                                    'https://images.unsplash.com/photo-1590079019458-0eb5b40a3371?auto=format&fit=crop&w=600&q=80',
+                                    'https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=600&q=80',
+                                    'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=600&q=80'
+                                ];
+                                imgUrl = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+                            }
+
+                            let cleanDesc = description.replace(/<\/?[^>]+(>|$)/g, "").trim();
+                            if (cleanDesc.length > 110) cleanDesc = cleanDesc.substring(0, 110) + '...';
+
+                            // Ссылка ведет на видео-блок/поиск видеоматериалов по конкретному событию
+                            let videoLink = `https://yandex.ru/video/preview/?text=${encodeURIComponent(title + ' видео хроника')}`;
+
+                            const cardHtml = `
+                                <a href="${videoLink}" target="_blank" class="news-item" data-id="${newsId}">
+                                    <div class="img-wrapper">
+                                        <img src="${imgUrl}" onerror="this.src='https://images.unsplash.com/photo-1590079019458-0eb5b40a3371?auto=format&fit=crop&w=600&q=80'">
+                                        <div class="video-play-btn">▶</div>
+                                    </div>
+                                    <div class="news-item-body">
+                                        <div>
+                                            <span class="news-date">⏱ ${pubDate}</span>
+                                            <h3 style="margin-top: 8px;">${title}</h3>
+                                        </div>
+                                        <p style="margin-top: 8px;">${cleanDesc}</p>
+                                    </div>
+                                </a>
+                            `;
+
+                            // Если это автообновление, новые карточки плавно добавляются в самое начало ленты
+                            if (!isFirstLoad) {
+                                grid.insertAdjacentHTML('afterbegin', cardHtml);
+                            } else {
+                                grid.innerHTML += cardHtml;
+                            }
+                            addedAny = true;
+                        }
                     });
 
-                    const finalItems = filteredItems.length > 0 ? filteredItems : data.items;
-                    renderNews(finalItems.slice(0, 12), grid, data.feed?.url ? 'json' : 'json', data.items);
-                } else {
-                    throw new Error('Fallback to raw XML');
+                    // Ограничиваем количество окон на экране (максимум 24 свежих карточки), чтобы не перегружать страницу
+                    while (grid.children.length > 24) {
+                        grid.removeChild(grid.lastChild);
+                    }
                 }
             } catch (e) {
-                // Если rss2json не отработал, пробуем забрать сырой XML через AllOrigins
-                try {
-                    const xmlResponse = await fetch(`https://api.allorigins.win/get?url=${encodedUrl}`);
-                    const xmlData = await xmlResponse.json();
-                    const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(xmlData.contents, "text/xml");
-                    const items = Array.from(xmlDoc.getElementsByTagName('item'));
-                    
-                    if(items.length > 0) {
-                        document.getElementById('news-title').innerHTML = `🎬 Военные репортажи | Актуально`;
-                        renderNews(items.slice(0, 12), grid, 'xml');
-                    } else {
-                        throw new Error();
-                    }
-                } catch(err) {
-                    grid.innerHTML = '<div class="loading-text" style="color: #ef4444;">Ошибка обновления ленты. Пожалуйста, попробуйте позже.</div>';
-                    document.getElementById('news-title').innerHTML = `🎬 Военные репортажи`;
+                if (isFirstLoad) {
+                    grid.innerHTML = '<div class="loading-text" style="color: #ef4444;">Не удалось подключиться к каналам новостей. Повтор...</div>';
                 }
-            }
-        }
-
-        async function renderNews(items, grid, type) {
-            grid.innerHTML = '';
-            
-            // Разнообразные фоновые заглушки на случай сбоя картинки в самом потоке
-            const fallbacks = [
-                'https://images.unsplash.com/photo-1590079019458-0eb5b40a3371?auto=format&fit=crop&w=600&q=80',
-                'https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=600&q=80',
-                'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=600&q=80',
-                'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80'
-            ];
-
-            for (let i = 0; i < items.length; i++) {
-                const item = items[i];
-                let title = '', link = '', pubDate = '', description = '', imgUrl = '';
-
-                if (type === 'json') {
-                    title = item.title;
-                    link = item.link;
-                    pubDate = item.pubDate ? new Date(item.pubDate.replace(' ', 'T')).toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'}) : '';
-                    description = item.description || '';
-                    
-                    // Поиск картинок в JSON структуре
-                    imgUrl = item.enclosure?.link || item.thumbnail || '';
-                    if(!imgUrl && item.description && item.description.includes('<img')) {
-                        const m = item.description.match(/src="([^"]+)"/);
-                        if(m) imgUrl = m[1];
-                    }
-                } else {
-                    // Парсинг напрямую из XML с учетом медиа пространств имен
-                    title = item.getElementsByTagName('title')[0]?.textContent || '';
-                    link = item.getElementsByTagName('link')[0]?.textContent || '#';
-                    const dateStr = item.getElementsByTagName('pubDate')[0]?.textContent;
-                    pubDate = dateStr ? new Date(dateStr).toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'}) : '';
-                    description = item.getElementsByTagName('description')[0]?.textContent || '';
-                    
-                    // Ищем стандартный enclosure
-                    let enc = item.getElementsByTagName('enclosure')[0];
-                    if (enc) imgUrl = enc.getAttribute('url');
-                    
-                    // Если пусто, ищем медиа-теги по названию (для Al Jazeera)
-                    if (!imgUrl) {
-                        let mediaContent = item.getElementsByTagName('media:content')[0] || item.getElementsByTagName('content')[0];
-                        if(mediaContent) imgUrl = mediaContent.getAttribute('url');
-                    }
-                    if (!imgUrl) {
-                        let mediaThumb = item.getElementsByTagName('media:thumbnail')[0] || item.getElementsByTagName('thumbnail')[0];
-                        if(mediaThumb) imgUrl = mediaThumb.getAttribute('url');
-                    }
-                }
-
-                // Перевод данных
-                const ruTitle = await translateText(title);
-                let cleanDesc = description.replace(/<\/?[^>]+(>|$)/g, "").trim();
-                const ruDesc = cleanDesc ? await translateText(cleanDesc) : '';
-
-                let finalDesc = ruDesc;
-                if (finalDesc.length > 120) finalDesc = finalDesc.substring(0, 120) + '...';
-                
-                // Если картинка не определилась, ставим чередующиеся уникальные фоны
-                if (!imgUrl || imgUrl.trim() === '') {
-                    imgUrl = fallbacks[i % fallbacks.length];
-                }
-
-                // Ссылка генерирует видео-поиск репортажей на основе заголовка
-                let videoLink = `https://yandex.ru/video/preview/?text=${encodeURIComponent(ruTitle + ' репортаж')}`;
-
-                grid.innerHTML += `
-                    <a href="${videoLink}" target="_blank" class="news-item">
-                        <div class="img-wrapper">
-                            <img src="${imgUrl}" onerror="this.src='${fallbacks[i % fallbacks.length]}'">
-                            <div class="video-play-btn">▶</div>
-                        </div>
-                        <div class="news-item-body">
-                            <div>
-                                <span class="news-date">⏱ ${pubDate}</span>
-                                <h3 style="margin-top: 5px;">${ruTitle}</h3>
-                            </div>
-                            <p style="margin-top: 8px;">${finalDesc}</p>
-                        </div>
-                    </a>
-                `;
             }
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            loadNews();
+            // Первая ручная загрузка при старте
+            loadNews(true);
+
+            // Таймер автообновления: каждые 30 секунд проверяет ленту. 
+            // Как только новостник выложит материал — карточка сама вылетит сверху ленты.
+            setInterval(() => {
+                loadNews(false);
+            }, 30000);
         });
     </script>
 </body>
