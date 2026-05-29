@@ -182,7 +182,7 @@
             width: 100%;
             height: 190px;
             position: relative;
-            background: linear-gradient(135deg, #1e1b4b 0%, #151d2f 100%);
+            background: #151d2f;
             overflow: hidden;
         }
 
@@ -190,6 +190,30 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+
+        .video-play-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(168, 85, 247, 0.85);
+            color: white;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            padding-left: 3px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: all 0.2s ease;
+        }
+
+        .news-item:hover .video-play-btn {
+            background: #a855f7;
+            transform: translate(-50%, -50%) scale(1.1);
         }
 
         .news-item-body {
@@ -276,9 +300,9 @@
         <div id="news-tab" class="tab-content">
             <div class="news-container">
                 <div class="news-card">
-                    <h2 id="news-title">🔥 Новости СВО | Загрузка...</h2>
+                    <h2 id="news-title">🎬 Репортажи с передовой | Загрузка...</h2>
                     <div class="news-grid" id="news-grid">
-                        <div class="loading-text">Загрузка свежих новостей...</div>
+                        <div class="loading-text">Загрузка свежих видеорепортажей...</div>
                     </div>
                 </div>
             </div>
@@ -311,60 +335,49 @@
                 return;
             }
 
-            const sources = [
-                { url: 'https://lenta.ru/rss/tags/theme/operation', name: 'Lenta.ru (СВО)' },
-                { url: 'https://ura.news/rss', name: 'URA.RU' }
+            const streamUrl = 'https://www.1tv.ru/news/rss/svoreportazhisperedovoy.xml';
+            const encodedUrl = encodeURIComponent(streamUrl);
+            
+            const proxies = [
+                `https://api.rss2json.com/v1/api.json?rss_url=${encodedUrl}`,
+                `https://api.allorigins.win/get?url=${encodedUrl}`
             ];
             
             let success = false;
 
-            for (const source of sources) {
+            for (const proxy of proxies) {
                 if (success) break;
-                const encodedUrl = encodeURIComponent(source.url);
-                const proxies = [
-                    `https://api.rss2json.com/v1/api.json?rss_url=${encodedUrl}`,
-                    `https://api.allorigins.win/get?url=${encodedUrl}`
-                ];
+                try {
+                    const response = await fetch(proxy);
+                    const data = await response.json();
 
-                for (const proxy of proxies) {
-                    if (success) break;
-                    try {
-                        const response = await fetch(proxy);
-                        const data = await response.json();
-
-                        if (data.status === 'ok' && data.items && data.items.length > 0) {
-                            document.getElementById('news-title').innerHTML = `🔥 Новости СВО | ${source.name}`;
-                            renderNews(data.items, grid, 'json');
+                    if (data.status === 'ok' && data.items && data.items.length > 0) {
+                        document.getElementById('news-title').innerHTML = `🎬 Репортажи с передовой | Первый канал`;
+                        renderNews(data.items, grid, 'json');
+                        success = true;
+                    } else if (data.contents) {
+                        const parser = new DOMParser();
+                        const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+                        const items = xmlDoc.getElementsByTagName('item');
+                        if (items.length > 0) {
+                            document.getElementById('news-title').innerHTML = `🎬 Репортажи с передовой | Первый канал`;
+                            renderNews(items, grid, 'xml');
                             success = true;
-                        } else if (data.contents) {
-                            const parser = new DOMParser();
-                            const xmlDoc = parser.parseFromString(data.contents, "text/xml");
-                            const items = xmlDoc.getElementsByTagName('item');
-                            if (items.length > 0) {
-                                document.getElementById('news-title').innerHTML = `🔥 Новости СВО | ${source.name}`;
-                                renderNews(items, grid, 'xml');
-                                success = true;
-                            }
                         }
-                    } catch (e) {}
-                }
+                    }
+                } catch (e) {}
             }
 
             if (!success) {
-                grid.innerHTML = '<div class="loading-text" style="color: #ef4444;">Ошибка загрузки новостей. Пожалуйста, попробуйте позже.</div>';
-                document.getElementById('news-title').innerHTML = `🔥 Новости СВО`;
+                grid.innerHTML = '<div class="loading-text" style="color: #ef4444;">Не удалось загрузить видеорепортажи. Пожалуйста, попробуйте позже.</div>';
+                document.getElementById('news-title').innerHTML = `🎬 Репортажи с передовой`;
             }
-        }
-
-        function extractImageFromText(htmlString) {
-            if (!htmlString) return null;
-            const m = htmlString.match(/<img[^>]+src="([^">]+)"/i);
-            return m ? m[1] : null;
         }
 
         function renderNews(items, grid, type) {
             grid.innerHTML = '';
-            const limit = Math.min(items.length, 30);
+            const limit = Math.min(items.length, 20);
+            const fallbackImg = 'https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=800&q=80';
 
             for (let i = 0; i < limit; i++) {
                 let title = '', link = '', pubDate = '', description = '', imgUrl = '';
@@ -375,7 +388,7 @@
                     link = item.link;
                     pubDate = new Date(item.pubDate.replace(' ', 'T')).toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'});
                     description = item.description || '';
-                    imgUrl = item.enclosure?.link || item.thumbnail || extractImageFromText(description) || '';
+                    imgUrl = item.enclosure?.link || item.thumbnail || '';
                 } else {
                     const item = items[i];
                     title = item.getElementsByTagName('title')[0]?.textContent || '';
@@ -385,31 +398,20 @@
                     description = item.getElementsByTagName('description')[0]?.textContent || '';
                     
                     const enclosure = item.getElementsByTagName('enclosure')[0];
-                    if (enclosure && enclosure.getAttribute('type')?.includes('image')) {
+                    if (enclosure) {
                         imgUrl = enclosure.getAttribute('url');
-                    }
-                    
-                    if (!imgUrl) {
-                        const mediaContent = item.getElementsByTagName('media:content')[0] || item.getElementsByTagName('content')[0];
-                        if (mediaContent) imgUrl = mediaContent.getAttribute('url');
-                    }
-                    
-                    if (!imgUrl) {
-                        imgUrl = extractImageFromText(description);
                     }
                 }
 
                 let cleanDesc = description.replace(/<\/?[^>]+(>|$)/g, "").trim();
-                if (cleanDesc.length > 140) cleanDesc = cleanDesc.substring(0, 140) + '...';
-
-                let imageHtml = imgUrl 
-                    ? `<img src="${imgUrl}" onerror="this.style.display='none'">` 
-                    : `<div style="width:100%; height:100%; background: linear-gradient(135deg, #2e1065 0%, #0f172a 100%);"></div>`;
+                if (cleanDesc.length > 130) cleanDesc = cleanDesc.substring(0, 130) + '...';
+                if (!imgUrl) imgUrl = fallbackImg;
 
                 grid.innerHTML += `
                     <a href="${link}" target="_blank" class="news-item">
                         <div class="img-wrapper">
-                            ${imageHtml}
+                            <img src="${imgUrl}" onerror="this.src='${fallbackImg}'">
+                            <div class="video-play-btn">▶</div>
                         </div>
                         <div class="news-item-body">
                             <div>
