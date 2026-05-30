@@ -147,16 +147,11 @@
 
         .news-feed {
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
             gap: 16px;
             width: 100%;
-            overflow-x: auto;
             padding: 10px 5px 25px 5px;
-            scrollbar-width: none;
-            scroll-snap-type: x mandatory;
         }
-
-        .news-feed::-webkit-scrollbar { display: none; }
 
         .florein-card {
             background: #111622;
@@ -165,10 +160,7 @@
             display: flex;
             flex-direction: column;
             padding: 24px;
-            min-width: 280px;
-            max-width: 280px;
-            scroll-snap-align: center;
-            flex-shrink: 0;
+            width: 100%;
         }
 
         .card-date {
@@ -179,7 +171,7 @@
         }
 
         .florein-card h3 { font-size: 17px; color: #ffffff; margin-bottom: 12px; }
-        .florein-card p { font-size: 14px; color: #94a3b8; margin-bottom: 20px; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+        .florein-card p { font-size: 14px; color: #94a3b8; margin-bottom: 20px; line-height: 1.5; }
 
         .card-btn {
             margin-top: auto;
@@ -216,7 +208,7 @@
         <div id="main-tab" class="tab-content active">
             <div class="status-card">
                 <h1>Сайт в разработке</h1>
-                <p>Привет! Сейчас я активно настраиваю модули и верстку. Совсем скоро здесь откроется полноценный функционал профиля.</p>
+                <p>Привет! Сайт обновляется в реальном времени. Вкладка новостей СВО работает автоматически.</p>
             </div>
         </div>
 
@@ -234,9 +226,8 @@
     <div class="footer-badge">🛡️ ВАШИ ДАННЫЕ ЗАЩИЩЕНЫ</div>
 
     <script>
-        const loadedNewsLinks = new Set();
         const container = document.getElementById('news-container');
-        const keywords = ['СВО', 'спецоперация', 'фронт', 'армия', 'оборона', 'Минобороны', 'военкор', 'ДНР', 'ЛНР', 'Украина', 'ВСУ', 'наступление', 'удар', 'тыл'];
+        const keywords = ['СВО', 'спецоперация', 'фронт', 'армия', 'оборона', 'Минобороны', 'военкор', 'ДНР', 'ЛНР', 'Украина', 'ВСУ', 'наступление', 'удар', 'тыл', 'Россия', 'конфликт'];
 
         function openTab(btnElement, tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -255,30 +246,30 @@
                 const filteredItems = data.items.filter(item => {
                     const text = (item.title + " " + item.description).toLowerCase();
                     return keywords.some(word => text.includes(word.toLowerCase()));
-                }).slice(0, 5); // Лимит: 5 новостей
+                }).slice(0, 15);
 
-                // Очищаем контейнер перед вставкой, чтобы убрать старые записи
-                container.innerHTML = '';
+                if (filteredItems.length > 0) {
+                    container.innerHTML = '';
+                    filteredItems.forEach(item => {
+                        const dateObj = new Date(item.pubDate.replace(' ', 'T'));
+                        const day = String(dateObj.getDate()).padStart(2, '0');
+                        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const year = dateObj.getFullYear().toString().slice(-2);
+                        const time = `${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
+                        
+                        const formattedDate = `${day}.${month}.${year} ${time}`;
 
-                filteredItems.forEach(item => {
-                    const dateObj = new Date(item.pubDate.replace(' ', 'T'));
-                    const day = String(dateObj.getDate()).padStart(2, '0');
-                    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-                    const year = dateObj.getFullYear().toString().slice(-2);
-                    const time = `${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
-                    
-                    const formattedDate = `${day}.${month}.${year} ${time}`;
-
-                    const card = document.createElement('div');
-                    card.className = 'florein-card';
-                    card.innerHTML = `
-                        <div class="card-date">${formattedDate}</div>
-                        <h3>${item.title}</h3>
-                        <p>${item.description.replace(/<[^>]*>?/gm, '').substring(0, 150)}...</p>
-                        <a href="${item.link}" target="_blank" class="card-btn">Читать на URA.RU ➔</a>
-                    `;
-                    container.appendChild(card);
-                });
+                        const card = document.createElement('div');
+                        card.className = 'florein-card';
+                        card.innerHTML = `
+                            <div class="card-date">${formattedDate}</div>
+                            <h3>${item.title}</h3>
+                            <p>${item.description.replace(/<[^>]*>?/gm, '').substring(0, 150)}...</p>
+                            <a href="${item.link}" target="_blank" class="card-btn">Читать на URA.RU ➔</a>
+                        `;
+                        container.appendChild(card);
+                    });
+                }
             } catch (error) { console.error('Ошибка:', error); }
         }
 
