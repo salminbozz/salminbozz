@@ -335,38 +335,38 @@
             btnElement.classList.add('active');
         }
 
-        // Парсинг RSS напрямую через прокси (обход кэша добавлением timestamp)
+        // Парсинг RSS через надежный сервис rss2json
         async function fetchLiveNews() {
             try {
-                // Добавляем текущее время, чтобы браузер и прокси не кэшировали запрос
-                const timestamp = new Date().getTime();
-                const targetUrl = encodeURIComponent(`https://ura.news/rss?_t=${timestamp}`);
-                const proxyUrl = `https://api.allorigins.win/get?url=${targetUrl}`;
+                // Используем api.rss2json.com вместо нестабильного allorigins и ручного парсинга XML
+                const rssUrl = 'https://ura.news/rss';
+                const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
 
-                const response = await fetch(proxyUrl);
+                const response = await fetch(apiUrl);
                 if (!response.ok) throw new Error('Ошибка сети');
                 
                 const data = await response.json();
                 
-                // Парсим XML
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(data.contents, "text/xml");
-                const items = Array.from(xmlDoc.querySelectorAll("item")).slice(0, 10);
+                // Проверяем статус ответа самого сервиса
+                if (data.status !== 'ok') throw new Error('Ошибка парсинга RSS');
 
+                const items = data.items.slice(0, 10);
                 let hasNewItems = false;
                 
                 // Идем с конца в начало, чтобы при добавлении (prepend) порядок сохранился
                 items.reverse().forEach(item => {
-                    const link = item.querySelector("link").textContent;
+                    const link = item.link;
                     
                     // Если новости еще нет в ленте — добавляем
                     if (!loadedNewsLinks.has(link)) {
                         hasNewItems = true;
                         loadedNewsLinks.add(link);
                         
-                        const title = item.querySelector("title").textContent;
-                        const pubDate = item.querySelector("pubDate").textContent;
-                        let description = item.querySelector("description").textContent;
+                        const title = item.title;
+                        
+                        // Нормализуем дату для корректной работы во всех браузерах (в т.ч. Safari на iOS)
+                        const pubDate = item.pubDate.replace(' ', 'T'); 
+                        let description = item.description;
                         
                         // Очистка от HTML тегов
                         let tempDiv = document.createElement("div");
@@ -417,7 +417,10 @@
             } catch (error) {
                 console.error('Ошибка загрузки фида:', error);
                 if (isFirstLoad) {
-                    document.getElementById('loading-text').innerHTML = 'Ошибка соединения. Повторная попытка...';
+                    const loadingText = document.getElementById('loading-text');
+                    if (loadingText) {
+                        loadingText.innerHTML = 'Ошибка соединения. Повторная попытка...';
+                    }
                 }
             }
         }
@@ -430,3 +433,5 @@
     </script>
 </body>
 </html>
+
+```
