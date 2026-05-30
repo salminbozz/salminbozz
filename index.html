@@ -24,7 +24,7 @@
             overflow-x: hidden;
         }
 
-        /* Полностью восстановленный баннер Florein со скриншота */
+        /* ТОТ САМЫЙ ОРИГИНАЛЬНЫЙ БАННЕР С АНИМЕ С ФОТО */
         .header-banner {
             width: 100%;
             max-width: 1200px;
@@ -34,18 +34,33 @@
             border: 1px solid rgba(168, 85, 247, 0.4);
             box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
             margin-bottom: 20px;
-            background: linear-gradient(135deg, #1e1b4b, #3b0764);
+            background-image: url('https://w.forfun.com/fetch/de/de7428741da6297df3158f967ba9cb20.jpeg');
+            background-size: cover;
+            background-position: center;
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+        }
+
+        /* Затемнение, чтобы текст читался как на скринах */
+        .header-banner::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 10, 30, 0.4);
+            z-index: 1;
         }
 
         .header-banner h2 {
-            font-size: 24px;
-            color: #c084fc;
-            letter-spacing: 2px;
+            position: relative;
+            z-index: 2;
+            font-size: 26px;
+            color: #ffffff;
+            letter-spacing: 3px;
             text-transform: uppercase;
-            font-weight: 700;
+            font-weight: 800;
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.8), 0 2px 4px rgba(0,0,0,0.5);
         }
 
         .nav-menu {
@@ -321,37 +336,25 @@
     </div>
 
     <script>
-        // Полностью замененные, рабочие CDN-ссылки на MP4 файлы, доступные без ограничений
+        // Стабильная база данных с рабочими .mp4 и реальными статичными картинками для обложек (poster)
         const reportDatabase = [
             { 
                 t: "Экстренный репортаж: Бои под Купянском, продвижение штурмовых групп", 
                 d: "Военкоры передают с места событий: бронетехника пошла на прорыв оборонительных рубежей. Уникальные кадры работы экипажей БМП.",
-                videoUrl: "https://yastatic.net/s3/lavka-web/public/videos/main_video_v3_ru.mp4"
+                videoUrl: "https://vjs.zencdn.net/v/oceans.mp4",
+                posterUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=600&q=80"
             },
             { 
                 t: "Кадры с передовой: Работа расчетов «Солнцепек» на Авдеевском направлении", 
                 d: "Кадры объективного контроля с беспилотника. Выжжен укрепрайон противника. Полный отчет нанесения ударов.",
-                videoUrl: "https://html5demos.com/assets/dizzy.mp4"
+                videoUrl: "https://html5demos.com/assets/dizzy.mp4",
+                posterUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80"
             },
             { 
                 t: "Репортаж из освобожденного поселка: Обстановка из первых уст", 
                 d: "Наши бойцы водрузили знамя в центре населенного пункта. Эксклюзивные интервью с командирами штурмовых батальонов.",
-                videoUrl: "https://vjs.zencdn.net/v/oceans.mp4"
-            },
-            { 
-                t: "Хроника СВО: Массированный удар дронов-камикадзе по тыловым объектам", 
-                d: "Кадры ночной работы операторов БПЛА. Уничтожены замаскированные склады с боеприпасами и ангары техники.",
-                videoUrl: "https://yastatic.net/s3/lavka-web/public/videos/main_video_v3_ru.mp4"
-            },
-            { 
-                t: "Спецрепортаж: Инженерные подразделения наводят переправы под огнем", 
-                d: "Кадры возведения понтонных мостов в реальном времени. Слаженная работа расчетов под прикрытием систем ПВО.",
-                videoUrl: "https://html5demos.com/assets/dizzy.mp4"
-            },
-            { 
-                t: "Кадры из окопов: Отбита мощная контратака на флангах Бахмута", 
-                d: "Эксклюзивное видео боя высокой интенсивности. Огневое поражение наступающих сил из всех видов стрелкового оружия.",
-                videoUrl: "https://vjs.zencdn.net/v/oceans.mp4"
+                videoUrl: "https://media.w3.org/2010/05/sintel/trailer.mp4",
+                posterUrl: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80"
             }
         ];
 
@@ -376,16 +379,16 @@
                 let data = reportDatabase[i];
                 let title = data.t + ` #_${100 - i}`;
 
-                grid.innerHTML += createCardHtml(title, data.d, timeString, data.videoUrl);
+                grid.innerHTML += createCardHtml(title, data.d, timeString, data.videoUrl, data.posterUrl);
             }
         }
 
-        // Вернул стандартное управление controls, чтобы видео запускалось на смартфонах без багов
-        function createCardHtml(title, desc, time, videoUrl) {
+        // Рендер с обязательным добавлением poster, чтобы мобильные браузеры отображали контент
+        function createCardHtml(title, desc, time, videoUrl, posterUrl) {
             return `
                 <div class="news-item">
                     <div class="video-wrapper">
-                        <video src="${videoUrl}" preload="metadata" controls playsinline controlsList="nodownload"></video>
+                        <video src="${videoUrl}" poster="${posterUrl}" preload="none" controls playsinline controlsList="nodownload"></video>
                     </div>
                     <div class="news-item-body">
                         <span class="news-date">⏱ ${time} | СВО ХРОНИКА</span>
@@ -404,10 +407,10 @@
             let randomData = reportDatabase[Math.floor(Math.random() * reportDatabase.length)];
             let liveTitle = `⚡ СРОЧНО: ` + randomData.t.replace("Экстренный репортаж: ", "").replace("Кадры с передовой: ", "");
 
-            let cardHtml = createCardHtml(liveTitle, randomData.d, timeString, randomData.videoUrl);
+            let cardHtml = createCardHtml(liveTitle, randomData.d, timeString, randomData.videoUrl, randomData.posterUrl);
             grid.insertAdjacentHTML('afterbegin', cardHtml);
 
-            if (grid.children.length > 9) {
+            if (grid.children.length > 6) {
                 grid.removeChild(grid.lastChild);
             }
         }
