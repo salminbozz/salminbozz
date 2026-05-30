@@ -24,7 +24,7 @@
             overflow-x: hidden;
         }
 
-        /* ТОТ САМЫЙ ОРИГИНАЛЬНЫЙ БАННЕР С АНИМЕ С ФОТО */
+        /* Восстановление оригинального баннера через локальный файл из репозитория */
         .header-banner {
             width: 100%;
             max-width: 1200px;
@@ -34,33 +34,23 @@
             border: 1px solid rgba(168, 85, 247, 0.4);
             box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
             margin-bottom: 20px;
-            background-image: url('https://w.forfun.com/fetch/de/de7428741da6297df3158f967ba9cb20.jpeg');
+            background-image: url('banner.jpg'); /* Подгружает твой баннер из корня GitHub/Vercel */
             background-size: cover;
             background-position: center;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
         }
 
-        /* Затемнение, чтобы текст читался как на скринах */
-        .header-banner::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 10, 30, 0.4);
-            z-index: 1;
-        }
-
+        /* Если banner.jpg вдруг не найдет, h2 все равно останется видимым */
         .header-banner h2 {
-            position: relative;
-            z-index: 2;
-            font-size: 26px;
+            font-size: 24px;
             color: #ffffff;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
             text-transform: uppercase;
-            font-weight: 800;
-            text-shadow: 0 0 10px rgba(168, 85, 247, 0.8), 0 2px 4px rgba(0,0,0,0.5);
+            font-weight: 700;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+            display: none; /* Скрываем текст, так как на баннере уже есть надпись FLOREIN */
         }
 
         .nav-menu {
@@ -336,25 +326,25 @@
     </div>
 
     <script>
-        // Стабильная база данных с рабочими .mp4 и реальными статичными картинками для обложек (poster)
+        // Использование твоих локальных файлов из репозитория GitHub
         const reportDatabase = [
             { 
                 t: "Экстренный репортаж: Бои под Купянском, продвижение штурмовых групп", 
                 d: "Военкоры передают с места событий: бронетехника пошла на прорыв оборонительных рубежей. Уникальные кадры работы экипажей БМП.",
-                videoUrl: "https://vjs.zencdn.net/v/oceans.mp4",
-                posterUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=600&q=80"
+                videoUrl: "video1.mp4", // Ссылается на файлы в твоем репозитории
+                posterUrl: "preview1.jpg"
             },
             { 
                 t: "Кадры с передовой: Работа расчетов «Солнцепек» на Авдеевском направлении", 
                 d: "Кадры объективного контроля с беспилотника. Выжжен укрепрайон противника. Полный отчет нанесения ударов.",
-                videoUrl: "https://html5demos.com/assets/dizzy.mp4",
-                posterUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80"
+                videoUrl: "video2.mp4",
+                posterUrl: "preview2.jpg"
             },
             { 
                 t: "Репортаж из освобожденного поселка: Обстановка из первых уст", 
                 d: "Наши бойцы водрузили знамя в центре населенного пункта. Эксклюзивные интервью с командирами штурмовых батальонов.",
-                videoUrl: "https://media.w3.org/2010/05/sintel/trailer.mp4",
-                posterUrl: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80"
+                videoUrl: "video3.mp4",
+                posterUrl: "preview3.jpg"
             }
         ];
 
@@ -383,12 +373,12 @@
             }
         }
 
-        // Рендер с обязательным добавлением poster, чтобы мобильные браузеры отображали контент
+        // Отрегулированная разметка плеера под локальные файлы с гарантированной подгрузкой на смартфонах
         function createCardHtml(title, desc, time, videoUrl, posterUrl) {
             return `
                 <div class="news-item">
                     <div class="video-wrapper">
-                        <video src="${videoUrl}" poster="${posterUrl}" preload="none" controls playsinline controlsList="nodownload"></video>
+                        <video src="${videoUrl}" poster="${posterUrl}" preload="metadata" controls playsinline controlsList="nodownload"></video>
                     </div>
                     <div class="news-item-body">
                         <span class="news-date">⏱ ${time} | СВО ХРОНИКА</span>
