@@ -8,14 +8,16 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background-color: #0b0f19; color: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px 10px; }
         
-        .header-banner { width: 100%; max-width: 600px; aspect-ratio: 5 / 1.5; border-radius: 16px; margin-bottom: 25px; background: #1e1b4b; background-size: cover; }
+        .header-banner { width: 100%; max-width: 600px; aspect-ratio: 5 / 1.5; border-radius: 16px; margin-bottom: 25px; background: #1e1b4b; background-size: cover; border: 1px solid rgba(168, 85, 247, 0.4); }
         
         .nav-menu { display: flex; gap: 15px; margin-bottom: 25px; background: rgba(21, 29, 47, 0.6); padding: 6px; border-radius: 12px; }
         .nav-btn { background: transparent; border: none; color: #94a3b8; padding: 10px 24px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: 0.3s; }
-        .nav-btn.active { background: #a855f7; color: #fff; }
+        .nav-btn.active { background: #a855f7; color: #fff; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3); }
         
         .tab-content { display: none; width: 100%; max-width: 600px; }
         .tab-content.active { display: block; }
+        
+        .status-card { background: rgba(21, 29, 47, 0.65); padding: 40px; border-radius: 20px; text-align: center; border: 1px solid rgba(168, 85, 247, 0.2); }
         
         .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
         .live-badge { background: rgba(168, 85, 247, 0.15); color: #c084fc; font-size: 11px; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; animation: pulse 2s infinite; }
@@ -34,18 +36,19 @@
 <body>
 
     <div class="header-banner"></div>
+    
     <div class="nav-menu">
         <button class="nav-btn active" onclick="openTab(this, 'main-tab')">Главная</button>
         <button class="nav-btn" onclick="openTab(this, 'news-tab')">Новости</button>
     </div>
 
-    <div class="tab-content" id="main-tab">
-        <div style="background: rgba(21, 29, 47, 0.65); padding: 40px; border-radius: 20px; text-align: center;">
+    <div class="tab-content active" id="main-tab">
+        <div class="status-card">
             <h1>Сайт в разработке</h1>
         </div>
     </div>
 
-    <div class="tab-content active" id="news-tab">
+    <div class="tab-content" id="news-tab">
         <div class="section-header">
             <h2>Новости СВО</h2>
             <span class="live-badge">● Live</span>
@@ -58,14 +61,7 @@
     <script>
         const container = document.getElementById('news-container');
         const loadedLinks = new Set();
-        const keywords = [
-            'СВО', 'спецоперация', 'фронт', 'армия', 'оборона', 'Минобороны', 'военкор', 
-            'ДНР', 'ЛНР', 'Украина', 'ВСУ', 'наступление', 'удар', 'тыл', 'Россия', 
-            'конфликт', 'спецслужба', 'беспилотник', 'БПЛА', 'обстрел', 'политика', 
-            'боевые', 'артиллерия', 'авиация', 'пво', 'донецк', 'луганск', 'херсон', 
-            'запорожье', 'харьков', 'бахмут', 'авдеевка', 'снаряд', 'вкс', 'танки', 
-            'ракетный', 'генштаб', 'мобилизация'
-        ];
+        const keywords = ['СВО', 'спецоперация', 'фронт', 'армия', 'оборона', 'Минобороны', 'военкор', 'ДНР', 'ЛНР', 'Украина', 'ВСУ', 'наступление', 'удар', 'тыл', 'Россия', 'конфликт', 'БПЛА', 'обстрел', 'танки'];
 
         function openTab(btn, id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -78,7 +74,6 @@
             try {
                 const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://ura.news/rss&t=' + Date.now());
                 const data = await res.json();
-                
                 if (data.status !== 'ok') return;
                 
                 data.items.filter(item => {
@@ -87,7 +82,6 @@
                 }).reverse().forEach(item => {
                     if (!loadedLinks.has(item.link)) {
                         loadedLinks.add(item.link);
-                        
                         const d = new Date(item.pubDate.replace(' ', 'T'));
                         const dateStr = `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear().toString().slice(-2)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
                         
@@ -106,7 +100,7 @@
         }
 
         fetchNews();
-        setInterval(fetchNews, 15000);
+        setInterval(fetchNews, 30000); // Обновление каждые 30 секунд
     </script>
 </body>
 </html>
