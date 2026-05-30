@@ -34,10 +34,10 @@
             border: 1px solid rgba(168, 85, 247, 0.4);
             box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
             margin-bottom: 25px;
-            background-image: url('banner.jpg'); /* Оставьте свой путь к баннеру */
+            background-image: url('banner.jpg');
             background-size: cover;
             background-position: center;
-            background-color: #1e1b4b; /* Заглушка, если картинки нет */
+            background-color: #1e1b4b;
         }
 
         /* Навигация */
@@ -120,24 +120,39 @@
             line-height: 1.6;
         }
 
-        /* Заголовок новостей в стиле URA.RU */
-        .ura-header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 0 10px;
+        /* Заголовок в родном дизайне Florein */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 0 5px;
+            width: 100%;
         }
 
-        .ura-header h2 {
-            color: #f97316; /* Оранжевый */
-            font-size: 28px;
-            font-weight: 800;
-            margin-bottom: 8px;
-            letter-spacing: -0.5px;
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
         }
 
-        .ura-header p {
-            color: #64748b;
-            font-size: 14px;
+        .live-badge {
+            background: rgba(168, 85, 247, 0.15);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            color: #c084fc;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(168, 85, 247, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
         }
 
         /* Горизонтальная лента новостей */
@@ -147,41 +162,69 @@
             gap: 16px;
             width: 100%;
             overflow-x: auto;
-            padding-bottom: 20px;
-            /* Скрываем скроллбар, но оставляем прокрутку */
+            padding: 10px 5px 25px 5px;
             scrollbar-width: none;
             -ms-overflow-style: none;
             scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
         }
 
         .news-feed::-webkit-scrollbar {
             display: none;
         }
 
-        /* Карточка в стиле URA.RU */
+        /* Карточка объединяющая структуру URA.RU и цвета Florein */
         .florein-card {
-            background: #11151e;
-            border: 1px solid #1e293b;
+            background: #111622;
+            border: 1px solid rgba(168, 85, 247, 0.15);
             border-radius: 16px;
             display: flex;
             flex-direction: column;
             padding: 24px;
-            min-width: 290px;
-            max-width: 290px;
+            min-width: 280px;
+            max-width: 280px;
             scroll-snap-align: center;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
             flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .florein-card:hover {
+            border-color: rgba(168, 85, 247, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* Анимация появления новой карточки */
+        .new-item-anim {
+            animation: slideInLeft 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px) scale(0.95); }
+            to { opacity: 1; transform: translateX(0) scale(1); }
         }
 
         .card-date {
             font-size: 13px;
-            color: #f97316; /* Оранжевая дата */
+            color: #c084fc; /* Фиолетовая дата */
             font-weight: 800;
             margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-date::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: #a855f7;
+            border-radius: 50%;
         }
 
         .florein-card h3 {
-            font-size: 18px;
+            font-size: 17px;
             color: #ffffff;
             line-height: 1.4;
             font-weight: 700;
@@ -193,7 +236,6 @@
             color: #94a3b8;
             line-height: 1.5;
             margin-bottom: 20px;
-            /* Ограничение текста в 4 строки */
             display: -webkit-box;
             -webkit-line-clamp: 4;
             -webkit-box-orient: vertical;
@@ -201,19 +243,19 @@
             text-overflow: ellipsis;
         }
 
-        /* Синяя ссылка на источник */
+        /* Фиолетовая ссылка */
         .card-btn {
             margin-top: auto;
             align-self: flex-start;
-            color: #3b82f6; 
+            color: #a855f7; 
             text-decoration: none;
             font-size: 14px;
             font-weight: 700;
-            transition: opacity 0.2s;
+            transition: color 0.2s;
         }
 
         .card-btn:hover {
-            opacity: 0.8;
+            color: #e9d5ff;
         }
 
         .info-text {
@@ -263,13 +305,13 @@
         </div>
 
         <div id="news-tab" class="tab-content">
-            <div class="ura-header">
-                <h2>Свежие новости (URA.RU)</h2>
-                <p>Самые актуальные события и сплетни</p>
+            <div class="section-header">
+                <span class="section-title">Свежие новости</span>
+                <span class="live-badge">● Live</span>
             </div>
             
             <div class="news-feed" id="news-container">
-                <div class="info-text">Получение актуальных данных...</div>
+                <div class="info-text" id="loading-text">Синхронизация потока...</div>
             </div>
         </div>
 
@@ -280,30 +322,10 @@
     </div>
 
     <script>
-        // Используем публичный сервис для обхода CORS и загружаем RSS URA.RU в JSON формате
-        const RSS_FEED_URL = 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fura.news%2Frss';
-
-        // Резервные данные, если API не отвечает (в точности со второго скриншота)
-        const fallbackNews = [
-            {
-                title: "Посол РФ в Армении вызван в Москву для консультаций на фоне сближения с ЕС",
-                pubDate: "2026-05-30 10:00:00",
-                description: "Посол России в Армении Сергей Копыркин вызван в Москву для консультаций из-за того, что Армения укрепляет связи с ЕС и западными партнерами.",
-                link: "https://ura.news"
-            },
-            {
-                title: "Самый маленький кремль России сохранился в свердловской глубинке — ему 428 лет",
-                pubDate: "2026-05-30 09:30:00",
-                description: "Верхотурский кремль — это не просто еще одна историческая достопримечательность, а уникальное место, сохранившее свой облик с XVII века.",
-                link: "https://ura.news"
-            },
-            {
-                title: "Лебединое озеро, День защиты детей: куда пойти в Челябинске 30-31 мая",
-                pubDate: "2026-05-30 08:15:00",
-                description: "Последние выходные мая обещают быть насыщенными. Рассказываем челябинцам и гостям города, как увидеть премьеры и провести время с семьей.",
-                link: "https://ura.news"
-            }
-        ];
+        // Храним ссылки на уже загруженные новости, чтобы не дублировать их
+        const loadedNewsLinks = new Set();
+        const container = document.getElementById('news-container');
+        let isFirstLoad = true;
 
         function openTab(btnElement, tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -313,56 +335,97 @@
             btnElement.classList.add('active');
         }
 
-        function renderCards(newsArray) {
-            const container = document.getElementById('news-container');
-            container.innerHTML = '';
-
-            newsArray.forEach(item => {
-                // Форматируем дату в DD.MM.YYYY
-                let dateObj = new Date(item.pubDate);
-                let day = String(dateObj.getDate()).padStart(2, '0');
-                let month = String(dateObj.getMonth() + 1).padStart(2, '0');
-                let year = dateObj.getFullYear();
-                let formattedDate = `${day}.${month}.${year}`;
-
-                // Очищаем описание от HTML-тегов, если они пришли из RSS
-                let tempDiv = document.createElement("div");
-                tempDiv.innerHTML = item.description;
-                let cleanDesc = tempDiv.textContent || tempDiv.innerText || "";
-
-                container.innerHTML += `
-                    <div class="florein-card">
-                        <div class="card-date">${formattedDate}</div>
-                        <h3>${item.title}</h3>
-                        <p>${cleanDesc}</p>
-                        <a href="${item.link}" target="_blank" class="card-btn">Читать на URA.RU ➔</a>
-                    </div>
-                `;
-            });
-        }
-
-        async function loadFloreinNews() {
+        // Парсинг RSS напрямую через прокси (обход кэша добавлением timestamp)
+        async function fetchLiveNews() {
             try {
-                const response = await fetch(RSS_FEED_URL);
-                if (!response.ok) throw new Error('CORS или Network Error');
+                // Добавляем текущее время, чтобы браузер и прокси не кэшировали запрос
+                const timestamp = new Date().getTime();
+                const targetUrl = encodeURIComponent(`https://ura.news/rss?_t=${timestamp}`);
+                const proxyUrl = `https://api.allorigins.win/get?url=${targetUrl}`;
+
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error('Ошибка сети');
                 
                 const data = await response.json();
-                if (data.status !== 'ok') throw new Error('API Error');
+                
+                // Парсим XML
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+                const items = Array.from(xmlDoc.querySelectorAll("item")).slice(0, 10);
 
-                // Берем первые 10 новостей из фида
-                renderCards(data.items.slice(0, 10));
+                let hasNewItems = false;
+                
+                // Идем с конца в начало, чтобы при добавлении (prepend) порядок сохранился
+                items.reverse().forEach(item => {
+                    const link = item.querySelector("link").textContent;
+                    
+                    // Если новости еще нет в ленте — добавляем
+                    if (!loadedNewsLinks.has(link)) {
+                        hasNewItems = true;
+                        loadedNewsLinks.add(link);
+                        
+                        const title = item.querySelector("title").textContent;
+                        const pubDate = item.querySelector("pubDate").textContent;
+                        let description = item.querySelector("description").textContent;
+                        
+                        // Очистка от HTML тегов
+                        let tempDiv = document.createElement("div");
+                        tempDiv.innerHTML = description;
+                        description = tempDiv.textContent || tempDiv.innerText || "";
+
+                        // Форматирование даты
+                        const dateObj = new Date(pubDate);
+                        const day = String(dateObj.getDate()).padStart(2, '0');
+                        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const year = dateObj.getFullYear();
+                        const hours = String(dateObj.getHours()).padStart(2, '0');
+                        const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+                        const formattedDate = `${day}.${month}.${year} в ${hours}:${minutes}`;
+
+                        // Создаем карточку
+                        const card = document.createElement('div');
+                        card.className = 'florein-card';
+                        
+                        // Если это не первая загрузка, добавляем анимацию появления
+                        if (!isFirstLoad) {
+                            card.classList.add('new-item-anim');
+                        }
+
+                        card.innerHTML = `
+                            <div class="card-date">${formattedDate}</div>
+                            <h3>${title}</h3>
+                            <p>${description}</p>
+                            <a href="${link}" target="_blank" class="card-btn">Читать источник ➔</a>
+                        `;
+
+                        // Вставляем новость в начало горизонтального списка
+                        container.prepend(card);
+                    }
+                });
+
+                // Убираем текст загрузки
+                const loadingText = document.getElementById('loading-text');
+                if (loadingText) loadingText.remove();
+
+                // При появлении новых постов прокручиваем слайдер в самое начало
+                if (hasNewItems && !isFirstLoad) {
+                    container.scrollTo({ left: 0, behavior: 'smooth' });
+                }
+                
+                isFirstLoad = false;
 
             } catch (error) {
-                console.warn('Не удалось загрузить живой фид. Использую резервные данные.', error);
-                // Если нет интернета или ошибка CORS - подгружаем красивые карточки из массива fallbackNews
-                renderCards(fallbackNews);
+                console.error('Ошибка загрузки фида:', error);
+                if (isFirstLoad) {
+                    document.getElementById('loading-text').innerHTML = 'Ошибка соединения. Повторная попытка...';
+                }
             }
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            loadFloreinNews();
-            // Фоновое обновление раз в 5 минут
-            setInterval(loadFloreinNews, 300000);
+            fetchLiveNews();
+            // Проверка новых постов каждые 30 секунд
+            setInterval(fetchLiveNews, 30000);
         });
     </script>
 </body>
