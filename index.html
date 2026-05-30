@@ -24,7 +24,7 @@
             overflow-x: hidden;
         }
 
-        /* ОРИГИНАЛЬНЫЙ БАННЕР С АНИМЕ */
+        /* Твой оригинальный баннер из корня GitHub */
         .header-banner {
             width: 100%;
             max-width: 1200px;
@@ -34,7 +34,7 @@
             border: 1px solid rgba(168, 85, 247, 0.4);
             box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
             margin-bottom: 20px;
-            background-image: url('banner.jpg'); /* Твой баннер из корня GitHub/Vercel */
+            background-image: url('banner.jpg');
             background-size: cover;
             background-position: center;
             display: flex;
@@ -43,7 +43,7 @@
         }
 
         .header-banner h2 {
-            display: none; /* Скрываем текст, так как логотип уже нарисован на картинке */
+            display: none;
         }
 
         .nav-menu {
@@ -214,14 +214,18 @@
             box-shadow: 0 12px 24px rgba(168, 85, 247, 0.12);
         }
 
-        .video-wrapper {
+        .media-wrapper {
             width: 100%;
             aspect-ratio: 16 / 9;
             position: relative;
             background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
 
-        .video-wrapper video {
+        .media-wrapper img, .media-wrapper video {
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -256,6 +260,14 @@
             font-size: 13px;
             color: #94a3b8;
             line-height: 1.5;
+        }
+
+        .loading-text {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: #64748b;
+            padding: 40px;
+            font-size: 16px;
         }
 
         .footer-badge {
@@ -303,10 +315,12 @@
             <div class="news-container">
                 <div class="news-card">
                     <h2>
-                        <span>🎬 Военная хроника | Репортажи</span>
-                        <div class="live-indicator"><div class="live-dot"></div>Прямой эфир</div>
+                        <span>🎬 Автоматическая лента новостей</span>
+                        <div class="live-indicator"><div class="live-dot"></div>Синхронизация</div>
                     </h2>
-                    <div class="news-grid" id="news-grid"></div>
+                    <div class="news-grid" id="news-grid">
+                        <div class="loading-text">Загрузка последних обновлений с источника...</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -319,27 +333,12 @@
     </div>
 
     <script>
-        // Заменил ссылки на стабильные глобальные видеопотоки, которые подгрузятся в любом браузере
-        const reportDatabase = [
-            { 
-                t: "Экстренный репортаж: Бои под Купянском, продвижение штурмовых групп", 
-                d: "Военкоры передают с места событий: бронетехника пошла на прорыв оборонительных рубежей. Уникальные кадры работы экипажей БМП.",
-                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-                posterUrl: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=600&auto=format&fit=crop"
-            },
-            { 
-                t: "Кадры с передовой: Работа расчетов «Солнцепек» на Авдеевском направлении", 
-                d: "Кадры объективного контроля с беспилотника. Выжжен укрепрайон противника. Полный отчет нанесения ударов.",
-                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-                posterUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop"
-            },
-            { 
-                t: "Репортаж из освобожденного поселка: Обстановка из первых уст", 
-                d: "Наши бойцы водрузили знамя в центре населенного пункта. Эксклюзивные интервью с командирами штурмовых батальонов.",
-                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
-                posterUrl: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600&auto=format&fit=crop"
-            }
-        ];
+        // СЮДА ВСТАВЬ RSS-ССЫЛКУ НА ИСТОЧНИК (СМИ, ТГ-КАНАЛ ИЛИ ЛЮБОЙ ДРУГОЙ РЕСУРС)
+        // Сейчас настроена стандартная демонстрационная лента военных новостей (РИА / Lenta)
+        const SOURCE_RSS_URL = 'https://lenta.ru/rss/news'; 
+
+        // Используем открытый бесплатный конвертер RSS-в-JSON, чтобы обойти защиту CORS браузеров
+        const API_CONVERTER = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(SOURCE_RSS_URL)}`;
 
         function openTab(btnElement, tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -349,62 +348,71 @@
             btnElement.classList.add('active');
         }
 
-        function generateInitialNews() {
+        // Функция автоматического парсинга и генерации карточек
+        async function fetchAutoNews() {
             const grid = document.getElementById('news-grid');
-            grid.innerHTML = '';
-            let now = new Date();
+            
+            try {
+                const response = await fetch(API_CONVERTER);
+                const data = await response.json();
 
-            for (let i = 0; i < reportDatabase.length; i++) {
-                let minutesAgo = (i * 15) + Math.floor(Math.random() * 5);
-                let reportTime = new Date(now.getTime() - minutesAgo * 60000);
-                let timeString = reportTime.toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'});
+                if (data.status !== 'ok') throw new Error('Ошибка получения данных');
 
-                let data = reportDatabase[i];
-                let title = data.t + ` #_${100 - i}`;
+                grid.innerHTML = ''; // Очищаем индикатор загрузки
 
-                grid.innerHTML += createCardHtml(title, data.d, timeString, data.videoUrl, data.posterUrl);
-            }
-        }
+                data.items.forEach(item => {
+                    // Парсим дату публикации от источника
+                    let pubDate = new Date(item.pubDate);
+                    let timeString = pubDate.toLocaleDateString('ru-RU', {
+                        day: '2-digit', 
+                        month: '2-digit', 
+                        year: 'numeric', 
+                        hour: '2-digit', 
+                        minute: '2-digit'
+                    });
 
-        function createCardHtml(title, desc, time, videoUrl, posterUrl) {
-            return `
-                <div class="news-item">
-                    <div class="video-wrapper">
-                        <video src="${videoUrl}" poster="${posterUrl}" preload="metadata" controls playsinline controlsList="nodownload"></video>
-                    </div>
-                    <div class="news-item-body">
-                        <span class="news-date">⏱ ${time} | СВО ХРОНИКА</span>
-                        <h3>${title}</h3>
-                        <p>${desc}</p>
-                    </div>
-                </div>
-            `;
-        }
+                    // Ищем картинку или превью видео в структуре новости источника
+                    let mediaUrl = item.enclosure?.link || item.thumbnail || '';
+                    if (!mediaUrl && item.description) {
+                        const imgMatch = item.description.match(/<img[^>]+src="([^">]+)"/);
+                        if (imgMatch) mediaUrl = imgMatch[1];
+                    }
+                    
+                    // Если у новости вообще нет медиафайла, ставим заглушку-заполнитель в тему дизайна
+                    if (!mediaUrl) mediaUrl = 'https://images.unsplash.com/photo-1595113316349-9fa4ee24f884?q=80&w=600&auto=format&fit=crop';
 
-        function pushNewReport() {
-            const grid = document.getElementById('news-grid');
-            let now = new Date();
-            let timeString = now.toLocaleDateString('ru-RU', {hour: '2-digit', minute:'2-digit'});
+                    // Очищаем описание от лишних HTML-тегов, которые может прислать источник
+                    let cleanDesc = item.description.replace(/<\/?[^>]+(>|$)/g, "").substring(0, 160) + '...';
 
-            let randomData = reportDatabase[Math.floor(Math.random() * reportDatabase.length)];
-            let liveTitle = `⚡ СРОЧНО: ` + randomData.t.replace("Экстренный репортаж: ", "").replace("Кадры с передовой: ", "");
+                    // Рендерим полноценный плеер/карточку, где контент на 100% совпадает с описанием
+                    grid.innerHTML += `
+                        <div class="news-item">
+                            <div class="media-wrapper">
+                                ${mediaUrl.endsWith('.mp4') ? 
+                                    `<video src="${mediaUrl}" controls playsinline preload="metadata"></video>` : 
+                                    `<img src="${mediaUrl}" alt="Иллюстрация к новости">`
+                                }
+                            </div>
+                            <div class="news-item-body">
+                                <span class="news-date">⏱ ${timeString} | ЛЕНТА ОБНОВЛЕНА</span>
+                                <h3>${item.title}</h3>
+                                <p>${cleanDesc}</p>
+                            </div>
+                        </div>
+                    `;
+                });
 
-            let cardHtml = createCardHtml(liveTitle, randomData.d, timeString, randomData.videoUrl, randomData.posterUrl);
-            grid.insertAdjacentHTML('afterbegin', cardHtml);
-
-            if (grid.children.length > 6) {
-                grid.removeChild(grid.lastChild);
+            } catch (error) {
+                console.error(error);
+                grid.innerHTML = `<div class="loading-text" style="color: #ef4444;">Не удалось автоматически обновить ленту. Проверьте адрес источника.</div>`;
             }
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            generateInitialNews();
+            fetchAutoNews();
 
-            setInterval(() => {
-                if(document.getElementById('news-tab').classList.contains('active')) {
-                    pushNewReport();
-                }
-            }, 30000);
+            // Скрипт проверяет наличие новых публикаций у источника каждые 60 секунд самостоятельно
+            setInterval(fetchAutoNews, 60000);
         });
     </script>
 </body>
