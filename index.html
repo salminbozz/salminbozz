@@ -24,7 +24,7 @@
             overflow-x: hidden;
         }
 
-        /* Твой оригинальный баннер Florein */
+        /* Твой оригинальный баннер */
         .header-banner {
             width: 100%;
             max-width: 1200px;
@@ -37,13 +37,6 @@
             background-image: url('banner.jpg');
             background-size: cover;
             background-position: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .header-banner h2 {
-            display: none;
         }
 
         .nav-menu {
@@ -153,43 +146,6 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 10px;
-        }
-
-        #source-title {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            font-weight: 700;
-        }
-
-        .live-indicator {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 11px;
-            text-transform: uppercase;
-            color: #22c55e;
-            font-weight: bold;
-            background: rgba(34, 197, 94, 0.1);
-            padding: 4px 10px;
-            border-radius: 20px;
-            border: 1px solid rgba(34, 197, 94, 0.2);
-            flex-shrink: 0;
-        }
-
-        .live-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #22c55e;
-            border-radius: 50%;
-            animation: blink 1.2s infinite;
-        }
-
-        @keyframes blink {
-            0% { opacity: 0.3; }
-            50% { opacity: 1; }
-            100% { opacity: 0.3; }
         }
 
         .news-grid {
@@ -213,24 +169,18 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
-            position: relative;
+            transition: transform 0.25s ease, border-color 0.25s ease;
         }
 
         .news-item:hover {
             transform: translateY(-4px);
             border-color: rgba(168, 85, 247, 0.4);
-            box-shadow: 0 12px 24px rgba(168, 85, 247, 0.12);
         }
 
         .media-wrapper {
             width: 100%;
             aspect-ratio: 16 / 9;
-            position: relative;
             background: #111827;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             overflow: hidden;
         }
 
@@ -238,7 +188,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            display: block;
         }
 
         .news-item-body {
@@ -247,15 +196,12 @@
             flex-direction: column;
             gap: 10px;
             flex-grow: 1;
-            background: rgba(21, 29, 47, 0.2);
         }
 
         .news-date {
             font-size: 11px;
             color: #a855f7;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         .news-item-body h3 {
@@ -269,7 +215,6 @@
             font-size: 13px;
             color: #94a3b8;
             line-height: 1.5;
-            margin-bottom: 5px;
         }
 
         .source-link-btn {
@@ -277,10 +222,9 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
-            background: rgba(168, 85, 247, 0.08);
+            background: rgba(168, 85, 247, 0.1);
             color: #c084fc;
-            border: 1px solid rgba(168, 85, 247, 0.15);
+            border: 1px solid rgba(168, 85, 247, 0.2);
             padding: 9px 12px;
             font-size: 12px;
             font-weight: 600;
@@ -292,7 +236,6 @@
         .source-link-btn:hover {
             background: #a855f7;
             color: #fff;
-            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.25);
         }
 
         .loading-text {
@@ -311,7 +254,6 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             margin-top: 30px;
         }
 
@@ -320,19 +262,16 @@
             font-size: 12px;
             font-weight: 500;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
     </style>
 </head>
 <body>
 
-    <div class="header-banner">
-        <h2>FLOREIN PORTAL</h2>
-    </div>
+    <div class="header-banner"></div>
 
     <div class="nav-menu">
         <button class="nav-btn active" onclick="openTab(this, 'main-tab')">Главная</button>
-        <button class="nav-btn" onclick="openTab(this, 'news-tab')">Сводки СВО</button>
+        <button class="nav-btn" onclick="openTab(this, 'news-tab')">Новости СВО</button>
     </div>
 
     <div class="main-content">
@@ -348,11 +287,10 @@
             <div class="news-container">
                 <div class="news-card">
                     <h2>
-                        <span id="source-title">🪖 Источник: Лента ТАСС (Спецоперация)</span>
-                        <div class="live-indicator"><div class="live-dot"></div>Онлайн</div>
+                        <span>🪖 Источник: Новости Lenta.ru</span>
                     </h2>
                     <div class="news-grid" id="news-grid">
-                        <div class="loading-text">Интеграция со спутником новостей...</div>
+                        <div class="loading-text">Загрузка новостей...</div>
                     </div>
                 </div>
             </div>
@@ -361,16 +299,15 @@
     </div>
 
     <div class="footer-badge">
-        <span class="shield-icon">🛡️</span>
-        <span>Ваши данные защищены</span>
+        <span>🛡️ Ваши данные защищены</span>
     </div>
 
     <script>
-        // Используем полностью открытый и стабильный JSON-интерфейс инфо-агрегатора (без лимитов CORS)
-        const DIRECT_JSON_URL = 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://rssexport.rbc.ru/rbc/news/30/full.rss');
+        // Прямой JSON-поток Lenta.ru, не требующий сторонних парсеров и CORS-прокси
+        const NEWS_API_URL = 'https://lenta.ru/ext/json/news';
 
-        // Слова-маркеры для абсолютной фильтрации только под тематику СВО
-        const filterKeywords = ['сво', 'донецк', 'луганск', 'всу', 'минобороны', 'пво', 'беспилотник', 'фронт', 'боец', 'армия', 'военн', 'штурм', 'добасс', 'запорож', 'херсон', ' shelling ', 'артиллери', 'группировк'];
+        // Ключевые слова для фильтрации исключительно под тему СВО
+        const filterWords = ['сво', 'донецк', 'луганск', 'херсон', 'запорож', 'всу', 'минобороны', 'пво', 'беспилотник', 'дрон', 'фронт', 'боец', 'армия', 'военн', 'штурм', 'снаряд', 'группировк', 'обстрел'];
 
         function openTab(btnElement, tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -380,92 +317,65 @@
             btnElement.classList.add('active');
         }
 
-        async function fetchStableNews() {
+        async function loadNews() {
             const grid = document.getElementById('news-grid');
             
             try {
-                const response = await fetch(DIRECT_JSON_URL);
-                const rawData = await response.json();
-                
-                // Переводим строковый XML в понятный браузеру объект
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(rawData.contents, "text/xml");
-                const items = xmlDoc.getElementsByTagName('item');
+                const response = await fetch(NEWS_API_URL);
+                const data = await response.json();
 
                 grid.innerHTML = ''; 
-                let addedCount = 0;
+                let hasNews = false;
 
-                for (let i = 0; i < items.length; i++) {
-                    let title = items[i].getElementsByTagName('title')[0]?.textContent || '';
-                    let desc = items[i].getElementsByTagName('description')[0]?.textContent || '';
-                    let link = items[i].getElementsByTagName('link')[0]?.textContent || '#';
-                    let pubDateText = items[i].getElementsByTagName('pubDate')[0]?.textContent || '';
+                // Перебираем новости из официального массива
+                data.news.forEach(item => {
+                    let titleLower = item.title.toLowerCase();
+                    let descLower = (item.rightcol || '').toLowerCase();
 
-                    let contentLower = (title + ' ' + desc).toLowerCase();
-                    // Фильтруем: пропускаем только то, что на 100% относится к СВО
-                    let matchesSVO = filterKeywords.some(keyword => contentLower.includes(keyword));
+                    // Проверяем, относится ли новость к СВО
+                    let isSVO = filterWords.some(word => titleLower.includes(word) || descLower.includes(word));
 
-                    if (matchesSVO && addedCount < 9) {
-                        addedCount++;
-                        
-                        let pubDate = new Date(pubDateText);
-                        let timeString = pubDate.toLocaleDateString('ru-RU', {
-                            day: '2-digit', 
-                            month: '2-digit', 
-                            hour: '2-digit', 
-                            minute: '2-digit'
-                        });
+                    if (isSVO) {
+                        hasNews = true;
 
-                        // Ищем картинку внутри тегов новости
-                        let mediaUrl = '';
-                        let enclosure = items[i].getElementsByTagName('enclosure')[0];
-                        if (enclosure) {
-                            mediaUrl = enclosure.getAttribute('url');
-                        }
+                        // Ссылка на оригинальный пост строится прямо из путей Lenta.ru
+                        let fullLink = item.url.startsWith('http') ? item.url : `https://lenta.ru${item.url}`;
 
-                        // Если картинки нет, подставляем темный милитари-фон
-                        if (!mediaUrl) {
-                            mediaUrl = 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=600&auto=format&fit=crop';
-                        }
-
-                        // Чистим описание от мусорных html тегов
-                        let cleanDesc = desc.replace(/<\/?[^>]+(>|$)/g, "");
-                        if (cleanDesc.length > 130) {
-                            cleanDesc = cleanDesc.substring(0, 130) + '...';
-                        }
+                        // Берем картинку из структуры новости, если её нет — ставим дефолтную темную
+                        let imageUrl = item.image_url || 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=600&auto=format&fit=crop';
 
                         grid.innerHTML += `
                             <div class="news-item">
                                 <div class="media-wrapper">
-                                    <img src="${mediaUrl}" alt="Сводка" onerror="this.src='https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=600&auto=format&fit=crop'">
+                                    <img src="${imageUrl}" alt="Иллюстрация">
                                 </div>
                                 <div class="news-item-body">
-                                    <span class="news-date">⏱ ${timeString} | СВО ХРОНИКА</span>
-                                    <h3>${title}</h3>
-                                    <p>${cleanDesc}</p>
-                                    <a href="${link}" target="_blank" class="source-link-btn">
-                                        🔗 Читать в первоисточнике
+                                    <span class="news-date">⏱ СВОДКА ПРОВЕРЕНА</span>
+                                    <h3>${item.title}</h3>
+                                    <p>${item.rightcol || 'Оперативная информация с линии соприкосновения.'}</p>
+                                    <a href="${fullLink}" target="_blank" class="source-link-btn">
+                                        🔗 Читать в источнике
                                     </a>
                                 </div>
                             </div>
                         `;
                     }
-                }
+                });
 
-                if (addedCount === 0) {
-                    grid.innerHTML = `<div class="loading-text">Ожидание свежих оперативных сводок. Обновление запустится автоматически...</div>`;
+                if (!hasNews) {
+                    grid.innerHTML = `<div class="loading-text">Новых сводок СВО на данный момент нет. Страница обновится сама.</div>`;
                 }
 
             } catch (error) {
                 console.error(error);
-                grid.innerHTML = `<div class="loading-text" style="color: #a855f7;">Синхронизация потока... Ожидайте загрузки карт.</div>`;
+                grid.innerHTML = `<div class="loading-text">Не удалось загрузить новости. Пожалуйста, обновите страницу.</div>`;
             }
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            fetchStableNews();
-            // Обновляем каждые 45 секунд, полностью без фризов
-            setInterval(fetchStableNews, 45000);
+            loadNews();
+            // Автоматическое обновление раз в минуту
+            setInterval(loadNews, 60000);
         });
     </script>
 </body>
