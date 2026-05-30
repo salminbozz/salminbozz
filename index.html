@@ -24,7 +24,7 @@
             overflow-x: hidden;
         }
 
-        /* Твой оригинальный баннер */
+        /* Твой оригинальный баннер Florein */
         .header-banner {
             width: 100%;
             max-width: 1200px;
@@ -96,7 +96,6 @@
         .status-card {
             background: rgba(21, 29, 47, 0.65);
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(168, 85, 247, 0.2);
             padding: 40px;
             border-radius: 20px;
@@ -109,7 +108,6 @@
         .status-card h1 {
             font-size: 28px;
             font-weight: 700;
-            letter-spacing: 1px;
             background: linear-gradient(45deg, #e9d5ff, #a855f7);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -122,36 +120,29 @@
             line-height: 1.6;
         }
 
-        .news-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            width: 100%;
+        /* Стилизация секции Новостей под URA.RU */
+        .section-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: #ff6b00; /* Фирменный оранжевый стиль заголовка */
+            text-align: center;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
         }
 
-        .news-card {
-            background: rgba(21, 29, 47, 0.65);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        .section-subtitle {
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 30px;
         }
 
-        .news-card h2 {
-            font-size: 18px;
-            color: #e2e8f0;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
+        /* Трёхколоночная сетка как на скрине */
         .news-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 24px;
+            gap: 20px;
+            width: 100%;
         }
 
         @media (min-width: 768px) {
@@ -162,86 +153,68 @@
             .news-grid { grid-template-columns: repeat(3, 1fr); }
         }
 
-        .news-item {
-            background: rgba(11, 15, 25, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 14px;
-            overflow: hidden;
+        /* Карточка точь-в-точь как у URA.RU */
+        .ura-card {
+            background: #111622;
+            border: 1px solid #1e293b;
+            border-radius: 16px;
+            padding: 24px;
             display: flex;
             flex-direction: column;
-            transition: transform 0.25s ease, border-color 0.25s ease;
+            gap: 12px;
+            min-height: 280px;
+            transition: transform 0.2s ease, border-color 0.2s ease;
         }
 
-        .news-item:hover {
-            transform: translateY(-4px);
-            border-color: rgba(168, 85, 247, 0.4);
+        .ura-card:hover {
+            transform: translateY(-2px);
+            border-color: #334155;
         }
 
-        .media-wrapper {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            background: #111827;
-            overflow: hidden;
-        }
-
-        .media-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .news-item-body {
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            flex-grow: 1;
-        }
-
-        .news-date {
-            font-size: 11px;
-            color: #a855f7;
+        .ura-date {
+            font-size: 13px;
+            color: #ff6b00; /* Оранжевая дата */
             font-weight: 700;
         }
 
-        .news-item-body h3 {
-            font-size: 15px;
-            color: #f1f5f9;
+        .ura-card h3 {
+            font-size: 18px;
+            color: #ffffff;
             line-height: 1.4;
-            font-weight: 600;
+            font-weight: 700;
         }
 
-        .news-item-body p {
-            font-size: 13px;
+        .ura-card p {
+            font-size: 14px;
             color: #94a3b8;
-            line-height: 1.5;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 10px;
         }
 
-        .source-link-btn {
+        .ura-link {
             margin-top: auto;
+            color: #0084ff; /* Синие аккуратные ссылки */
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            background: rgba(168, 85, 247, 0.1);
-            color: #c084fc;
-            border: 1px solid rgba(168, 85, 247, 0.2);
-            padding: 9px 12px;
-            font-size: 12px;
-            font-weight: 600;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.2s ease;
+            gap: 4px;
+            transition: color 0.2s;
         }
 
-        .source-link-btn:hover {
-            background: #a855f7;
-            color: #fff;
+        .ura-link:hover {
+            color: #38bdf8;
         }
 
         .loading-text {
             grid-column: 1 / -1;
             text-align: center;
-            color: #64748b;
+            color: #475569;
             padding: 40px;
             font-size: 15px;
         }
@@ -271,7 +244,7 @@
 
     <div class="nav-menu">
         <button class="nav-btn active" onclick="openTab(this, 'main-tab')">Главная</button>
-        <button class="nav-btn" onclick="openTab(this, 'news-tab')">Новости СВО</button>
+        <button class="nav-btn" onclick="openTab(this, 'news-tab')">Новости</button>
     </div>
 
     <div class="main-content">
@@ -284,15 +257,11 @@
         </div>
 
         <div id="news-tab" class="tab-content">
-            <div class="news-container">
-                <div class="news-card">
-                    <h2>
-                        <span>🪖 Источник: Новости Lenta.ru</span>
-                    </h2>
-                    <div class="news-grid" id="news-grid">
-                        <div class="loading-text">Загрузка новостей...</div>
-                    </div>
-                </div>
+            <h1 class="section-title">Свежие новости СВО</h1>
+            <p class="section-subtitle">Самые актуальные события с передовой</p>
+            
+            <div class="news-grid" id="news-grid">
+                <div class="loading-text">Загрузка актуальных сводок...</div>
             </div>
         </div>
 
@@ -303,11 +272,11 @@
     </div>
 
     <script>
-        // Прямой JSON-поток Lenta.ru, не требующий сторонних парсеров и CORS-прокси
-        const NEWS_API_URL = 'https://lenta.ru/ext/json/news';
+        // Используем стабильный парсер без CORS ограничений
+        const RSS_FEED_URL = 'https://api.rss2json.com/v1/api.json?rss_url=https://tass.ru/rss/vna.xml';
 
-        // Ключевые слова для фильтрации исключительно под тему СВО
-        const filterWords = ['сво', 'донецк', 'луганск', 'херсон', 'запорож', 'всу', 'минобороны', 'пво', 'беспилотник', 'дрон', 'фронт', 'боец', 'армия', 'военн', 'штурм', 'снаряд', 'группировк', 'обстрел'];
+        // Жесткий фильтр ключевых слов СВО, чтобы убрать «номера», «выплаты» и прочий мусор
+        const filterKeywords = ['сво', 'всу', 'минобороны', 'донецк', 'луганск', 'херсон', 'запорож', 'пво', 'обстрел', 'фронт', 'штурм', 'боец', 'армия', 'беспилотник', 'дрон', 'авдеев', 'купян', 'снаряд', 'группировк'];
 
         function openTab(btnElement, tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -317,65 +286,63 @@
             btnElement.classList.add('active');
         }
 
-        async function loadNews() {
+        async function fetchUraStyleNews() {
             const grid = document.getElementById('news-grid');
             
             try {
-                const response = await fetch(NEWS_API_URL);
+                const response = await fetch(RSS_FEED_URL);
                 const data = await response.json();
 
+                if (data.status !== 'ok') throw new Error();
+
                 grid.innerHTML = ''; 
-                let hasNews = false;
+                let count = 0;
 
-                // Перебираем новости из официального массива
-                data.news.forEach(item => {
+                data.items.forEach(item => {
                     let titleLower = item.title.toLowerCase();
-                    let descLower = (item.rightcol || '').toLowerCase();
+                    let descLower = (item.description || '').toLowerCase();
 
-                    // Проверяем, относится ли новость к СВО
-                    let isSVO = filterWords.some(word => titleLower.includes(word) || descLower.includes(word));
+                    // Проверяем строгое соответствие оборонной тематике
+                    let isSVO = filterKeywords.some(word => titleLower.includes(word) || descLower.includes(word));
 
-                    if (isSVO) {
-                        hasNews = true;
+                    if (isSVO && count < 6) { // Выводим максимум 6 плиток, как в блоках
+                        count++;
 
-                        // Ссылка на оригинальный пост строится прямо из путей Lenta.ru
-                        let fullLink = item.url.startsWith('http') ? item.url : `https://lenta.ru${item.url}`;
+                        // Форматируем дату в стиль ДД.ММ.ГГГГ
+                        let pubDate = new Date(item.pubDate);
+                        let day = String(pubDate.getDate()).padStart(2, '0');
+                        let month = String(pubDate.getMonth() + 1).padStart(2, '0');
+                        let year = pubDate.getFullYear();
+                        let dateString = `${day}.${month}.${year}`;
 
-                        // Берем картинку из структуры новости, если её нет — ставим дефолтную темную
-                        let imageUrl = item.image_url || 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=600&auto=format&fit=crop';
+                        // Очистка описания от лишних тегов
+                        let cleanDesc = (item.description || 'Оперативная сводка с линии соприкосновения.').replace(/<\/?[^>]+(>|$)/g, "");
 
                         grid.innerHTML += `
-                            <div class="news-item">
-                                <div class="media-wrapper">
-                                    <img src="${imageUrl}" alt="Иллюстрация">
-                                </div>
-                                <div class="news-item-body">
-                                    <span class="news-date">⏱ СВОДКА ПРОВЕРЕНА</span>
-                                    <h3>${item.title}</h3>
-                                    <p>${item.rightcol || 'Оперативная информация с линии соприкосновения.'}</p>
-                                    <a href="${fullLink}" target="_blank" class="source-link-btn">
-                                        🔗 Читать в источнике
-                                    </a>
-                                </div>
+                            <div class="ura-card">
+                                <div class="ura-date">${dateString}</div>
+                                <h3>${item.title}</h3>
+                                <p>${cleanDesc}</p>
+                                <a href="${item.link}" target="_blank" class="ura-link">
+                                    Читать на ТАСС ->
+                                </a>
                             </div>
                         `;
                     }
                 });
 
-                if (!hasNews) {
-                    grid.innerHTML = `<div class="loading-text">Новых сводок СВО на данный момент нет. Страница обновится сама.</div>`;
+                if (count === 0) {
+                    grid.innerHTML = `<div class="loading-text">Новых военных сводок не обнаружено. Ожидайте обновления...</div>`;
                 }
 
             } catch (error) {
-                console.error(error);
-                grid.innerHTML = `<div class="loading-text">Не удалось загрузить новости. Пожалуйста, обновите страницу.</div>`;
+                grid.innerHTML = `<div class="loading-text">Ошибка загрузки фида новостей. Пожалуйста, обновите страницу.</div>`;
             }
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            loadNews();
-            // Автоматическое обновление раз в минуту
-            setInterval(loadNews, 60000);
+            fetchUraStyleNews();
+            setInterval(fetchUraStyleNews, 60000); // Обновление раз в минуту
         });
     </script>
 </body>
