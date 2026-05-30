@@ -24,7 +24,7 @@
             overflow-x: hidden;
         }
 
-        /* Твой оригинальный баннер из корня GitHub */
+        /* Твой оригинальный баннер */
         .header-banner {
             width: 100%;
             max-width: 1200px;
@@ -161,18 +161,18 @@
             gap: 6px;
             font-size: 11px;
             text-transform: uppercase;
-            color: #ef4444;
+            color: #22c55e;
             font-weight: bold;
-            background: rgba(239, 68, 68, 0.1);
+            background: rgba(34, 197, 94, 0.1);
             padding: 4px 10px;
             border-radius: 20px;
-            border: 1px solid rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.2);
         }
 
         .live-dot {
             width: 8px;
             height: 8px;
-            background-color: #ef4444;
+            background-color: #22c55e;
             border-radius: 50%;
             animation: blink 1.2s infinite;
         }
@@ -236,7 +236,7 @@
             padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
             flex-grow: 1;
             background: rgba(21, 29, 47, 0.2);
         }
@@ -260,6 +260,31 @@
             font-size: 13px;
             color: #94a3b8;
             line-height: 1.5;
+            margin-bottom: 5px;
+        }
+
+        /* Кнопка ссылки на оригинальный пост */
+        .source-link-btn {
+            margin-top: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: rgba(168, 85, 247, 0.1);
+            color: #c084fc;
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .source-link-btn:hover {
+            background: #a855f7;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.25);
         }
 
         .loading-text {
@@ -299,7 +324,7 @@
 
     <div class="nav-menu">
         <button class="nav-btn active" onclick="openTab(this, 'main-tab')">Главная</button>
-        <button class="nav-btn" onclick="openTab(this, 'news-tab')">Новости</button>
+        <button class="nav-btn" onclick="openTab(this, 'news-tab')">Новости СВО</button>
     </div>
 
     <div class="main-content">
@@ -315,11 +340,11 @@
             <div class="news-container">
                 <div class="news-card">
                     <h2>
-                        <span>🎬 Автоматическая лента новостей</span>
+                        <span id="source-title">📡 Источник: Lenta.ru (Силы и Оружие)</span>
                         <div class="live-indicator"><div class="live-dot"></div>Синхронизация</div>
                     </h2>
                     <div class="news-grid" id="news-grid">
-                        <div class="loading-text">Загрузка последних обновлений с источника...</div>
+                        <div class="loading-text">Получение сводок СВО с первоисточника...</div>
                     </div>
                 </div>
             </div>
@@ -333,11 +358,10 @@
     </div>
 
     <script>
-        // СЮДА ВСТАВЬ RSS-ССЫЛКУ НА ИСТОЧНИК (СМИ, ТГ-КАНАЛ ИЛИ ЛЮБОЙ ДРУГОЙ РЕСУРС)
-        // Сейчас настроена стандартная демонстрационная лента военных новостей (РИА / Lenta)
-        const SOURCE_RSS_URL = 'https://lenta.ru/rss/news'; 
-
-        // Используем открытый бесплатный конвертер RSS-в-JSON, чтобы обойти защиту CORS браузеров
+        // Использован официальный тематический поток "Силы / СВО / Вооружение"
+        const SOURCE_RSS_URL = 'https://lenta.ru/rss/articles/forces'; 
+        
+        // Посредник для обработки CORS-ограничений в браузере
         const API_CONVERTER = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(SOURCE_RSS_URL)}`;
 
         function openTab(btnElement, tabId) {
@@ -348,7 +372,6 @@
             btnElement.classList.add('active');
         }
 
-        // Функция автоматического парсинга и генерации карточек
         async function fetchAutoNews() {
             const grid = document.getElementById('news-grid');
             
@@ -356,47 +379,49 @@
                 const response = await fetch(API_CONVERTER);
                 const data = await response.json();
 
-                if (data.status !== 'ok') throw new Error('Ошибка получения данных');
+                if (data.status !== 'ok') throw new Error('Ошибка сети');
 
-                grid.innerHTML = ''; // Очищаем индикатор загрузки
+                grid.innerHTML = ''; 
 
                 data.items.forEach(item => {
-                    // Парсим дату публикации от источника
+                    // Форматируем время публикации поста
                     let pubDate = new Date(item.pubDate);
                     let timeString = pubDate.toLocaleDateString('ru-RU', {
                         day: '2-digit', 
                         month: '2-digit', 
-                        year: 'numeric', 
                         hour: '2-digit', 
                         minute: '2-digit'
                     });
 
-                    // Ищем картинку или превью видео в структуре новости источника
+                    // Вытаскиваем изображение
                     let mediaUrl = item.enclosure?.link || item.thumbnail || '';
                     if (!mediaUrl && item.description) {
                         const imgMatch = item.description.match(/<img[^>]+src="([^">]+)"/);
                         if (imgMatch) mediaUrl = imgMatch[1];
                     }
                     
-                    // Если у новости вообще нет медиафайла, ставим заглушку-заполнитель в тему дизайна
-                    if (!mediaUrl) mediaUrl = 'https://images.unsplash.com/photo-1595113316349-9fa4ee24f884?q=80&w=600&auto=format&fit=crop';
+                    // Заглушка в темных тонах, если у статьи нет картинки
+                    if (!mediaUrl) mediaUrl = 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=600&auto=format&fit=crop';
 
-                    // Очищаем описание от лишних HTML-тегов, которые может прислать источник
-                    let cleanDesc = item.description.replace(/<\/?[^>]+(>|$)/g, "").substring(0, 160) + '...';
+                    // Чистим описание новости от HTML-тегов источника
+                    let cleanDesc = item.description.replace(/<\/?[^>]+(>|$)/g, "");
+                    if(cleanDesc.length > 150) {
+                        cleanDesc = cleanDesc.substring(0, 150) + '...';
+                    }
 
-                    // Рендерим полноценный плеер/карточку, где контент на 100% совпадает с описанием
+                    // Ссылка на конкретный пост (item.link) встраивается в кнопку внизу карточки
                     grid.innerHTML += `
                         <div class="news-item">
                             <div class="media-wrapper">
-                                ${mediaUrl.endsWith('.mp4') ? 
-                                    `<video src="${mediaUrl}" controls playsinline preload="metadata"></video>` : 
-                                    `<img src="${mediaUrl}" alt="Иллюстрация к новости">`
-                                }
+                                <img src="${mediaUrl}" alt="Иллюстрация">
                             </div>
                             <div class="news-item-body">
-                                <span class="news-date">⏱ ${timeString} | ЛЕНТА ОБНОВЛЕНА</span>
+                                <span class="news-date">⏱ ${timeString} | ВОЕННАЯ ХРОНИКА</span>
                                 <h3>${item.title}</h3>
                                 <p>${cleanDesc}</p>
+                                <a href="${item.link}" target="_blank" class="source-link-btn">
+                                    🔗 Читать в источнике
+                                </a>
                             </div>
                         </div>
                     `;
@@ -404,14 +429,13 @@
 
             } catch (error) {
                 console.error(error);
-                grid.innerHTML = `<div class="loading-text" style="color: #ef4444;">Не удалось автоматически обновить ленту. Проверьте адрес источника.</div>`;
+                grid.innerHTML = `<div class="loading-text" style="color: #ef4444;">Не удалось обновить сводки. Повторная попытка через минуту...</div>`;
             }
         }
 
         document.addEventListener("DOMContentLoaded", () => {
             fetchAutoNews();
-
-            // Скрипт проверяет наличие новых публикаций у источника каждые 60 секунд самостоятельно
+            // Поиск обновлений на сервере источника каждую минуту
             setInterval(fetchAutoNews, 60000);
         });
     </script>
