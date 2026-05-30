@@ -28,6 +28,16 @@
         .tab-content { display: none; width: 100%; max-width: 600px; }
         .tab-content.active { display: block; }
         
+        /* Центрирование надписи "Сайт в разработке" */
+        #main-tab { 
+            display: none; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 40vh; 
+        }
+        #main-tab.active { display: flex; }
+        
         .status-card { background: rgba(21, 29, 47, 0.65); padding: 40px; border-radius: 20px; text-align: center; border: 1px solid rgba(168, 85, 247, 0.2); }
         
         .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding: 0 5px; }
@@ -72,7 +82,6 @@
     <script>
         const container = document.getElementById('news-container');
         const loadedLinks = new Set();
-        // Увеличенный список ключевых слов для постоянного наполнения
         const keywords = ['СВО', 'спецоперация', 'фронт', 'армия', 'оборона', 'Минобороны', 'военкор', 'ДНР', 'ЛНР', 'Украина', 'ВСУ', 'наступление', 'удар', 'тыл', 'Россия', 'конфликт', 'БПЛА', 'обстрел', 'танки', 'ракетный', 'генштаб', 'мобилизация', 'песков', 'путин', 'донецк', 'луганск', 'херсон', 'запорожье'];
 
         function openTab(btn, id) {
@@ -112,7 +121,7 @@
         }
 
         fetchNews();
-        setInterval(fetchNews, 30000); // Обновление каждые 30 секунд
+        setInterval(fetchNews, 30000);
     </script>
 </body>
 </html>
