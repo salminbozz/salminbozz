@@ -230,7 +230,7 @@
             display: block;
         }
 
-        /* Кастомная кнопка запуска видео */
+        /* Кастомная фиолетовая кнопка запуска */
         .play-overlay-btn {
             position: absolute;
             top: 50%;
@@ -250,7 +250,7 @@
             z-index: 10;
             cursor: pointer;
             transition: all 0.2s ease;
-            pointer-events: none; /* Пропускает клик на само видео */
+            pointer-events: none;
         }
 
         .news-item:hover .play-overlay-btn {
@@ -258,7 +258,7 @@
             transform: translate(-50%, -50%) scale(1.1);
         }
 
-        /* Скрываем кнопку, когда видео играет */
+        /* Скрываем кнопку, когда видео запущено */
         .news-item.playing .play-overlay-btn {
             opacity: 0;
             visibility: hidden;
@@ -356,7 +356,7 @@
     </div>
 
     <script>
-        // Железобетонная база данных с прямыми стриминговыми видео-ссылками
+        // Стабильные, прямые стриминговые потоки (.mp4) для проверки работоспособности
         const reportDatabase = [
             { 
                 t: "Экстренный репортаж: Бои под Купянском, продвижение штурмовых групп", 
@@ -386,7 +386,7 @@
             { 
                 t: "Кадры из окопов: Отбита мощная контратака на флангах Бахмута", 
                 d: "Эксклюзивное видео боя высокой интенсивности. Огневое поражение наступающих сил из всех видов стрелкового оружия.",
-                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4"
+                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4"
             }
         ];
 
@@ -398,7 +398,7 @@
             btnElement.classList.add('active');
         }
 
-        // Рендерим стартовую сетку
+        // Рендерим стартовую сетку новостей
         function generateInitialNews() {
             const grid = document.getElementById('news-grid');
             grid.innerHTML = '';
@@ -416,7 +416,7 @@
             }
         }
 
-        // Генерация разметки с живым встроенным HTML5 плеером
+        // Чистая генерация разметки без iframe
         function createCardHtml(title, desc, time, videoUrl) {
             return `
                 <div class="news-item" onclick="toggleVideo(this)">
@@ -433,12 +433,12 @@
             `;
         }
 
-        // Функция воспроизведения/паузы при клике на карточку
+        // Интеллектуальный запуск плеера: убирает кнопку, добавляет нативные элементы контроля только при игре
         function toggleVideo(cardElement) {
             const video = cardElement.querySelector('video');
             
             if (video.paused) {
-                // Останавливаем другие играющие видео на странице, если они есть
+                // Ставим на паузу другие видео, чтобы звук не накладывался
                 document.querySelectorAll('.news-item.playing').forEach(el => {
                     el.querySelector('video').pause();
                     el.classList.remove('playing');
@@ -446,7 +446,7 @@
                 });
 
                 video.play();
-                video.setAttribute('controls', 'true'); // Показываем нативные кнопки управления только во время игры
+                video.setAttribute('controls', 'true');
                 cardElement.classList.add('playing');
             } else {
                 video.pause();
@@ -454,7 +454,7 @@
             }
         }
 
-        // Свежие репортажи сверху
+        // Лента автообновления (добавление свежих событий наверх)
         function pushNewReport() {
             const grid = document.getElementById('news-grid');
             let now = new Date();
@@ -474,7 +474,7 @@
         document.addEventListener("DOMContentLoaded", () => {
             generateInitialNews();
 
-            // Интервал автообновления контента
+            // Интервал проверки обновлений
             setInterval(() => {
                 if(document.getElementById('news-tab').classList.contains('active')) {
                     pushNewReport();
