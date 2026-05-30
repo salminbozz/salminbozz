@@ -247,7 +247,6 @@
 
         async function fetchLiveNews() {
             try {
-                // Добавляем timestamp для обхода кэша
                 const response = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://ura.news/rss&t=' + new Date().getTime());
                 const data = await response.json();
                 
@@ -256,34 +255,35 @@
                 const filteredItems = data.items.filter(item => {
                     const text = (item.title + " " + item.description).toLowerCase();
                     return keywords.some(word => text.includes(word.toLowerCase()));
-                }).slice(0, 30);
+                }).slice(0, 5); // Лимит: 5 новостей
+
+                // Очищаем контейнер перед вставкой, чтобы убрать старые записи
+                container.innerHTML = '';
 
                 filteredItems.forEach(item => {
-                    if (!loadedNewsLinks.has(item.link)) {
-                        loadedNewsLinks.add(item.link);
-                        const dateObj = new Date(item.pubDate.replace(' ', 'T'));
-                        const formattedDate = `${String(dateObj.getDate()).padStart(2, '0')}.${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
+                    const dateObj = new Date(item.pubDate.replace(' ', 'T'));
+                    const day = String(dateObj.getDate()).padStart(2, '0');
+                    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const year = dateObj.getFullYear().toString().slice(-2);
+                    const time = `${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
+                    
+                    const formattedDate = `${day}.${month}.${year} ${time}`;
 
-                        const card = document.createElement('div');
-                        card.className = 'florein-card';
-                        card.innerHTML = `
-                            <div class="card-date">${formattedDate}</div>
-                            <h3>${item.title}</h3>
-                            <p>${item.description.replace(/<[^>]*>?/gm, '').substring(0, 150)}...</p>
-                            <a href="${item.link}" target="_blank" class="card-btn">Читать на URA.RU ➔</a>
-                        `;
-                        container.prepend(card);
-                    }
+                    const card = document.createElement('div');
+                    card.className = 'florein-card';
+                    card.innerHTML = `
+                        <div class="card-date">${formattedDate}</div>
+                        <h3>${item.title}</h3>
+                        <p>${item.description.replace(/<[^>]*>?/gm, '').substring(0, 150)}...</p>
+                        <a href="${item.link}" target="_blank" class="card-btn">Читать на URA.RU ➔</a>
+                    `;
+                    container.appendChild(card);
                 });
-
-                const loadingText = document.getElementById('loading-text');
-                if (loadingText) loadingText.remove();
             } catch (error) { console.error('Ошибка:', error); }
         }
 
         document.addEventListener("DOMContentLoaded", () => {
             fetchLiveNews();
-            // Автообновление каждые 15 секунд
             setInterval(fetchLiveNews, 15000);
         });
     </script>
