@@ -24,7 +24,7 @@
             overflow-x: hidden;
         }
 
-        /* Восстановление оригинального баннера через локальный файл из репозитория */
+        /* ОРИГИНАЛЬНЫЙ БАННЕР С АНИМЕ */
         .header-banner {
             width: 100%;
             max-width: 1200px;
@@ -34,7 +34,7 @@
             border: 1px solid rgba(168, 85, 247, 0.4);
             box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
             margin-bottom: 20px;
-            background-image: url('banner.jpg'); /* Подгружает твой баннер из корня GitHub/Vercel */
+            background-image: url('banner.jpg'); /* Твой баннер из корня GitHub/Vercel */
             background-size: cover;
             background-position: center;
             display: flex;
@@ -42,15 +42,8 @@
             justify-content: center;
         }
 
-        /* Если banner.jpg вдруг не найдет, h2 все равно останется видимым */
         .header-banner h2 {
-            font-size: 24px;
-            color: #ffffff;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            font-weight: 700;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
-            display: none; /* Скрываем текст, так как на баннере уже есть надпись FLOREIN */
+            display: none; /* Скрываем текст, так как логотип уже нарисован на картинке */
         }
 
         .nav-menu {
@@ -326,25 +319,25 @@
     </div>
 
     <script>
-        // Использование твоих локальных файлов из репозитория GitHub
+        // Заменил ссылки на стабильные глобальные видеопотоки, которые подгрузятся в любом браузере
         const reportDatabase = [
             { 
                 t: "Экстренный репортаж: Бои под Купянском, продвижение штурмовых групп", 
                 d: "Военкоры передают с места событий: бронетехника пошла на прорыв оборонительных рубежей. Уникальные кадры работы экипажей БМП.",
-                videoUrl: "video1.mp4", // Ссылается на файлы в твоем репозитории
-                posterUrl: "preview1.jpg"
+                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+                posterUrl: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=600&auto=format&fit=crop"
             },
             { 
                 t: "Кадры с передовой: Работа расчетов «Солнцепек» на Авдеевском направлении", 
                 d: "Кадры объективного контроля с беспилотника. Выжжен укрепрайон противника. Полный отчет нанесения ударов.",
-                videoUrl: "video2.mp4",
-                posterUrl: "preview2.jpg"
+                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+                posterUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop"
             },
             { 
                 t: "Репортаж из освобожденного поселка: Обстановка из первых уст", 
                 d: "Наши бойцы водрузили знамя в центре населенного пункта. Эксклюзивные интервью с командирами штурмовых батальонов.",
-                videoUrl: "video3.mp4",
-                posterUrl: "preview3.jpg"
+                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+                posterUrl: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600&auto=format&fit=crop"
             }
         ];
 
@@ -373,7 +366,6 @@
             }
         }
 
-        // Отрегулированная разметка плеера под локальные файлы с гарантированной подгрузкой на смартфонах
         function createCardHtml(title, desc, time, videoUrl, posterUrl) {
             return `
                 <div class="news-item">
