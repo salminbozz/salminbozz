@@ -146,7 +146,6 @@
         </div>
     </div>
 
-    <!-- Вкладка Новостей с готовыми окнами (карточками) -->
     <div class="tab-content" id="news-tab">
         <div class="section-header">
             <h2>Новости СВО</h2>
@@ -154,27 +153,17 @@
         </div>
         <div class="news-feed" id="news-container">
             
-            <!-- Окно новости 1 -->
-            <div class="florein-card">
+            <div class="florein-card" data-link="static-1">
                 <div class="card-date">31.05.26 21:15</div>
                 <h3>Российские системы ПВО отразили массированную атаку БПЛА в приграничных районах</h3>
                 <p>Дежурными средствами противовоздушной обороны за прошедший час перехвачены и уничтожены несколько десятков беспилотных летательных аппаратов самолетного типа. Ситуация на границе находится под полным контролем подразделений обеспечения безопасности.</p>
                 <a href="https://ura.news/" target="_blank" class="card-btn">Читать на URA.RU ➔</a>
             </div>
 
-            <!-- Окно новости 2 -->
-            <div class="florein-card">
+            <div class="florein-card" data-link="static-2">
                 <div class="card-date">31.05.26 18:40</div>
                 <h3>Группировка войск «Центр» улучшила тактическое положение и нанесла удар по резервам ВСУ</h3>
                 <p>В ходе активных действий штурмовые отряды продвинулись вглубь обороны противника. Огнем артиллерии и ударами тяжелых огнеметных систем были поражены опорные пункты и скопления живой силы резервных бригад ВСУ на данном направлении.</p>
-                <a href="https://ura.news/" target="_blank" class="card-btn">Читать на URA.RU ➔</a>
-            </div>
-
-            <!-- Окно новости 3 -->
-            <div class="florein-card">
-                <div class="card-date">31.05.26 15:20</div>
-                <h3>Волонтеры доставили крупную партию гуманитарной помощи и спецсредств на Донецкое направление</h3>
-                <p>Бойцам на передовой передали новые комплекты технического снаряжения, средства радиоэлектронной борьбы (РЭБ), медикаменты и продуктовые наборы. Гуманитарный груз собирали силами неравнодушных граждан и общественных организаций.</p>
                 <a href="https://ura.news/" target="_blank" class="card-btn">Читать на URA.RU ➔</a>
             </div>
 
@@ -363,5 +352,30 @@
         
         document.addEventListener('DOMContentLoaded', checkUser);
     </script>
-</body>
-</html>
+
+    <script>
+        const container = document.getElementById('news-container');
+        const loadedLinks = new Set(['static-1', 'static-2']); // Защита от дубликатов базовых окон
+        
+        const keywords = [
+            'СВО', 'спецоперац', 'фронт', 'арми', 'оборон', 'минобороны', 'военкор', 
+            'украин', 'всу', 'наступ', 'удар', 'тыл', 'росс', 'конфликт', 'боев', 
+            'днр', 'лнр', 'донецк', 'луганск', 'херсон', 'запорож', 'харьков', 'обстрел'
+        ];
+
+        async function fetchNews() {
+            try {
+                // Используем открытый чистый API парсинга RSS-лент, который разрешен всеми браузерами напрямую
+                const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent('https://ura.news/rss')}`);
+                if (!res.ok) return;
+                
+                const data = await res.json();
+                if (!data.items || data.items.length === 0) return;
+
+                // Фильтруем пришедшие новости по ключевым словам и переворачиваем, чтобы старые были снизу, а новые шли наверх
+                data.items.filter(item => {
+                    const text = (item.title + ' ' + item.description).toLowerCase();
+                    return keywords.some(k => text.includes(k.toLowerCase()));
+                }).reverse().forEach(item => {
+                    if (!loadedLinks.has(item.link)) {
+                     
