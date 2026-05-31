@@ -173,11 +173,6 @@
             <h2>Личный кабинет</h2>
             <p id="profile-name">Загрузка...</p>
             <p id="profile-email"></p>
-            
-            <div class="admin-panel" id="admin-only-block" style="display: none;">
-                <h3>👑 Доступ разрешен: Администратор</h3>
-                <p>Ты босс</p>
-            </div>
 
             <button class="submit-btn secondary-btn" style="margin-top: 20px;" onclick="logout()">Выйти из аккаунта</button>
         </div>
@@ -310,19 +305,42 @@
                         document.getElementById('profile-name').innerText = 'имя пользователя не заданно';
                     }
                     
+                    // Удаляем плашку, если она уже была на странице, чтобы избежать дубликатов
+                    const oldBadge = document.getElementById('user-role-badge');
+                    if (oldBadge) oldBadge.remove();
+
+                    // Создаем динамическую панель роли под стиль вашего сайта
+                    const roleBadge = document.createElement('div');
+                    roleBadge.id = 'user-role-badge';
+                    roleBadge.className = 'admin-panel'; // Использует рамки и скругления вашего CSS класса
+                    roleBadge.style.textAlign = 'center';
+                    
                     if (user.app_metadata && user.app_metadata.role === 'admin') {
-                        document.getElementById('admin-only-block').style.display = 'block';
+                        // Оформление для Администратора (Красный неон)
+                        roleBadge.style.background = 'rgba(220, 38, 38, 0.1)';
+                        roleBadge.style.borderColor = 'rgba(220, 38, 38, 0.4)';
+                        roleBadge.innerHTML = `<h3 style="color: #f87171; margin: 0; display: inline-flex; align-items: center; gap: 8px;">👑 Роль: Администратор</h3>`;
                     } else {
-                        document.getElementById('admin-only-block').style.display = 'none';
+                        // Оформление для Пользователя (Фиолетовый неон в тему кнопок)
+                        roleBadge.style.background = 'rgba(168, 85, 247, 0.1)';
+                        roleBadge.style.borderColor = 'rgba(168, 85, 247, 0.4)';
+                        roleBadge.innerHTML = `<h3 style="color: #c084fc; margin: 0; display: inline-flex; align-items: center; gap: 8px;">👤 Роль: Пользователь</h3>`;
                     }
+                    
+                    // Аккуратно вставляем созданное окно роли в личный кабинет перед кнопкой выхода
+                    const logoutBtn = document.querySelector('button[onclick="logout()"]');
+                    logoutBtn.parentNode.insertBefore(roleBadge, logoutBtn);
+
                 } else {
                     document.getElementById('auth-form-block').style.display = 'block';
                     document.getElementById('profile-block').style.display = 'none';
-                    document.getElementById('admin-only-block').style.display = 'none';
+                    
+                    // Чистим плашку роли при выходе из аккаунта
+                    const oldBadge = document.getElementById('user-role-badge');
+                    if (oldBadge) oldBadge.remove();
                 }
             } catch (e) {}
         }
-        
         // Проверяем сессию при загрузке страницы
         document.addEventListener('DOMContentLoaded', checkUser);
     </script>
