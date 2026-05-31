@@ -286,7 +286,7 @@
                     }
                 });
                 if (error) alert('Ошибка регистрации: ' + error.message);
-                else alert('Регистрация успешна! Теперь вы можете войти. И не забудьте подтвердить свой Email письмом которое пришло вам на указанный адрес');
+                else alert('Регистрация успешна! Теперь вы можете войти.');
             }
         }
 
@@ -310,15 +310,35 @@
                         document.getElementById('profile-name').innerText = 'имя пользователя не заданно';
                     }
                     
+                    // Управляем плашкой роли
+                    const oldBadge = document.getElementById('user-role-panel');
+                    if (oldBadge) oldBadge.remove();
+
+                    const rolePanel = document.createElement('div');
+                    rolePanel.id = 'user-role-panel';
+                    rolePanel.className = 'admin-panel';
+                    
                     if (user.app_metadata && user.app_metadata.role === 'admin') {
                         document.getElementById('admin-only-block').style.display = 'block';
+                        rolePanel.style.background = 'rgba(220, 38, 38, 0.1)';
+                        rolePanel.style.borderColor = 'rgba(220, 38, 38, 0.4)';
+                        rolePanel.innerHTML = `<h3 style="color: #f87171;">👑 Роль: Администратор</h3>`;
                     } else {
                         document.getElementById('admin-only-block').style.display = 'none';
+                        rolePanel.style.background = 'rgba(168, 85, 247, 0.1)';
+                        rolePanel.style.borderColor = 'rgba(168, 85, 247, 0.4)';
+                        rolePanel.innerHTML = `<h3 style="color: #c084fc;">👤 Роль: Пользователь</h3>`;
                     }
+                    
+                    const adminBlock = document.getElementById('admin-only-block');
+                    adminBlock.parentNode.insertBefore(rolePanel, adminBlock);
+
                 } else {
                     document.getElementById('auth-form-block').style.display = 'block';
                     document.getElementById('profile-block').style.display = 'none';
                     document.getElementById('admin-only-block').style.display = 'none';
+                    const oldBadge = document.getElementById('user-role-panel');
+                    if (oldBadge) oldBadge.remove();
                 }
             } catch (e) {}
         }
@@ -361,18 +381,4 @@
                         const card = document.createElement('div');
                         card.className = 'florein-card';
                         card.innerHTML = `
-                            <div class="card-date">${dateStr}</div>
-                            <h3>${item.title}</h3>
-                            <p>${item.description.replace(/<[^>]*>/g, '').substring(0, 150)}...</p>
-                            <a href="${item.link}" target="_blank" class="card-btn">Читать на URA.RU ➔</a>
-                        `;
-                        container.prepend(card);
-                    }
-                });
-            } catch (e) { console.error('Ошибка новостей:', e); }
-        }
-        fetchNews();
-        setInterval(fetchNews, 30000);
-    </script>
-</body>
-</html>
+                            <div class="card-date">$
