@@ -258,8 +258,13 @@
         
         const nativeSupabase = {
             auth: {
-                async signUp({ email, password, options }) {
-                    return nativeSupabase._request('/auth/v1/signup', { email, password, options });
+                async signUp({ email, password, name }) {
+                    // ИСПРАВЛЕНО: Для REST API поле 'data' передается в корне тела запроса
+                    return nativeSupabase._request('/auth/v1/signup', { 
+                        email, 
+                        password, 
+                        data: { name: name } 
+                    });
                 },
                 async signInWithPassword({ email, password }) {
                     const res = await nativeSupabase._request('/auth/v1/token?grant_type=password', { email, password });
@@ -276,7 +281,6 @@
                         localStorage.removeItem('sb_token');
                         return { data: { user: null }, error: res.error };
                     }
-                    // ИСПРАВЛЕНО: Теперь оборачиваем объект пользователя в свойство user, чтобы деструктуризация работала корректно
                     return { data: { user: res.data }, error: null };
                 },
                 async signOut() {
@@ -307,8 +311,11 @@
                         'apikey': SUPABASE_KEY,
                         'Content-Type': 'application/json'
                     };
-                    if (token) headers['Authorization'] = `Bearer ${token}`;
-                    else if (localStorage.getItem('sb_token')) headers['Authorization'] = `Bearer ${localStorage.getItem('sb_token')}`;
+                    
+                    // ИСПРАВЛЕНО: Если токена пользователя нет (авторизация/регистрация), 
+                    // шлюз Supabase все равно требует анон-ключ в заголовке Authorization
+                    const activeToken = token || localStorage.getItem('sb_token') || SUPABASE_KEY;
+                    headers['Authorization'] = `Bearer ${activeToken}`;
 
                     const options = { method, headers };
                     if (body && method !== 'GET') options.body = JSON.stringify(body);
@@ -353,9 +360,9 @@
         let currentUserData = null;
 
         async function handleAuth() {
-            const name = document.getElementById('auth-name').value;
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
+            const name = document.getElementById('auth-name').value.trim();
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value.trim();
 
             if (isLoginMode) {
                 if (!email || !password) return alert('Заполните все поля!');
@@ -364,10 +371,11 @@
                 else checkUser();
             } else {
                 if (!name || !email || !password) return alert('Заполните все поля, включая Имя!');
+                // ИСПРАВЛЕНО: Передаем параметры плоско, структура сформируется внутри nativeSupabase
                 const { data, error } = await nativeSupabase.auth.signUp({ 
                     email, 
                     password,
-                    options: { data: { name: name } }
+                    name
                 });
                 if (error) alert('Ошибка регистрации: ' + error.message);
                 else {
@@ -399,9 +407,4 @@
                     const userName = user.user_metadata?.name || 'Не указано';
                     document.getElementById('profile-name').innerText = `Имя: ${userName}`;
                     
-                    if (user.app_metadata && user.app_metadata.role === 'admin') {
-                        document.getElementById('admin-only-block').style.display = 'block';
-                        loadModerationRequests();
-                    } else {
-                        document.getElementById('admin-only-block').style.display = 'none';
-          
+                    if (user.app_me
