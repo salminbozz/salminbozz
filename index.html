@@ -100,6 +100,7 @@
         .admin-panel h3 { color: #f87171; margin-bottom: 10px; font-size: 16px; display: flex; align-items: center; gap: 8px;}
         .admin-panel p { color: #fca5a5; font-size: 13px; margin-bottom: 0; }
 
+        /* Оптимизированная кнопка Max — больше не перекрывает важные элементы */
         .download-image-link {
             position: fixed;
             bottom: 70px; right: 20px; width: 55px; height: 55px; 
@@ -190,6 +191,7 @@
         const SUPABASE_URL = 'https://aapkvsfbgbbtxofxmyqn.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhcGt2c2ZiZ2JidHhvZnhteXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMjA1NDgsImV4cCI6MjA5NTc5NjU0OH0.1yPqAnrEMpHnZPXwbR9DoqBNZDRk5C0a3EGwD1tjTGQ';
         
+        // Объект-замена официальной библиотеки, выполняющий прямые HTTP-запросы
         const nativeSupabase = {
             auth: {
                 async signUp({ email, password, options }) {
@@ -284,7 +286,7 @@
                     }
                 });
                 if (error) alert('Ошибка регистрации: ' + error.message);
-                else alert('Регистрация успешна! Теперь вы можете войти.');
+                else alert('Регистрация успешна! Теперь вы можете войти. И не забудьте подтвердить свой Email письмом которое пришло вам на указанный адрес');
             }
         }
 
@@ -300,41 +302,28 @@
                     document.getElementById('auth-form-block').style.display = 'none';
                     document.getElementById('profile-block').style.display = 'block';
                     
-                    document.getElementById('profile-name').innerText = (user.user_metadata && user.user_metadata.name) ? user.user_metadata.name : 'имя пользователя не заданно';
                     document.getElementById('profile-email').innerText = `моя почта: ${user.email}`;
                     
-                    const oldBadge = document.getElementById('user-role-badge');
-                    if (oldBadge) oldBadge.remove();
-
-                    const roleBadge = document.createElement('div');
-                    roleBadge.id = 'user-role-badge';
-                    roleBadge.className = 'admin-panel';
-                    roleBadge.style.textAlign = 'center';
+                    if (user.user_metadata && user.user_metadata.name) {
+                        document.getElementById('profile-name').innerText = user.user_metadata.name;
+                    } else {
+                        document.getElementById('profile-name').innerText = 'имя пользователя не заданно';
+                    }
                     
                     if (user.app_metadata && user.app_metadata.role === 'admin') {
                         document.getElementById('admin-only-block').style.display = 'block';
-                        roleBadge.style.borderColor = 'rgba(220, 38, 38, 0.4)';
-                        roleBadge.innerHTML = `<h3 style="color: #f87171; margin:0;">👑 Роль: Администратор</h3>`;
                     } else {
                         document.getElementById('admin-only-block').style.display = 'none';
-                        roleBadge.style.borderColor = 'rgba(168, 85, 247, 0.4)';
-                        roleBadge.style.background = 'rgba(168, 85, 247, 0.1)';
-                        roleBadge.innerHTML = `<h3 style="color: #c084fc; margin:0;">👤 Роль: Пользователь</h3>`;
                     }
-                    
-                    const logoutBtn = document.querySelector('button[onclick="logout()"]');
-                    logoutBtn.parentNode.insertBefore(roleBadge, logoutBtn);
-
                 } else {
                     document.getElementById('auth-form-block').style.display = 'block';
                     document.getElementById('profile-block').style.display = 'none';
                     document.getElementById('admin-only-block').style.display = 'none';
-                    const oldBadge = document.getElementById('user-role-badge');
-                    if (oldBadge) oldBadge.remove();
                 }
             } catch (e) {}
         }
         
+        // Проверяем сессию при загрузке страницы
         document.addEventListener('DOMContentLoaded', checkUser);
     </script>
 
@@ -380,4 +369,10 @@
                         container.prepend(card);
                     }
                 });
-            } catch (e) { console.er
+            } catch (e) { console.error('Ошибка новостей:', e); }
+        }
+        fetchNews();
+        setInterval(fetchNews, 30000);
+    </script>
+</body>
+</html>
