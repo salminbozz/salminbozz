@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Florein | Портал</title>
+    <title>Florein | Portal</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         
@@ -14,7 +14,7 @@
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            padding: 20px 10px 90px 10px; /* Отступ снизу, чтобы плашка не перекрывала контент */
+            padding: 20px 10px 90px 10px; 
         }
         
         .header-banner { 
@@ -40,26 +40,36 @@
         #main-tab { display: none; flex-direction: column; justify-content: center; align-items: center; }
         #main-tab.active { display: flex; }
         
-        /* Стили для блока Минобороны */
+        /* Блок Минобороны с фоном contract_bg.jpeg */
         .contract-card { 
-            background: linear-gradient(135deg, #151d2f 0%, #0f172a 100%); 
-            padding: 30px; 
+            position: relative;
+            background-image: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.85)), url('contract_bg.jpeg'); 
+            background-size: cover;
+            background-position: center;
+            padding: 40px 30px; 
             border-radius: 20px; 
             text-align: center; 
-            border: 1px solid rgba(168, 85, 247, 0.3);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(168, 85, 247, 0.4); 
+            box-shadow: 0 10px 30px rgba(168, 85, 247, 0.15); 
             width: 100%;
+            overflow: hidden;
         }
         .contract-card h1 {
             font-size: 22px;
             color: #ffffff;
             margin-bottom: 15px;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
         }
         .contract-card p {
             font-size: 14px;
-            color: #94a3b8;
+            color: #e2e8f0;
             margin-bottom: 25px;
             line-height: 1.6;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
         }
         .contract-btn {
             display: inline-block;
@@ -68,26 +78,28 @@
             text-decoration: none;
             padding: 12px 28px;
             border-radius: 10px;
-            font-weight: 600;
-            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+            font-weight: semibold;
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
             transition: 0.2s ease;
+            position: relative;
+            z-index: 2;
         }
         .contract-btn:hover {
             background: #9333ea;
             transform: translateY(-1px);
         }
 
-        /* Фиксированная кнопка-логотип Max (Всегда в правом нижнем углу) */
+        /* Фиксированная кнопка-логотип Max */
         .download-image-link {
             position: fixed;
-            bottom: 55px; /* Находится ровно над нижней плашкой */
+            bottom: 55px; 
             right: 20px;
-            width: 60px; /* Сделал аккуратной круглой кнопкой-иконкой */
+            width: 60px; 
             height: 60px; 
-            background-image: url('max.png'); /* Исправлено на .png */
+            background-image: url('max.png'); 
             background-size: cover;
             background-position: center;
-            border-radius: 50%; /* Идеально круглая форма как на логотипе */
+            border-radius: 50%; 
             border: 2px solid #a855f7;
             box-shadow: 0 8px 24px rgba(168, 85, 247, 0.3);
             z-index: 1000;
@@ -133,7 +145,6 @@
             z-index: 1010;
         }
 
-        /* На мобилках оставляем кнопку фиксированной, просто уменьшаем отступы */
         @media (max-width: 640px) {
             .download-image-link {
                 bottom: 50px;
