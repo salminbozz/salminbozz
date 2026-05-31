@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Florein | Портал</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.43.4/supabase-js.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         
@@ -58,7 +59,6 @@
         .contract-btn { display: inline-block; background: #a855f7; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 10px; font-weight: 600; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4); transition: 0.2s ease; position: relative; z-index: 2; }
         .contract-btn:hover { background: #9333ea; transform: translateY(-1px); }
 
-        /* Стили для формы авторизации и профиля */
         .auth-card {
             background: linear-gradient(135deg, #151d2f 0%, #0f172a 100%);
             padding: 30px;
@@ -89,7 +89,6 @@
         .profile-info { text-align: center; }
         .profile-info p { margin-bottom: 20px; font-size: 16px; color: #cbd5e1; }
 
-        /* Стиль для секретного блока админа */
         .admin-panel {
             margin-top: 25px;
             padding: 20px;
@@ -101,7 +100,6 @@
         .admin-panel h3 { color: #f87171; margin-bottom: 10px; font-size: 16px; display: flex; align-items: center; gap: 8px;}
         .admin-panel p { color: #fca5a5; font-size: 13px; margin-bottom: 0; }
 
-        /* Фиксированная кнопка-логотип Max */
         .download-image-link {
             position: fixed;
             bottom: 65px; right: 20px; width: 60px; height: 60px; 
@@ -210,6 +208,82 @@
     </script>
 
     <script>
+        const SUPABASE_URL = 'https://aapkvsfbgbbtxofxmyqn.supabase.co'; 
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhcGt2c2ZiZ2JidHhvZnhteXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMjA1NDgsImV4cCI6MjA5NTc5NjU0OH0.1yPqAnrEMpHnZPXwbR9DoqBNZDRk5C0a3EGwD1tjTGQ';
+        let supabase = null;
+
+        function initSupabase() {
+            try {
+                // Проверяем классическое подключение через UMD сборку cdnjs
+                if (window.supabase && typeof window.supabase.createClient === 'function') {
+                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                    checkUser();
+                }
+            } catch (err) {
+                console.error("Критическая ошибка инициализации базы данных:", err);
+            }
+        }
+
+        // Запускаем инициализацию сразу, как только сформируется структура документа
+        document.addEventListener('DOMContentLoaded', initSupabase);
+        // Дублируем на случай медленной загрузки сети
+        window.addEventListener('load', () => { if(!supabase) initSupabase(); });
+
+        async function handleAuth() {
+            if (!supabase) {
+                return alert('Ошибка: Скрипт базы данных заблокирован вашим провайдером или браузером. Отключите VPN/блокировщики и перезагрузите страницу.');
+            }
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+
+            if (!email || !password) return alert('Заполните все поля!');
+
+            try {
+                if (isLoginMode) {
+                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                    if (error) alert('Ошибка входа: ' + error.message);
+                    else checkUser();
+                } else {
+                    const { data, error } = await supabase.auth.signUp({ email, password });
+                    if (error) alert('Ошибка регистрации: ' + error.message);
+                    else alert('Регистрация успешна! Теперь вы можете войти.');
+                }
+            } catch (e) {
+                alert('Не удалось связаться с сервером авторизации.');
+            }
+        }
+
+        async function logout() {
+            if (supabase) {
+                await supabase.auth.signOut();
+                checkUser();
+            }
+        }
+
+        async function checkUser() {
+            if (!supabase) return;
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    document.getElementById('auth-form-block').style.display = 'none';
+                    document.getElementById('profile-block').style.display = 'block';
+                    document.getElementById('profile-email').innerText = `Добро пожаловать, ${user.email}!`;
+                    
+                    if (user.app_metadata && user.app_metadata.role === 'admin') {
+                        document.getElementById('admin-only-block').style.display = 'block';
+                    } else {
+                        document.getElementById('admin-only-block').style.display = 'none';
+                    }
+                } else {
+                    document.getElementById('auth-form-block').style.display = 'block';
+                    document.getElementById('profile-block').style.display = 'none';
+                    document.getElementById('admin-only-block').style.display = 'none';
+                }
+            } catch (e) {}
+        }
+    </script>
+
+    <script>
         const container = document.getElementById('news-container');
         const loadedLinks = new Set();
         const keywords = [
@@ -255,79 +329,6 @@
         }
         fetchNews();
         setInterval(fetchNews, 30000);
-    </script>
-
-    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <script>
-        const SUPABASE_URL = 'https://aapkvsfbgbbtxofxmyqn.supabase.co'; 
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhcGt2c2ZiZ2JidHhvZnhteXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMjA1NDgsImV4cCI6MjA5NTc5NjU0OH0.1yPqAnrEMpHnZPXwbR9DoqBNZDRk5C0a3EGwD1tjTGQ';
-        let supabase = null;
-
-        window.addEventListener('load', () => {
-            try {
-                if (window.supabase && typeof window.supabase.createClient === 'function') {
-                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                    checkUser();
-                }
-            } catch (err) {
-                console.error("Supabase не инициализировался:", err);
-            }
-        });
-
-        async function handleAuth() {
-            if (!supabase) return alert('База данных еще загружается. Попробуйте через секунду.');
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
-
-            if (!email || !password) return alert('Заполните все поля!');
-
-            try {
-                if (isLoginMode) {
-                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                    if (error) alert('Ошибка входа: ' + error.message);
-                    else checkUser();
-                } else {
-                    const { data, error } = await supabase.auth.signUp({ email, password });
-                    if (error) alert('Ошибка регистрации: ' + error.message);
-                    else alert('Регистрация успешна! Войдите в аккаунт.');
-                }
-            } catch (e) {
-                alert('Ошибка сети при запросе к бд.');
-            }
-        }
-
-        async function logout() {
-            if (supabase) {
-                await supabase.auth.signOut();
-                checkUser();
-            }
-        }
-
-        async function checkUser() {
-            if (!supabase) return;
-            try {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (user) {
-                    document.getElementById('auth-form-block').style.display = 'none';
-                    document.getElementById('profile-block').style.display = 'block';
-                    document.getElementById('profile-email').innerText = `Добро пожаловать, ${user.email}!`;
-                    
-                    // --- ПРОВЕРКА НА АДМИНА ---
-                    // Проверяем роль внутри app_metadata
-                    if (user.app_metadata && user.app_metadata.role === 'admin') {
-                        document.getElementById('admin-only-block').style.display = 'block';
-                    } else {
-                        document.getElementById('admin-only-block').style.display = 'none';
-                    }
-                    
-                } else {
-                    document.getElementById('auth-form-block').style.display = 'block';
-                    document.getElementById('profile-block').style.display = 'none';
-                    document.getElementById('admin-only-block').style.display = 'none';
-                }
-            } catch (e) {}
-        }
     </script>
 </body>
 </html>
