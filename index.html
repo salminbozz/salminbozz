@@ -17,169 +17,68 @@
             padding: 20px 10px 120px 10px; 
         }
         
-        .header-banner { 
-            width: 100%; 
-            max-width: 600px; 
-            aspect-ratio: 5 / 1.5; 
-            border-radius: 16px; 
-            margin-bottom: 25px; 
-            background-color: #1e1b4b; 
-            background-image: url('banner.jpg'); 
-            background-size: cover; 
-            background-position: center;
-            border: 1px solid rgba(168, 85, 247, 0.4); 
-        }
-        
+        /* Твои элементы оформления */
+        .header-banner { width: 100%; max-width: 600px; aspect-ratio: 5 / 1.5; border-radius: 16px; margin-bottom: 25px; background-color: #1e1b4b; background-image: url('banner.jpg'); background-size: cover; background-position: center; border: 1px solid rgba(168, 85, 247, 0.4); }
+        .download-image-link { position: fixed; bottom: 70px; right: 20px; width: 55px; height: 55px; background-image: url('max.png'); background-size: cover; background-position: center; border-radius: 50%; border: 2px solid #a855f7; box-shadow: 0 8px 24px rgba(168, 85, 247, 0.3); z-index: 999; display: block; }
+        .footer-badge { position: fixed; bottom: 0; left: 0; width: 100%; background: #070a12; border-top: 1px solid rgba(168, 85, 247, 0.2); padding: 12px 0; text-align: center; font-size: 11px; color: #a78bfa; text-transform: uppercase; letter-spacing: 1px; z-index: 1010; }
+
+        /* Навигация (Вкладки) */
         .nav-menu { display: flex; gap: 10px; margin-bottom: 25px; background: rgba(21, 29, 47, 0.6); padding: 6px; border-radius: 12px; z-index: 10; }
         .nav-btn { background: transparent; border: none; color: #94a3b8; padding: 10px 20px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: 0.3s; font-size: 14px;}
         .nav-btn.active { background: #a855f7; color: #fff; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3); }
         
+        /* Скрываем все вкладки по умолчанию */
         .tab-content { display: none; width: 100%; max-width: 600px; }
+        
+        /* Показываем активную вкладку */
         .tab-content.active { display: block; }
-        
-        #main-tab { display: none; flex-direction: column; justify-content: center; align-items: center; }
-        #main-tab.active { display: flex; }
-        
-        .contract-card { 
-            position: relative;
-            background-image: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.85)), url('contract_bg.jpeg'); 
-            background-size: cover;
-            background-position: center;
-            padding: 40px 30px; 
-            border-radius: 20px; 
-            text-align: center; 
-            border: 1px solid rgba(168, 85, 247, 0.4); 
-            box-shadow: 0 10px 30px rgba(168, 85, 247, 0.15); 
-            width: 100%;
-            overflow: hidden;
-        }
-        .contract-card h1 { font-size: 22px; color: #ffffff; margin-bottom: 15px; position: relative; z-index: 2; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6); }
-        .contract-card p { font-size: 14px; color: #e2e8f0; margin-bottom: 25px; line-height: 1.6; position: relative; z-index: 2; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6); }
-        .contract-btn { display: inline-block; background: #a855f7; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 10px; font-weight: 600; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4); transition: 0.2s ease; position: relative; z-index: 2; }
-        .contract-btn:hover { background: #9333ea; transform: translateY(-1px); }
+        #main-tab.active { display: flex; flex-direction: column; justify-content: center; align-items: center; }
 
-        .auth-card {
-            background: linear-gradient(135deg, #151d2f 0%, #0f172a 100%);
-            padding: 30px;
-            border-radius: 20px;
-            border: 1px solid rgba(168, 85, 247, 0.3);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-            width: 100%;
-        }
+        /* Блок Контракта */
+        .contract-card { position: relative; background-image: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.85)), url('contract_bg.jpeg'); background-size: cover; background-position: center; padding: 40px 30px; border-radius: 20px; text-align: center; border: 1px solid rgba(168, 85, 247, 0.4); box-shadow: 0 10px 30px rgba(168, 85, 247, 0.15); width: 100%; overflow: hidden; }
+        .contract-card h1 { font-size: 22px; color: #ffffff; margin-bottom: 15px; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6); }
+        .contract-card p { font-size: 14px; color: #e2e8f0; margin-bottom: 25px; line-height: 1.6; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6); }
+        .contract-btn { display: inline-block; background: #a855f7; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 10px; font-weight: 600; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4); }
+        
+        /* Авторизация и Формы */
+        .auth-card { background: linear-gradient(135deg, #151d2f 0%, #0f172a 100%); padding: 30px; border-radius: 20px; border: 1px solid rgba(168, 85, 247, 0.3); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4); width: 100%; }
         .auth-card h2 { font-size: 20px; margin-bottom: 20px; text-align: center; color: #fff; }
         .auth-form { display: flex; flex-direction: column; gap: 15px; }
-        .auth-form input {
-            background: #0b0f19;
-            border: 1px solid rgba(168, 85, 247, 0.2);
-            padding: 12px 16px;
-            border-radius: 10px;
-            color: #fff;
-            font-size: 14px;
-            outline: none;
-            transition: 0.3s;
-        }
-        .auth-form input:focus { border-color: #a855f7; box-shadow: 0 0 8px rgba(168, 85, 247, 0.2); }
+        .auth-form input { background: #0b0f19; border: 1px solid rgba(168, 85, 247, 0.2); padding: 12px 16px; border-radius: 10px; color: #fff; font-size: 14px; outline: none; }
+        .auth-form input:focus { border-color: #a855f7; }
         .auth-buttons { display: flex; gap: 10px; margin-top: 5px; }
-        .submit-btn { flex: 1; background: #a855f7; color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .submit-btn:hover { background: #9333ea; }
+        .submit-btn { flex: 1; background: #a855f7; color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; text-align: center; }
         .secondary-btn { background: rgba(148, 163, 184, 0.1); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.2); }
-        .secondary-btn:hover { background: rgba(148, 163, 184, 0.2); color: #fff; }
         
+        /* Профиль */
         .profile-info { text-align: center; }
         .profile-info p { margin-bottom: 10px; font-size: 16px; color: #cbd5e1; }
         .profile-name { font-weight: 600; color: #a855f7 !important; margin-bottom: 20px !important; }
-
-        .name-change-block {
-            margin-top: 25px;
-            padding: 20px;
-            background: rgba(168, 85, 247, 0.05);
-            border: 1px solid rgba(168, 85, 247, 0.2);
-            border-radius: 12px;
-            text-align: left;
-        }
+        .name-change-block { margin-top: 25px; padding: 20px; background: rgba(168, 85, 247, 0.05); border: 1px solid rgba(168, 85, 247, 0.2); border-radius: 12px; text-align: left; }
         .name-change-block h3 { font-size: 15px; color: #fff; margin-bottom: 10px; }
-
-        /* Панель Модерации */
-        .admin-panel {
-            margin-top: 25px;
-            padding: 20px;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: 12px;
-            text-align: left;
-        }
-        .admin-panel h3 { color: #f87171; margin-bottom: 5px; font-size: 16px; display: flex; align-items: center; gap: 8px;}
-        .admin-panel .admin-subtitle { color: #94a3b8; font-size: 13px; margin-bottom: 15px; }
         
-        .moderation-container {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            max-height: 350px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-        
-        .moderation-container::-webkit-scrollbar { width: 6px; }
-        .moderation-container::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 4px; }
-        .moderation-container::-webkit-scrollbar-thumb { background: rgba(239, 68, 68, 0.3); border-radius: 4px; }
-
-        .request-card {
-            background: #0b0f19;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 13px;
-        }
-        .request-info { margin-bottom: 10px; line-height: 1.4; color: #cbd5e1; }
-        .request-info strong { color: #fff; }
-        .request-info .arrow { color: #ef4444; margin: 0 4px; }
+        /* Админка */
+        .admin-panel { margin-top: 25px; padding: 20px; background: rgba(30, 27, 75, 0.4); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 12px; text-align: left; }
+        .admin-panel h3 { color: #c084fc; margin-bottom: 12px; font-size: 16px; }
+        .requests-list { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
+        .request-item { background: #0f172a; border: 1px solid rgba(168, 85, 247, 0.2); padding: 14px; border-radius: 8px; }
+        .request-info { font-size: 13px; color: #94a3b8; margin-bottom: 10px; line-height: 1.4; }
         .request-actions { display: flex; gap: 8px; }
-        
-        .action-btn {
-            flex: 1;
-            padding: 6px 10px;
-            font-size: 12px;
-            font-weight: 600;
-            border-radius: 6px;
-            cursor: pointer;
-            border: none;
-            transition: 0.2s;
-            color: #fff;
-        }
-        .btn-approve { background: #10b981; }
-        .btn-approve:hover { background: #059669; }
-        .btn-reject { background: #ef4444; }
-        .btn-reject:hover { background: #dc2626; }
-        
-        .no-requests { text-align: center; color: #64748b; font-size: 13px; padding: 15px 0; }
+        .action-btn { flex: 1; padding: 8px; border-radius: 6px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; color: white;}
+        .approve-btn { background: #22c55e; }
+        .reject-btn { background: #ef4444; }
+        .empty-requests { font-size: 13px; color: #64748b; text-align: center; padding: 10px 0; }
 
-        .download-image-link {
-            position: fixed;
-            bottom: 70px; right: 20px; width: 55px; height: 55px; 
-            background-image: url('max.png'); background-size: cover; background-position: center;
-            border-radius: 50%; border: 2px solid #a855f7; box-shadow: 0 8px 24px rgba(168, 85, 247, 0.3);
-            z-index: 999; transition: transform 0.2s ease; display: block;
-        }
-        .download-image-link:hover { transform: scale(1.05); }
-        
+        /* Новости */
         .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding: 0 5px; }
-        .live-badge { background: rgba(168, 85, 247, 0.15); color: #c084fc; font-size: 11px; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(168, 85, 247, 0); } 100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); } }
-        
-        .news-feed { display: flex; flex-direction: column; gap: 16px; width: 100%; }
-        .florein-card { background: #111622; border: 1px solid rgba(168, 85, 247, 0.15); border-radius: 16px; padding: 24px; width: 100%; }
+        .live-badge { background: rgba(168, 85, 247, 0.15); color: #c084fc; font-size: 11px; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; }
+        .florein-card { background: #111622; border: 1px solid rgba(168, 85, 247, 0.15); border-radius: 16px; padding: 24px; margin-bottom: 16px; width: 100%; }
         .card-date { font-size: 13px; color: #c084fc; font-weight: 800; margin-bottom: 12px; }
-        h3 { font-size: 17px; color: #ffffff; margin-bottom: 12px; }
-        p { font-size: 14px; color: #94a3b8; margin-bottom: 20px; line-height: 1.5; }
-        .card-btn { color: #a855f7; text-decoration: none; font-weight: 700; }
-        
-        .footer-badge { position: fixed; bottom: 0; left: 0; width: 100%; background: #070a12; border-top: 1px solid rgba(168, 85, 247, 0.2); padding: 12px 0; text-align: center; font-size: 11px; color: #a78bfa; text-transform: uppercase; letter-spacing: 1px; z-index: 1010; }
+        .florein-card h3 { font-size: 17px; color: #ffffff; margin-bottom: 12px; text-align: left; }
+        .florein-card p { font-size: 14px; color: #94a3b8; margin-bottom: 20px; line-height: 1.5; text-align: left; }
+        .card-btn { color: #a855f7; text-decoration: none; font-weight: 700; display: inline-block; width: 100%; text-align: left; }
 
-        @media (max-width: 640px) { 
-            .download-image-link { bottom: 60px; right: 15px; width: 50px; height: 50px; } 
-            body { padding-bottom: 140px; }
-        }
+        @media (max-width: 640px) { body { padding-bottom: 140px; } }
     </style>
 </head>
 <body>
@@ -187,12 +86,12 @@
     <div class="header-banner"></div>
     
     <div class="nav-menu">
-        <button class="nav-btn active" onclick="openTab(this, 'main-tab')">Главная</button>
-        <button class="nav-btn" onclick="openTab(this, 'news-tab')">Новости</button>
-        <button class="nav-btn" onclick="openTab(this, 'auth-tab')">Профиль</button>
+        <button type="button" class="nav-btn active" onclick="openTab(this, 'main-tab')">Главная</button>
+        <button type="button" class="nav-btn" onclick="openTab(this, 'news-tab')">Новости</button>
+        <button type="button" class="nav-btn" onclick="openTab(this, 'auth-tab')">Профиль</button>
     </div>
 
-    <div class="tab-content active" id="main-tab">
+    <div id="main-tab" class="tab-content active">
         <div class="contract-card">
             <h1>Служба по контракту в Министерстве Обороны</h1>
             <p>Узнайте ключевые условия, актуальные требования к кандидатам, подробную информацию о выплатах, льготах и социальных гарантиях для военнослужащих по контракту.</p>
@@ -200,29 +99,32 @@
         </div>
     </div>
 
-    <div class="tab-content" id="news-tab">
+    <div id="news-tab" class="tab-content">
         <div class="section-header">
             <h2>Новости СВО</h2>
             <span class="live-badge">● Live</span>
         </div>
-        <div class="news-feed" id="news-container"></div>
+        <div id="news-container">
+            <div style="color: #64748b; font-size:14px; text-align:center; padding:20px;">Нажмите на вкладку, чтобы загрузить новости.</div>
+        </div>
     </div>
 
-    <div class="tab-content" id="auth-tab">
-        <div class="auth-card" id="auth-form-block">
+    <div id="auth-tab" class="tab-content">
+        
+        <div id="auth-form-block" class="auth-card">
             <h2 id="auth-title">Войти в аккаунт</h2>
             <div class="auth-form">
                 <input type="text" id="auth-name" placeholder="Ваше Имя" style="display: none;">
                 <input type="email" id="auth-email" placeholder="E-mail">
                 <input type="password" id="auth-password" placeholder="Пароль">
                 <div class="auth-buttons">
-                    <button class="submit-btn" id="main-auth-btn" onclick="handleAuth()">Войти</button>
-                    <button class="submit-btn secondary-btn" id="toggle-auth-btn" onclick="toggleAuthMode()">Регистрация</button>
+                    <button type="button" class="submit-btn" id="main-auth-btn" onclick="handleAuth()">Войти</button>
+                    <button type="button" class="submit-btn secondary-btn" id="toggle-auth-btn" onclick="toggleAuthMode()">Регистрация</button>
                 </div>
             </div>
         </div>
 
-        <div class="auth-card profile-info" id="profile-block" style="display: none;">
+        <div id="profile-block" class="auth-card profile-info" style="display: none;">
             <h2>Личный кабинет</h2>
             <p id="profile-email">Загрузка...</p>
             <p id="profile-name" class="profile-name"></p>
@@ -231,26 +133,61 @@
                 <h3>Заявка на изменение имени</h3>
                 <div class="auth-form">
                     <input type="text" id="new-name-input" placeholder="Новое имя">
-                    <button class="submit-btn" onclick="sendNameChangeRequest()">Отправить заявку</button>
+                    <button type="button" class="submit-btn" onclick="sendNameChangeRequest()">Отправить заявку</button>
                 </div>
             </div>
 
-            <div class="admin-panel" id="admin-only-block" style="display: none;">
-                <h3>👑 Модерация: Администратор</h3>
-                <p class="admin-subtitle">Управление входящими заявками на смену никнеймов пользователей.</p>
-                
-                <div class="moderation-container" id="moderation-list">
-                    <div class="no-requests">Загрузка списка заявок...</div>
+            <div id="admin-only-block" class="admin-panel" style="display: none;">
+                <h3>👑 Панель модерации Florein</h3>
+                <div id="moderation-requests-container" class="requests-list">
+                    <div class="empty-requests">Загрузка списка заявок...</div>
                 </div>
             </div>
 
-            <button class="submit-btn secondary-btn" style="margin-top: 20px;" onclick="logout()">Выйти из аккаунта</button>
+            <button type="button" class="submit-btn secondary-btn" style="margin-top: 20px;" onclick="logout()">Выйти из аккаунта</button>
         </div>
     </div>
 
     <div class="footer-badge">🛡️ ВАШИ ДАННЫЕ ЗАЩИЩЕНЫ</div>
+    <a href="https://max.ru/" target="_blank" class="download-image-link"></a>
 
-    <a href="https://max.ru/" target="_blank" class="download-image-link" title="Скачать Max"></a>
+
+    <script>
+        // ГАРАНТИРОВАННОЕ ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК
+        window.openTab = function(btnElement, tabId) {
+            try {
+                // 1. Убираем класс active у всех вкладок
+                const allTabs = document.querySelectorAll('.tab-content');
+                allTabs.forEach(tab => tab.classList.remove('active'));
+                
+                // 2. Убираем класс active у всех кнопок
+                const allBtns = document.querySelectorAll('.nav-btn');
+                allBtns.forEach(btn => btn.classList.remove('active'));
+                
+                // 3. Добавляем класс active нужной вкладке и кнопке
+                document.getElementById(tabId).classList.add('active');
+                btnElement.classList.add('active');
+
+                // 4. Если открыли новости - загружаем их
+                if (tabId === 'news-tab') {
+                    if (window.loadFilteredNews) window.loadFilteredNews();
+                }
+            } catch(e) {
+                console.error("Ошибка переключения вкладок:", e);
+            }
+        };
+
+        // ПЕРЕКЛЮЧЕНИЕ РЕЖИМА ВХОД / РЕГИСТРАЦИЯ
+        let isLoginMode = true;
+        window.toggleAuthMode = function() {
+            isLoginMode = !isLoginMode;
+            document.getElementById('auth-title').innerText = isLoginMode ? 'Войти в аккаунт' : 'Регистрация нового аккаунта';
+            document.getElementById('main-auth-btn').innerText = isLoginMode ? 'Войти' : 'Создать аккаунт';
+            document.getElementById('toggle-auth-btn').innerText = isLoginMode ? 'Регистрация' : 'Уже есть аккаунт';
+            document.getElementById('auth-name').style.display = isLoginMode ? 'none' : 'block';
+        };
+    </script>
+
 
     <script>
         const SUPABASE_URL = 'https://aapkvsfbgbbtxofxmyqn.supabase.co'; 
@@ -258,30 +195,29 @@
         
         const nativeSupabase = {
             auth: {
-                async signUp({ email, password, name }) {
-                    // ИСПРАВЛЕНО: Для REST API поле 'data' передается в корне тела запроса
-                    return nativeSupabase._request('/auth/v1/signup', { 
-                        email, 
-                        password, 
-                        data: { name: name } 
-                    });
+                async signUp({ email, password, options }) {
+                    return nativeSupabase._request('/auth/v1/signup', { email, password, options });
                 },
                 async signInWithPassword({ email, password }) {
                     const res = await nativeSupabase._request('/auth/v1/token?grant_type=password', { email, password });
-                    if (!res.error && res.data && res.data.access_token) {
+                    if (res && res.data && res.data.access_token) {
                         localStorage.setItem('sb_token', res.data.access_token);
                     }
                     return res;
                 },
                 async getUser() {
-                    const token = localStorage.getItem('sb_token');
-                    if (!token) return { data: { user: null }, error: null };
-                    const res = await nativeSupabase._request('/auth/v1/user', null, 'GET', token);
-                    if (res.error) {
-                        localStorage.removeItem('sb_token');
-                        return { data: { user: null }, error: res.error };
+                    try {
+                        const token = localStorage.getItem('sb_token');
+                        if (!token) return { data: { user: null }, error: null };
+                        const res = await nativeSupabase._request('/auth/v1/user', null, 'GET', token);
+                        if (res && res.error) {
+                            localStorage.removeItem('sb_token');
+                            return { data: { user: null }, error: res.error };
+                        }
+                        return { data: { user: res ? res.data : null }, error: null };
+                    } catch(e) {
+                        return { data: { user: null }, error: e };
                     }
-                    return { data: { user: res.data }, error: null };
                 },
                 async signOut() {
                     localStorage.removeItem('sb_token');
@@ -290,121 +226,116 @@
             },
             from(table) {
                 return {
-                    insert: async (data) => {
-                        return nativeSupabase._request(`/rest/v1/${table}`, data, 'POST');
-                    },
-                    select: async (queryStr = '*') => {
-                        const path = `/rest/v1/${table}?select=${queryStr}&status=eq.pending`;
-                        return nativeSupabase._request(path, null, 'GET');
-                    },
-                    update: async (matchObject, updateData) => {
-                        const key = Object.keys(matchObject)[0];
-                        const value = matchObject[key];
-                        const path = `/rest/v1/${table}?${key}=eq.${value}`;
-                        return nativeSupabase._request(path, updateData, 'PATCH');
+                    insert: async (data) => { return nativeSupabase._request(`/rest/v1/${table}`, data, 'POST'); },
+                    select: async (queryStr = 'id=not.is.null') => { return nativeSupabase._request(`/rest/v1/${table}?${queryStr}`, null, 'GET'); },
+                    update: async (matchData, updateData) => {
+                        const key = Object.keys(matchData)[0];
+                        const val = matchData[key];
+                        return nativeSupabase._request(`/rest/v1/${table}?${key}=eq.${val}`, updateData, 'PATCH');
                     }
                 };
             },
             async _request(path, body, method = 'POST', token = null) {
                 try {
-                    const headers = {
-                        'apikey': SUPABASE_KEY,
-                        'Content-Type': 'application/json'
-                    };
-                    
-                    // ИСПРАВЛЕНО: Если токена пользователя нет (авторизация/регистрация), 
-                    // шлюз Supabase все равно требует анон-ключ в заголовке Authorization
-                    const activeToken = token || localStorage.getItem('sb_token') || SUPABASE_KEY;
-                    headers['Authorization'] = `Bearer ${activeToken}`;
+                    const headers = { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+                    if (token) headers['Authorization'] = `Bearer ${token}`;
+                    else if (localStorage.getItem('sb_token')) headers['Authorization'] = `Bearer ${localStorage.getItem('sb_token')}`;
 
                     const options = { method, headers };
                     if (body && method !== 'GET') options.body = JSON.stringify(body);
 
                     const response = await fetch(`${SUPABASE_URL}${path}`, options);
-                    if (response.status === 201 || response.status === 204) return { data: true, error: null };
+                    if (response.status === 204) return { data: true, error: null };
                     
-                    const data = await response.json();
-                    if (!response.ok) return { data: null, error: { message: data.msg || data.error_description || data.message || 'Ошибка запроса' } };
+                    let data = null;
+                    const text = await response.text();
+                    if (text) { try { data = JSON.parse(text); } catch(e) { data = text; } }
+                    if (!response.ok) { return { data: null, error: { message: data?.message || data?.error_description || 'Ошибка сервера' } }; }
                     return { data, error: null };
                 } catch (e) {
-                    console.error("Ошибка сети Supabase:", e);
-                    return { data: null, error: { message: 'Нет подключения к серверу или ошибка запроса.' } };
+                    return { data: null, error: { message: 'Нет подключения к серверу' } };
                 }
             }
         };
-    </script>
 
-    <script>
-        function openTab(btn, id) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            
-            const targetTab = document.getElementById(id);
-            if (targetTab) {
-                targetTab.classList.add('active');
-            }
-            btn.classList.add('active');
-        }
-
-        let isLoginMode = true;
-        function toggleAuthMode() {
-            isLoginMode = !isLoginMode;
-            document.getElementById('auth-title').innerText = isLoginMode ? 'Войти в аккаунт' : 'Регистрация нового аккаунта';
-            document.getElementById('main-auth-btn').innerText = isLoginMode ? 'Войти' : 'Создать аккаунт';
-            document.getElementById('toggle-auth-btn').innerText = isLoginMode ? 'Регистрация' : 'Уже есть аккаунт';
-            document.getElementById('auth-name').style.display = isLoginMode ? 'none' : 'block';
-        }
-    </script>
-
-    <script>
+        // ЛОГИКА АВТОРИЗАЦИИ
         let currentUserData = null;
 
-        async function handleAuth() {
-            const name = document.getElementById('auth-name').value.trim();
-            const email = document.getElementById('auth-email').value.trim();
-            const password = document.getElementById('auth-password').value.trim();
-
+        window.handleAuth = async function() {
+            const name = document.getElementById('auth-name').value;
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            
             if (isLoginMode) {
                 if (!email || !password) return alert('Заполните все поля!');
-                const { data, error } = await nativeSupabase.auth.signInWithPassword({ email, password });
-                if (error) alert('Ошибка входа: ' + error.message);
-                else checkUser();
+                const result = await nativeSupabase.auth.signInWithPassword({ email, password });
+                if (result && result.error) alert('Ошибка входа: ' + result.error.message);
+                else await checkUser();
             } else {
-                if (!name || !email || !password) return alert('Заполните все поля, включая Имя!');
-                // ИСПРАВЛЕНО: Передаем параметры плоско, структура сформируется внутри nativeSupabase
-                const { data, error } = await nativeSupabase.auth.signUp({ 
-                    email, 
-                    password,
-                    name
-                });
-                if (error) alert('Ошибка регистрации: ' + error.message);
-                else {
-                    alert('Регистрация успешна! Теперь вы можете войти под своими данными.');
-                    toggleAuthMode();
-                }
+                if (!name || !email || !password) return alert('Заполните все поля!');
+                const result = await nativeSupabase.auth.signUp({ email, password, options: { data: { name: name } } });
+                if (result && result.error) alert('Ошибка регистрации: ' + result.error.message);
+                else { alert('Регистрация успешна! Теперь вы можете войти.'); toggleAuthMode(); }
             }
-        }
+        };
 
-        async function logout() {
+        window.logout = async function() {
             await nativeSupabase.auth.signOut();
             currentUserData = null;
             checkUser();
-        }
+        };
 
-        async function checkUser() {
+        window.checkUser = async function() {
             try {
-                const { data: { user }, error } = await nativeSupabase.auth.getUser();
-                if (error) {
-                    console.error("Ошибка при проверке сессии:", error);
-                }
-                
+                const result = await nativeSupabase.auth.getUser();
+                const user = result?.data?.user;
                 if (user) {
                     currentUserData = user;
                     document.getElementById('auth-form-block').style.display = 'none';
                     document.getElementById('profile-block').style.display = 'block';
                     document.getElementById('profile-email').innerText = `Email: ${user.email}`;
+                    document.getElementById('profile-name').innerText = `Имя: ${user.user_metadata?.name || 'Не указано'}`;
                     
-                    const userName = user.user_metadata?.name || 'Не указано';
-                    document.getElementById('profile-name').innerText = `Имя: ${userName}`;
-                    
-                    if (user.app_me
+                    if (user.app_metadata && user.app_metadata.role === 'admin') {
+                        document.getElementById('admin-only-block').style.display = 'block';
+                        await loadAdminRequests();
+                    } else {
+                        document.getElementById('admin-only-block').style.display = 'none';
+                    }
+                } else {
+                    document.getElementById('auth-form-block').style.display = 'block';
+                    document.getElementById('profile-block').style.display = 'none';
+                    document.getElementById('admin-only-block').style.display = 'none';
+                }
+            } catch (e) {
+                console.error("Ошибка проверки пользователя", e);
+            }
+        };
+
+        // ЗАЯВКИ НА ИМЯ
+        window.sendNameChangeRequest = async function() {
+            const newName = document.getElementById('new-name-input').value.trim();
+            if (!newName || !currentUserData) return alert('Введите имя!');
+            const { error } = await nativeSupabase.from('name_change_requests').insert({ 
+                user_id: currentUserData.id, 
+                current_name: currentUserData.user_metadata?.name || 'Не указано', 
+                requested_name: newName, 
+                status: 'pending' 
+            });
+            if (error) alert('Ошибка отправки: ' + error.message);
+            else { alert('Заявка отправлена!'); document.getElementById('new-name-input').value = ''; }
+        };
+
+        window.loadAdminRequests = async function() {
+            const container = document.getElementById('moderation-requests-container');
+            if(!container) return;
+            const { data, error } = await nativeSupabase.from('name_change_requests').select('status=eq.pending');
+            if (error || !data || data.length === 0 || data === true) { 
+                container.innerHTML = '<div class="empty-requests">Новых заявок нет</div>'; 
+                return; 
+            }
+            container.innerHTML = '';
+            data.forEach(req => {
+                const item = document.createElement('div');
+                item.className = 'request-item';
+                item.innerHTML = `<div class="request-info"
