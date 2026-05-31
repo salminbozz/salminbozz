@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Florein | Портал</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.43.4/supabase-js.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         
@@ -15,7 +14,7 @@
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            padding: 20px 10px 110px 10px; 
+            padding: 20px 10px 120px 10px; 
         }
         
         .header-banner { 
@@ -100,16 +99,15 @@
         .admin-panel h3 { color: #f87171; margin-bottom: 10px; font-size: 16px; display: flex; align-items: center; gap: 8px;}
         .admin-panel p { color: #fca5a5; font-size: 13px; margin-bottom: 0; }
 
+        /* Оптимизированная кнопка Max — больше не перекрывает важные элементы */
         .download-image-link {
             position: fixed;
-            bottom: 65px; right: 20px; width: 60px; height: 60px; 
+            bottom: 70px; right: 20px; width: 55px; height: 55px; 
             background-image: url('max.png'); background-size: cover; background-position: center;
             border-radius: 50%; border: 2px solid #a855f7; box-shadow: 0 8px 24px rgba(168, 85, 247, 0.3);
-            z-index: 1000; transition: transform 0.2s ease, box-shadow 0.2s ease; display: block; animation: slideUp 0.4s ease-out;
+            z-index: 999; transition: transform 0.2s ease; display: block;
         }
-        .download-image-link:hover { transform: scale(1.08) translateY(-2px); box-shadow: 0 12px 28px rgba(168, 85, 247, 0.5); }
-
-        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .download-image-link:hover { transform: scale(1.05); }
         
         .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding: 0 5px; }
         .live-badge { background: rgba(168, 85, 247, 0.15); color: #c084fc; font-size: 11px; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; animation: pulse 2s infinite; }
@@ -125,8 +123,8 @@
         .footer-badge { position: fixed; bottom: 0; left: 0; width: 100%; background: #070a12; border-top: 1px solid rgba(168, 85, 247, 0.2); padding: 12px 0; text-align: center; font-size: 11px; color: #a78bfa; text-transform: uppercase; letter-spacing: 1px; z-index: 1010; }
 
         @media (max-width: 640px) { 
-            .download-image-link { bottom: 55px; right: 15px; width: 55px; height: 55px; } 
-            body { padding-bottom: 130px; }
+            .download-image-link { bottom: 60px; right: 15px; width: 50px; height: 50px; } 
+            body { padding-bottom: 140px; }
         }
     </style>
 </head>
@@ -187,6 +185,62 @@
     <a href="https://max.ru/" target="_blank" class="download-image-link" title="Скачать Max"></a>
 
     <script>
+        const SUPABASE_URL = 'https://aapkvsfbgbbtxofxmyqn.supabase.co'; 
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhcGt2c2ZiZ2JidHhvZnhteXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMjA1NDgsImV4cCI6MjA5NTc5NjU0OH0.1yPqAnrEMpHnZPXwbR9DoqBNZDRk5C0a3EGwD1tjTGQ';
+        
+        // Объект-замена официальной библиотеки, выполняющий прямые HTTP-запросы
+        const nativeSupabase = {
+            auth: {
+                async signUp({ email, password }) {
+                    return nativeSupabase._request('/auth/v1/signup', { email, password });
+                },
+                async signInWithPassword({ email, password }) {
+                    const res = await nativeSupabase._request('/auth/v1/token?grant_type=password', { email, password });
+                    if (!res.error && res.data && res.data.access_token) {
+                        localStorage.setItem('sb_token', res.data.access_token);
+                    }
+                    return res;
+                },
+                async getUser() {
+                    const token = localStorage.getItem('sb_token');
+                    if (!token) return { data: { user: null }, error: null };
+                    const res = await nativeSupabase._request('/auth/v1/user', null, 'GET', token);
+                    if (res.error) {
+                        localStorage.removeItem('sb_token');
+                        return { data: { user: null }, error: res.error };
+                    }
+                    return { data: { user: res.data }, error: null };
+                },
+                async signOut() {
+                    localStorage.removeItem('sb_token');
+                    return { error: null };
+                }
+            },
+            async _request(path, body, method = 'POST', token = null) {
+                try {
+                    const headers = {
+                        'apikey': SUPABASE_KEY,
+                        'Content-Type': 'application/json'
+                    };
+                    if (token) headers['Authorization'] = `Bearer ${token}`;
+                    else if (localStorage.getItem('sb_token')) headers['Authorization'] = `Bearer ${localStorage.getItem('sb_token')}`;
+
+                    const options = { method, headers };
+                    if (body && method !== 'GET') options.body = JSON.stringify(body);
+
+                    const response = await fetch(`${SUPABASE_URL}${path}`, options);
+                    const data = await response.json();
+                    
+                    if (!response.ok) return { data: null, error: { message: data.msg || data.error_description || 'Ошибка запроса' } };
+                    return { data, error: null };
+                } catch (e) {
+                    return { data: null, error: { message: 'Нет подключения к серверу авторизации.' } };
+                }
+            }
+        };
+    </script>
+
+    <script>
         function openTab(btn, id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -208,62 +262,31 @@
     </script>
 
     <script>
-        const SUPABASE_URL = 'https://aapkvsfbgbbtxofxmyqn.supabase.co'; 
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhcGt2c2ZiZ2JidHhvZnhteXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMjA1NDgsImV4cCI6MjA5NTc5NjU0OH0.1yPqAnrEMpHnZPXwbR9DoqBNZDRk5C0a3EGwD1tjTGQ';
-        let supabase = null;
-
-        function initSupabase() {
-            try {
-                // Проверяем классическое подключение через UMD сборку cdnjs
-                if (window.supabase && typeof window.supabase.createClient === 'function') {
-                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                    checkUser();
-                }
-            } catch (err) {
-                console.error("Критическая ошибка инициализации базы данных:", err);
-            }
-        }
-
-        // Запускаем инициализацию сразу, как только сформируется структура документа
-        document.addEventListener('DOMContentLoaded', initSupabase);
-        // Дублируем на случай медленной загрузки сети
-        window.addEventListener('load', () => { if(!supabase) initSupabase(); });
-
         async function handleAuth() {
-            if (!supabase) {
-                return alert('Ошибка: Скрипт базы данных заблокирован вашим провайдером или браузером. Отключите VPN/блокировщики и перезагрузите страницу.');
-            }
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
 
             if (!email || !password) return alert('Заполните все поля!');
 
-            try {
-                if (isLoginMode) {
-                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                    if (error) alert('Ошибка входа: ' + error.message);
-                    else checkUser();
-                } else {
-                    const { data, error } = await supabase.auth.signUp({ email, password });
-                    if (error) alert('Ошибка регистрации: ' + error.message);
-                    else alert('Регистрация успешна! Теперь вы можете войти.');
-                }
-            } catch (e) {
-                alert('Не удалось связаться с сервером авторизации.');
+            if (isLoginMode) {
+                const { data, error } = await nativeSupabase.auth.signInWithPassword({ email, password });
+                if (error) alert('Ошибка входа: ' + error.message);
+                else checkUser();
+            } else {
+                const { data, error } = await nativeSupabase.auth.signUp({ email, password });
+                if (error) alert('Ошибка регистрации: ' + error.message);
+                else alert('Регистрация успешна! Теперь вы можете войти.');
             }
         }
 
         async function logout() {
-            if (supabase) {
-                await supabase.auth.signOut();
-                checkUser();
-            }
+            await nativeSupabase.auth.signOut();
+            checkUser();
         }
 
         async function checkUser() {
-            if (!supabase) return;
             try {
-                const { data: { user } } = await supabase.auth.getUser();
+                const { data: { user } } = await nativeSupabase.auth.getUser();
                 if (user) {
                     document.getElementById('auth-form-block').style.display = 'none';
                     document.getElementById('profile-block').style.display = 'block';
@@ -281,6 +304,9 @@
                 }
             } catch (e) {}
         }
+        
+        // Проверяем сессию при загрузке страницы
+        document.addEventListener('DOMContentLoaded', checkUser);
     </script>
 
     <script>
