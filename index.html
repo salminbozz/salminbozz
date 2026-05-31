@@ -89,6 +89,18 @@
         .profile-info { text-align: center; }
         .profile-info p { margin-bottom: 20px; font-size: 16px; color: #cbd5e1; }
 
+        /* Стиль для секретного блока админа */
+        .admin-panel {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(220, 38, 38, 0.1);
+            border: 1px solid rgba(220, 38, 38, 0.4);
+            border-radius: 12px;
+            text-align: left;
+        }
+        .admin-panel h3 { color: #f87171; margin-bottom: 10px; font-size: 16px; display: flex; align-items: center; gap: 8px;}
+        .admin-panel p { color: #fca5a5; font-size: 13px; margin-bottom: 0; }
+
         /* Фиксированная кнопка-логотип Max */
         .download-image-link {
             position: fixed;
@@ -162,7 +174,13 @@
         <div class="auth-card profile-info" id="profile-block" style="display: none;">
             <h2>Личный кабинет</h2>
             <p id="profile-email">Загрузка...</p>
-            <button class="submit-btn secondary-btn" onclick="logout()">Выйти из аккаунта</button>
+            
+            <div class="admin-panel" id="admin-only-block" style="display: none;">
+                <h3>👑 Доступ разрешен: Администратор</h3>
+                <p>Вы успешно подтвердили права создателя портала Florein. Система управления базой данных работает стабильно.</p>
+            </div>
+
+            <button class="submit-btn secondary-btn" style="margin-top: 20px;" onclick="logout()">Выйти из аккаунта</button>
         </div>
     </div>
 
@@ -246,7 +264,6 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhcGt2c2ZiZ2JidHhvZnhteXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMjA1NDgsImV4cCI6MjA5NTc5NjU0OH0.1yPqAnrEMpHnZPXwbR9DoqBNZDRk5C0a3EGwD1tjTGQ';
         let supabase = null;
 
-        // Ждем, пока полностью загрузится скрипт Supabase, добавленный выше
         window.addEventListener('load', () => {
             try {
                 if (window.supabase && typeof window.supabase.createClient === 'function') {
@@ -254,12 +271,12 @@
                     checkUser();
                 }
             } catch (err) {
-                console.error("Supabase не смог инициализироваться в фоновом режиме:", err);
+                console.error("Supabase не инициализировался:", err);
             }
         });
 
         async function handleAuth() {
-            if (!supabase) return alert('База данных еще загружается или заблокирована вашим браузером. Попробуйте через секунду.');
+            if (!supabase) return alert('База данных еще загружается. Попробуйте через секунду.');
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
 
@@ -273,7 +290,7 @@
                 } else {
                     const { data, error } = await supabase.auth.signUp({ email, password });
                     if (error) alert('Ошибка регистрации: ' + error.message);
-                    else alert('Регистрация успешна!');
+                    else alert('Регистрация успешна! Войдите в аккаунт.');
                 }
             } catch (e) {
                 alert('Ошибка сети при запросе к бд.');
@@ -295,9 +312,19 @@
                     document.getElementById('auth-form-block').style.display = 'none';
                     document.getElementById('profile-block').style.display = 'block';
                     document.getElementById('profile-email').innerText = `Добро пожаловать, ${user.email}!`;
+                    
+                    // --- ПРОВЕРКА НА АДМИНА ---
+                    // Проверяем роль внутри app_metadata
+                    if (user.app_metadata && user.app_metadata.role === 'admin') {
+                        document.getElementById('admin-only-block').style.display = 'block';
+                    } else {
+                        document.getElementById('admin-only-block').style.display = 'none';
+                    }
+                    
                 } else {
                     document.getElementById('auth-form-block').style.display = 'block';
                     document.getElementById('profile-block').style.display = 'none';
+                    document.getElementById('admin-only-block').style.display = 'none';
                 }
             } catch (e) {}
         }
