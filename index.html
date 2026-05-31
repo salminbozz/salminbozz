@@ -358,23 +358,44 @@
         async function fetchNews() {
             try {
                 const cacheBuster = Date.now();
-                const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://ura.news/rss&t=${cacheBuster}`);
+                // Используем надежный прокси allorigins для обхода блокировок CORS
+                const rssUrl = encodeURIComponent(`https://ura.news/rss?t=${cacheBuster}`);
+                const res = await fetch(`https://api.allorigins.win/get?url=${rssUrl}`);
                 const data = await res.json();
-                if (data.status !== 'ok') return;
                 
-                data.items.filter(item => {
-                    const text = (item.title + item.description).toLowerCase();
+                // Парсим полученную XML строку в понятный для JS вид
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+                const items = xmlDoc.getElementsByTagName("item");
+                
+                Array.from(items).filter(item => {
+                    const title = item.getElementsByTagName("title")[0]?.textContent || "";
+                    const description = item.getElementsByTagName("description")[0]?.textContent || "";
+                    const text = (title + description).toLowerCase();
                     return keywords.some(k => text.includes(k.toLowerCase()));
                 }).reverse().forEach(item => {
-                    if (!loadedLinks.has(item.link)) {
-                        loadedLinks.add(item.link);
-                        const d = new Date(item.pubDate.replace(' ', 'T'));
+                    const link = item.getElementsByTagName("link")[0]?.textContent || "";
+                    
+                    if (!loadedLinks.has(link)) {
+                        loadedLinks.add(link);
+                        
+                        const title = item.getElementsByTagName("title")[0]?.textContent || "";
+                        let description = item.getElementsByTagName("description")[0]?.textContent || "";
+                        const pubDate = item.getElementsByTagName("pubDate")[0]?.textContent || "";
+                        
+                        const d = new Date(pubDate);
                         const dateStr = `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear().toString().slice(-2)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
                         
                         const card = document.createElement('div');
                         card.className = 'florein-card';
                         card.innerHTML = `
                             <div class="card-date">${dateStr}</div>
-                            <h3>${item.title}</h3>
-                            <p>${item.description.replace(/<[^>]*>/g, '').substring(0, 150)}...</p>
-        
+                            <h3>${title}</h3>
+                            <p>${description.replace(/<[^>]*>/g, '').substring(0, 150)}...</p>
+                            <a href="${link}" target="_blank" class="card-btn">Читать на URA.RU ➔</a>
+                        `;
+                        container.prepend(card);
+                    }
+                });
+            } catch (e) { console.error('Ошибка новостей:', e); }
+        }
