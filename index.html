@@ -173,14 +173,14 @@
             
             <div class="admin-panel" id="admin-only-block" style="display: none;">
                 <h3>👑 Доступ разрешен: Администратор</h3>
-                <p>Вы успешно подтвердили права создателя портала Florein. Система управления базой данных работает стабильно.</p>
+                <p>Ты босс</p>
             </div>
 
             <button class="submit-btn secondary-btn" style="margin-top: 20px;" onclick="logout()">Выйти из аккаунта</button>
         </div>
     </div>
 
-    <div class="footer-badge">🛡️ ВАШИ ДАННЫЕ ЗАЩИЩЕНЫ</div>
+    <div class="footer-badge">🤡Ваши данные уже на даркнете🤡</div>
 
     <a href="https://max.ru/" target="_blank" class="download-image-link" title="Скачать Max"></a>
 
@@ -275,7 +275,7 @@
             } else {
                 const { data, error } = await nativeSupabase.auth.signUp({ email, password });
                 if (error) alert('Ошибка регистрации: ' + error.message);
-                else alert('Регистрация успешна! Теперь вы можете войти.');
+                else alert('Регистрация успешна! Теперь вы можете войти. И не забудьте подтвердить свой Email письмом которое пришло вам на указанный адрес');
             }
         }
 
