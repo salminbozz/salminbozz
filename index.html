@@ -35,17 +35,12 @@
         .requests-list { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
         .request-item { background: #0f172a; border: 1px solid rgba(168, 85, 247, 0.2); padding: 14px; border-radius: 8px; }
         .request-info { font-size: 13px; color: #94a3b8; margin-bottom: 10px; line-height: 1.4; }
-        .request-actions { display: flex; gap: 8px; }
-        .action-btn { flex: 1; padding: 8px; border-radius: 6px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; }
-        .approve-btn { background: #22c55e; color: #fff; }
-        .reject-btn { background: #ef4444; color: #fff; }
         .empty-requests { font-size: 13px; color: #64748b; text-align: center; padding: 10px 0; }
         .download-image-link { position: fixed; bottom: 70px; right: 20px; width: 55px; height: 55px; background-image: url('max.png'); background-size: cover; background-position: center; border-radius: 50%; border: 2px solid #a855f7; box-shadow: 0 8px 24px rgba(168, 85, 247, 0.3); z-index: 999; display: block; }
         .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding: 0 5px; }
         .live-badge { background: rgba(168, 85, 247, 0.15); color: #c084fc; font-size: 11px; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; }
         .news-feed { display: flex; flex-direction: column; gap: 16px; width: 100%; }
         .florein-card { background: #111622; border: 1px solid rgba(168, 85, 247, 0.15); border-radius: 16px; padding: 24px; width: 100%; }
-        .card-date { font-size: 13px; color: #c084fc; font-weight: 800; margin-bottom: 12px; }
         .florein-card h3 { font-size: 17px; color: #ffffff; margin-bottom: 12px; text-align: left; }
         .florein-card p { font-size: 14px; color: #94a3b8; margin-bottom: 20px; line-height: 1.5; text-align: left; }
         .card-btn { color: #a855f7; text-decoration: none; font-weight: 700; display: inline-block; width: 100%; text-align: left; }
@@ -58,9 +53,9 @@
     <div class="header-banner"></div>
     
     <div class="nav-menu">
-        <button class="nav-btn active" onclick="openTab(this, 'main-tab')">Главная</button>
-        <button class="nav-btn" onclick="openTab(this, 'news-tab')">Новости</button>
-        <button class="nav-btn" onclick="openTab(this, 'auth-tab')">Профиль</button>
+        <button class="nav-btn active" onclick="window.openTab(this, 'main-tab')">Главная</button>
+        <button class="nav-btn" onclick="window.openTab(this, 'news-tab')">Новости</button>
+        <button class="nav-btn" onclick="window.openTab(this, 'auth-tab')">Профиль</button>
     </div>
 
     <div class="tab-content active" id="main-tab">
@@ -89,8 +84,8 @@
                 <input type="email" id="auth-email" placeholder="E-mail">
                 <input type="password" id="auth-password" placeholder="Пароль">
                 <div class="auth-buttons">
-                    <button class="submit-btn" id="main-auth-btn" onclick="handleAuth()">Войти</button>
-                    <button class="submit-btn secondary-btn" id="toggle-auth-btn" onclick="toggleAuthMode()">Регистрация</button>
+                    <button class="submit-btn" id="main-auth-btn" onclick="window.handleAuth()">Войти</button>
+                    <button class="submit-btn secondary-btn" id="toggle-auth-btn" onclick="window.toggleAuthMode()">Регистрация</button>
                 </div>
             </div>
         </div>
@@ -104,7 +99,7 @@
                 <h3>Заявка на изменение имени</h3>
                 <div class="auth-form">
                     <input type="text" id="new-name-input" placeholder="Новое имя">
-                    <button class="submit-btn" onclick="sendNameChangeRequest()">Отправить заявку</button>
+                    <button class="submit-btn" onclick="window.sendNameChangeRequest()">Отправить заявку</button>
                 </div>
             </div>
 
@@ -115,7 +110,7 @@
                 </div>
             </div>
 
-            <button class="submit-btn secondary-btn" style="margin-top: 20px;" onclick="logout()">Выйти из аккаунта</button>
+            <button class="submit-btn secondary-btn" style="margin-top: 20px;" onclick="window.logout()">Выйти из аккаунта</button>
         </div>
     </div>
 
@@ -123,15 +118,14 @@
     <a href="https://max.ru/" target="_blank" class="download-image-link"></a>
 
     <script>
-        function openTab(buttonElement, tabId) {
+        // Глобальный переключатель табов
+        window.openTab = function(buttonElement, tabId) {
             const contents = document.getElementsByClassName('tab-content');
-            for (let i = 0; i < contents.length; i++) {
-                contents[i].style.display = 'none';
-            }
+            for (let i = 0; i < contents.length; i++) { contents[i].style.display = 'none'; }
+            
             const buttons = document.getElementsByClassName('nav-btn');
-            for (let i = 0; i < buttons.length; i++) {
-                buttons[i].classList.remove('active');
-            }
+            for (let i = 0; i < buttons.length; i++) { buttons[i].classList.remove('active'); }
+            
             const activeTab = document.getElementById(tabId);
             if (activeTab) {
                 if (tabId === 'main-tab') activeTab.style.display = 'flex'; 
@@ -139,13 +133,9 @@
             }
             buttonElement.classList.add('active');
 
-            if (tabId === 'news-tab') {
-                loadFilteredNews();
-            }
-        }
-    </script>
+            if (tabId === 'news-tab') { window.loadFilteredNews(); }
+        };
 
-    <script>
         const SUPABASE_URL = 'https://aapkvsfbgbbtxofxmyqn.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhcGt2c2ZiZ2JidHhvZnhteXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMjA1NDgsImV4cCI6MjA5NTc5NjU0OH0.1yPqAnrEMpHnZPXwbR9DoqBNZDRk5C0a3EGwD1tjTGQ';
         
@@ -183,12 +173,7 @@
             from(table) {
                 return {
                     insert: async (data) => { return nativeSupabase._request(`/rest/v1/${table}`, data, 'POST'); },
-                    select: async (queryStr = 'id=not.is.null') => { return nativeSupabase._request(`/rest/v1/${table}?${queryStr}`, null, 'GET'); },
-                    update: async (matchData, updateData) => {
-                        const key = Object.keys(matchData)[0];
-                        const val = matchData[key];
-                        return nativeSupabase._request(`/rest/v1/${table}?${key}=eq.${val}`, updateData, 'PATCH');
-                    }
+                    select: async (queryStr = 'id=not.is.null') => { return nativeSupabase._request(`/rest/v1/${table}?${queryStr}`, null, 'GET'); }
                 };
             },
             async _request(path, body, method = 'POST', token = null) {
@@ -214,66 +199,61 @@
             }
         };
 
-        const keywords = ['СВО', 'спецоперац', 'фронт', 'арми', 'оборон', 'минобороны', 'военкор', 'украин', 'всу', 'наступ', 'удар', 'тыл', 'росс', 'конфликт', 'боев', 'днр', 'лнр', 'донецк', 'луганск', 'херсон', 'запорож', 'харьков', 'бахмут', 'авдеевк', 'крым', 'севастополь', 'белгород', 'курск', 'брянск', 'донбасс', 'бпла', 'беспилот', 'дрон', 'артиллери', 'авиаци', 'пво', 'танк', 'снаряд', 'ракет', 'рсзо', 'вертолет', 'самолет', 'техник', 'генштаб', 'мобилизац', 'песков', 'путин', 'шойгу', 'белоусов', 'спецслужб', 'полит', 'санкц', 'переговор', 'гуманитар', 'волонтер', 'безопасн', 'границ', 'обстрел', 'провокац', 'террорист', 'диверс', 'опорник'];
+        const keywords = ['сво', 'спецоперац', 'фронт', 'арми', 'оборон', 'минобороны', 'военкор', 'украин', 'всу', 'росс', 'боев', 'донецк', 'луганск', 'дрон', 'ракет', 'обстрел'];
 
-        async function loadFilteredNews() {
+        window.loadFilteredNews = async function() {
             const container = document.getElementById('news-container');
             if (!container) return;
-            container.innerHTML = '<div style="color: #64748b; font-size:14px; text-align:center; padding:20px;">Синхронизация с лентой новостей...</div>';
+            container.innerHTML = '<div style="color: #64748b; font-size:14px; text-align:center; padding:20px;">Синхронизация ленты новостей...</div>';
             try {
-                // Прямой HTTPS парсинг через специализированный CORS-декодер (без лимитов и ключей)
-                const response = await fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent('https://lenta.ru/rss/news'));
+                const response = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Flenta.ru%2Frss%2Fnews');
                 const data = await response.json();
                 
-                if (!data || !data.items || data.items.length === 0) {
-                    container.innerHTML = '<div style="color: #64748b; font-size:14px; text-align:center; padding:20px;">Не удалось обновить ленту.</div>';
+                if (!data || !data.items) {
+                    container.innerHTML = '<div style="color: #64748b; font-size:14px; text-align:center; padding:20px;">Новостей нет.</div>';
                     return;
                 }
 
-                let count = 0;
                 container.innerHTML = '';
+                let count = 0;
 
                 data.items.forEach(item => {
                     const title = item.title || '';
-                    const description = item.description || '';
-                    const link = item.link || '#';
-
-                    const t = title.toLowerCase();
-                    const d = description.toLowerCase();
-
-                    const matches = keywords.some(word => t.includes(word.toLowerCase()) || d.includes(word.toLowerCase()));
+                    const desc = item.description || '';
+                    const textToSearch = (title + ' ' + desc).toLowerCase();
                     
+                    const matches = keywords.some(word => textToSearch.includes(word));
                     if (matches) {
                         count++;
                         const card = document.createElement('div');
                         card.className = 'florein-card';
-                        card.innerHTML = `<h3>${title}</h3><p>${description}</p><a href="${link}" target="_blank" class="card-btn">Читать подробнее →</a>`;
+                        card.innerHTML = `<h3>${title}</h3><p>${desc}</p><a href="${item.link}" target="_blank" class="card-btn">Читать подробнее →</a>`;
                         container.appendChild(card);
                     }
                 });
 
                 if (count === 0) {
-                    container.innerHTML = '<div style="color: #64748b; font-size:14px; text-align:center; padding:20px;">Нет свежих новостей по ключевым словам.</div>';
+                    container.innerHTML = '<div style="color: #64748b; font-size:14px; text-align:center; padding:20px;">Нет свежих новостей по теме СВО.</div>';
                 }
             } catch (e) {
-                container.innerHTML = '<div style="color: #ef4444; font-size:14px; text-align:center; padding:20px;">Ошибка загрузки новостей RSS.</div>';
+                container.innerHTML = '<div style="color: #ef4444; font-size:14px; text-align:center; padding:20px;">Ошибка загрузки RSS.</div>';
             }
-        }
+        };
 
         let isLoginMode = true;
-        function toggleAuthMode() {
+        window.toggleAuthMode = function() {
             isLoginMode = !isLoginMode;
             document.getElementById('auth-title').innerText = isLoginMode ? 'Войти в аккаунт' : 'Регистрация нового аккаунта';
             document.getElementById('main-auth-btn').innerText = isLoginMode ? 'Войти' : 'Создать аккаунт';
             document.getElementById('toggle-auth-btn').innerText = isLoginMode ? 'Регистрация' : 'Уже есть аккаунт';
             document.getElementById('auth-name').style.display = isLoginMode ? 'none' : 'block';
-        }
+        };
 
         let currentUserData = null;
-        async function handleAuth() {
-            const name = document.getElementById('auth-name').value;
+        window.handleAuth = async function() {
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
+            const name = document.getElementById('auth-name').value;
             
             if (isLoginMode) {
                 if (!email || !password) return alert('Заполните все поля!');
@@ -281,7 +261,7 @@
                 if (result && result.error) {
                     alert('Ошибка входа: ' + result.error.message);
                 } else {
-                    await checkUser();
+                    await window.checkUser();
                 }
             } else {
                 if (!name || !email || !password) return alert('Заполните все поля!');
@@ -289,19 +269,19 @@
                 if (result && result.error) {
                     alert('Ошибка регистрации: ' + result.error.message);
                 } else { 
-                    alert('Регистрация успешна! Теперь войдите.'); 
-                    toggleAuthMode(); 
+                    alert('Регистрация успешна! Войдите.'); 
+                    window.toggleAuthMode(); 
                 }
             }
-        }
+        };
 
-        async function logout() { 
+        window.logout = async function() { 
             await nativeSupabase.auth.signOut(); 
             currentUserData = null; 
-            checkUser(); 
-        }
+            window.checkUser(); 
+        };
 
-        async function checkUser() {
+        window.checkUser = async function() {
             try {
                 const result = await nativeSupabase.auth.getUser();
                 const user = result?.data?.user;
@@ -310,4 +290,29 @@
                     document.getElementById('auth-form-block').style.display = 'none';
                     document.getElementById('profile-block').style.display = 'block';
                     document.getElementById('profile-email').innerText = `Email: ${user.email}`;
-                    document.getElementById('profile-name').innerTe
+                    document.getElementById('profile-name').innerText = `Имя: ${user.user_metadata?.name || 'Не указано'}`;
+                    
+                    if (user.app_metadata && user.app_metadata.role === 'admin') {
+                        document.getElementById('admin-only-block').style.display = 'block';
+                        window.loadModerationRequests();
+                    }
+                } else {
+                    document.getElementById('auth-form-block').style.display = 'block';
+                    document.getElementById('profile-block').style.display = 'none';
+                    document.getElementById('admin-only-block').style.display = 'none';
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        };
+
+        window.loadModerationRequests = async function() {
+            const container = document.getElementById('moderation-requests-container');
+            if (!container) return;
+            const res = await nativeSupabase.from('name_change_requests').select();
+            if (res && res.data && Array.isArray(res.data) && res.data.length > 0) {
+                container.innerHTML = '';
+                res.data.forEach(req => {
+                    const item = document.createElement('div');
+                    item.className = 'request-item';
+                    item.innerHTML = `<div class="request-info"><strong>Email:</strong> ${req.user_email}<br><strong>Новое имя:</strong> 
