@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Florein | Портал</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         
@@ -15,7 +14,7 @@
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            padding: 20px 10px 110px 10px; /* Увеличили нижний отступ, чтобы кнопка Max не перекрывала контент */
+            padding: 20px 10px 110px 10px; 
         }
         
         .header-banner { 
@@ -172,7 +171,6 @@
     <a href="https://max.ru/" target="_blank" class="download-image-link" title="Скачать Max"></a>
 
     <script>
-        // Функция переключения вкладок — теперь она полностью независима и работает железно
         function openTab(btn, id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -184,30 +182,84 @@
             btn.classList.add('active');
         }
 
-        // --- ПОДКЛЮЧЕНИЕ SUPABASE ---
-        const SUPABASE_URL = 'https://aapkvsfbgbbtxofxmyqn.supabase.co'; 
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhcGt2c2ZiZ2JidHhvZnhteXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMjA1NDgsImV4cCI6MjA5NTc5NjU0OH0.1yPqAnrEMpHnZPXwbR9DoqBNZDRk5C0a3EGwD1tjTGQ';
-        
-        let supabase = null;
-        try {
-            if (window.supabase && typeof window.supabase.createClient === 'function') {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            }
-        } catch (err) {
-            console.error("Ошибка при создании клиента Supabase:", err);
-        }
-
         let isLoginMode = true;
-
         function toggleAuthMode() {
             isLoginMode = !isLoginMode;
             document.getElementById('auth-title').innerText = isLoginMode ? 'Войти в аккаунт' : 'Регистрация нового аккаунта';
             document.getElementById('main-auth-btn').innerText = isLoginMode ? 'Войти' : 'Создать аккаунт';
             document.getElementById('toggle-auth-btn').innerText = isLoginMode ? 'Регистрация' : 'Уже есть аккаунт';
         }
+    </script>
+
+    <script>
+        const container = document.getElementById('news-container');
+        const loadedLinks = new Set();
+        const keywords = [
+            'СВО', 'спецоперац', 'фронт', 'арми', 'оборон', 'минобороны', 'военкор', 
+            'украин', 'всу', 'наступ', 'удар', 'тыл', 'росс', 'конфликт', 'боев', 
+            'днр', 'лнр', 'донецк', 'луганск', 'херсон', 'запорож', 'харьков', 'бахмут', 
+            'авдеевк', 'крым', 'севастополь', 'белгород', 'курск', 'брянск', 'донбасс',
+            'бпла', 'беспилот', 'дрон', 'артиллери', 'авиаци', 'пво', 'танк', 
+            'снаряд', 'ракет', 'рсзо', 'вертолет', 'самолет', 'техник', 
+            'генштаб', 'мобилизац', 'песков', 'путин', 'шойгу', 'белоусов', 'спецслужб', 
+            'полит', 'санкц', 'переговор', 'гуманитар', 'волонтер', 'безопасн', 
+            'границ', 'обстрел', 'провокац', 'террорист', 'диверс', 'опорник'
+        ];
+
+        async function fetchNews() {
+            try {
+                const cacheBuster = Date.now();
+                const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://ura.news/rss&t=${cacheBuster}`);
+                const data = await res.json();
+                if (data.status !== 'ok') return;
+                
+                data.items.filter(item => {
+                    const text = (item.title + item.description).toLowerCase();
+                    return keywords.some(k => text.includes(k.toLowerCase()));
+                }).reverse().forEach(item => {
+                    if (!loadedLinks.has(item.link)) {
+                        loadedLinks.add(item.link);
+                        const d = new Date(item.pubDate.replace(' ', 'T'));
+                        const dateStr = `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear().toString().slice(-2)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                        
+                        const card = document.createElement('div');
+                        card.className = 'florein-card';
+                        card.innerHTML = `
+                            <div class="card-date">${dateStr}</div>
+                            <h3>${item.title}</h3>
+                            <p>${item.description.replace(/<[^>]*>/g, '').substring(0, 150)}...</p>
+                            <a href="${item.link}" target="_blank" class="card-btn">Читать на URA.RU ➔</a>
+                        `;
+                        container.prepend(card);
+                    }
+                });
+            } catch (e) { console.error('Ошибка новостей:', e); }
+        }
+        fetchNews();
+        setInterval(fetchNews, 30000);
+    </script>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        const SUPABASE_URL = 'https://aapkvsfbgbbtxofxmyqn.supabase.co'; 
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhcGt2c2ZiZ2JidHhvZnhteXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMjA1NDgsImV4cCI6MjA5NTc5NjU0OH0.1yPqAnrEMpHnZPXwbR9DoqBNZDRk5C0a3EGwD1tjTGQ';
+        let supabase = null;
+
+        // Ждем, пока полностью загрузится скрипт Supabase, добавленный выше
+        window.addEventListener('load', () => {
+            try {
+                if (window.supabase && typeof window.supabase.createClient === 'function') {
+                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                    checkUser();
+                }
+            } catch (err) {
+                console.error("Supabase не смог инициализироваться в фоновом режиме:", err);
+            }
+        });
 
         async function handleAuth() {
-            if (!supabase) return alert('Supabase не подключен или заблокирован расширением браузера!');
+            if (!supabase) return alert('База данных еще загружается или заблокирована вашим браузером. Попробуйте через секунду.');
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
 
@@ -221,10 +273,10 @@
                 } else {
                     const { data, error } = await supabase.auth.signUp({ email, password });
                     if (error) alert('Ошибка регистрации: ' + error.message);
-                    else alert('Регистрация успешна! Если ты отключил подтверждение в настройках Supabase — можешь сразу входить.');
+                    else alert('Регистрация успешна!');
                 }
             } catch (e) {
-                alert('Произошла непредвиденная ошибка сети.');
+                alert('Ошибка сети при запросе к бд.');
             }
         }
 
@@ -247,65 +299,8 @@
                     document.getElementById('auth-form-block').style.display = 'block';
                     document.getElementById('profile-block').style.display = 'none';
                 }
-            } catch (e) {
-                console.log("Пользователь не авторизован");
-            }
+            } catch (e) {}
         }
-        
-        if (supabase) {
-            checkUser();
-        }
-
-        // --- НОВОСТНОЙ КОД ---
-        const container = document.getElementById('news-container');
-        const loadedLinks = new Set();
-        
-        const keywords = [
-            'СВО', 'спецоперац', 'фронт', 'арми', 'оборон', 'минобороны', 'военкор', 
-            'украин', 'всу', 'наступ', 'удар', 'тыл', 'росс', 'конфликт', 'боев', 
-            'днр', 'лнр', 'донецк', 'луганск', 'херсон', 'запорож', 'харьков', 'бахмут', 
-            'авдеевк', 'крым', 'севастополь', 'белгород', 'курск', 'брянск', 'донбасс',
-            'бпла', 'беспилот', 'дрон', 'артиллери', 'авиаци', 'пво', 'танк', 
-            'снаряд', 'ракет', 'рсзо', 'вертолет', 'самолет', 'техник', 
-            'генштаб', 'мобилизац', 'песков', 'путин', 'шойгу', 'белоусов', 'спецслужб', 
-            'полит', 'санкц', 'переговор', 'гуманитар', 'волонтер', 'безопасн', 
-            'границ', 'обстрел', 'провокац', 'террорист', 'диверс', 'опорник'
-        ];
-
-        async function fetchNews() {
-            try {
-                const cacheBuster = Date.now();
-                const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://ura.news/rss&t=${cacheBuster}`);
-                const data = await res.json();
-                
-                if (data.status !== 'ok') return;
-                
-                data.items.filter(item => {
-                    const text = (item.title + item.description).toLowerCase();
-                    return keywords.some(k => text.includes(k.toLowerCase()));
-                }).reverse().forEach(item => {
-                    if (!loadedLinks.has(item.link)) {
-                        loadedLinks.add(item.link);
-                        
-                        const d = new Date(item.pubDate.replace(' ', 'T'));
-                        const dateStr = `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear().toString().slice(-2)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-                        
-                        const card = document.createElement('div');
-                        card.className = 'florein-card';
-                        card.innerHTML = `
-                            <div class="card-date">${dateStr}</div>
-                            <h3>${item.title}</h3>
-                            <p>${item.description.replace(/<[^>]*>/g, '').substring(0, 150)}...</p>
-                            <a href="${item.link}" target="_blank" class="card-btn">Читать на URA.RU ➔</a>
-                        `;
-                        container.prepend(card);
-                    }
-                });
-            } catch (e) { console.error('Ошибка при загрузке новостей:', e); }
-        }
-
-        fetchNews();
-        setInterval(fetchNews, 30000);
     </script>
 </body>
 </html>
