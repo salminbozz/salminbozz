@@ -80,7 +80,7 @@
         }
         .auth-form input:focus { border-color: #a855f7; box-shadow: 0 0 8px rgba(168, 85, 247, 0.2); }
         .auth-buttons { display: flex; gap: 10px; margin-top: 5px; }
-        .submit-btn { flex: 1; background: #a855f7; color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .submit-btn { flex: 1; background: #a855f7; color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center;}
         .submit-btn:hover { background: #9333ea; }
         .secondary-btn { background: rgba(148, 163, 184, 0.1); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.2); }
         .secondary-btn:hover { background: rgba(148, 163, 184, 0.2); color: #fff; }
@@ -99,16 +99,33 @@
         }
         .name-change-block h3 { font-size: 15px; color: #fff; margin-bottom: 10px; }
 
+        /* Стилизация Панели Модерации */
         .admin-panel {
             margin-top: 25px;
             padding: 20px;
-            background: rgba(220, 38, 38, 0.1);
-            border: 1px solid rgba(220, 38, 38, 0.4);
+            background: rgba(30, 27, 75, 0.4);
+            border: 1px solid rgba(168, 85, 247, 0.4);
             border-radius: 12px;
             text-align: left;
         }
-        .admin-panel h3 { color: #f87171; margin-bottom: 10px; font-size: 16px; display: flex; align-items: center; gap: 8px;}
-        .admin-panel p { color: #fca5a5; font-size: 13px; margin-bottom: 0; }
+        .admin-panel h3 { color: #c084fc; margin-bottom: 15px; font-size: 16px; display: flex; align-items: center; gap: 8px;}
+        .requests-list { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
+        .request-item { 
+            background: #0f172a; 
+            border: 1px solid rgba(168, 85, 247, 0.2); 
+            padding: 14px; 
+            border-radius: 8px;
+        }
+        .request-info { font-size: 13px; color: #94a3b8; margin-bottom: 10px; line-height: 1.4; }
+        .request-info strong { color: #fff; }
+        .request-info .arrow { color: #a855f7; font-weight: bold; }
+        .request-actions { display: flex; gap: 8px; }
+        .action-btn { flex: 1; padding: 8px; border-radius: 6px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; transition: 0.2s; }
+        .approve-btn { background: #22c55e; color: #fff; }
+        .approve-btn:hover { background: #16a34a; }
+        .reject-btn { background: #ef4444; color: #fff; }
+        .reject-btn:hover { background: #dc2626; }
+        .empty-requests { font-size: 13px; color: #64748b; text-align: center; padding: 10px 0; }
 
         .download-image-link {
             position: fixed;
@@ -192,8 +209,11 @@
             </div>
 
             <div class="admin-panel" id="admin-only-block" style="display: none;">
-                <h3>👑 Доступ разрешен: Администратор</h3>
-                <p>Вы успешно подтвердили права создателя портала Florein. Система управления базой данных работает стабильно.</p>
+                <h3>👑 Панель модерации Florein</h3>
+                <p style="color: #a78bfa; font-size: 13px; margin-bottom: 10px;">Активные заявки на смену имени:</p>
+                <div class="requests-list" id="moderation-requests-container">
+                    <div class="empty-requests">Загрузка списка заявок...</div>
+                </div>
             </div>
 
             <button class="submit-btn secondary-btn" style="margin-top: 20px;" onclick="logout()">Выйти из аккаунта</button>
@@ -206,7 +226,7 @@
 
     <script>
         const SUPABASE_URL = 'https://aapkvsfbgbbtxofxmyqn.supabase.co'; 
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhcGt2c2ZiZ2JidHhvZnhteXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMjA1NDgsImV4cCI6MjA5NTc5NjU0OH0.1yPqAnrEMpHnZPXwbR9DoqBNZDRk5C0a3EGwD1tjTGQ';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhcGt2c2ZiZ2JidHxvZnhteXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMjA1NDgsImV4cCI6MjA5NTc5NjU0OH0.1yPqAnrEMpHnZPXwbR9DoqBNZDRk5C0a3EGwD1tjTGQ';
         
         const nativeSupabase = {
             auth: {
@@ -235,11 +255,21 @@
                     return { error: null };
                 }
             },
-            // Метод для отправки данных в таблицы (например, для заявок)
+            // Расширенный метод для работы с таблицами БД через REST API Supabase
             from(table) {
                 return {
                     insert: async (data) => {
                         return nativeSupabase._request(`/rest/v1/${table}`, data, 'POST');
+                    },
+                    select: async (queryStr = 'id=not.is.null') => {
+                        // По умолчанию выбираем "все" записи, где id не равен null
+                        return nativeSupabase._request(`/rest/v1/${table}?${queryStr}`, null, 'GET');
+                    },
+                    update: async (matchData, updateData) => {
+                        // matchData — объект фильтрации, например { id: 5 }
+                        const key = Object.keys(matchData)[0];
+                        const val = matchData[key];
+                        return nativeSupabase._request(`/rest/v1/${table}?${key}=eq.${val}`, updateData, 'PATCH');
                     }
                 };
             },
@@ -247,7 +277,8 @@
                 try {
                     const headers = {
                         'apikey': SUPABASE_KEY,
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=representation' // Позволяет получать измененные данные обратно в ответе
                     };
                     if (token) headers['Authorization'] = `Bearer ${token}`;
                     else if (localStorage.getItem('sb_token')) headers['Authorization'] = `Bearer ${localStorage.getItem('sb_token')}`;
@@ -256,7 +287,7 @@
                     if (body && method !== 'GET') options.body = JSON.stringify(body);
 
                     const response = await fetch(`${SUPABASE_URL}${path}`, options);
-                    if (response.status === 201 || response.status === 204) return { data: true, error: null };
+                    if (response.status === 204) return { data: true, error: null };
                     
                     const data = await response.json();
                     if (!response.ok) return { data: null, error: { message: data.msg || data.error_description || data.message || 'Ошибка запроса' } };
@@ -286,7 +317,6 @@
             document.getElementById('auth-title').innerText = isLoginMode ? 'Войти в аккаунт' : 'Регистрация нового аккаунта';
             document.getElementById('main-auth-btn').innerText = isLoginMode ? 'Войти' : 'Создать аккаунт';
             document.getElementById('toggle-auth-btn').innerText = isLoginMode ? 'Регистрация' : 'Уже есть аккаунт';
-            // Показываем/скрываем поле Имени
             document.getElementById('auth-name').style.display = isLoginMode ? 'none' : 'block';
         }
     </script>
@@ -309,7 +339,7 @@
                 const { data, error } = await nativeSupabase.auth.signUp({ 
                     email, 
                     password,
-                    options: { data: { name: name } } // Передаем имя в метаданные пользователя
+                    options: { data: { name: name } }
                 });
                 if (error) alert('Ошибка регистрации: ' + error.message);
                 else {
@@ -334,12 +364,13 @@
                     document.getElementById('profile-block').style.display = 'block';
                     document.getElementById('profile-email').innerText = `Email: ${user.email}`;
                     
-                    // Извлекаем имя из метаданных пользователя
                     const userName = user.user_metadata?.name || 'Не указано';
                     document.getElementById('profile-name').innerText = `Имя: ${userName}`;
                     
+                    // Проверка роли администратора
                     if (user.app_metadata && user.app_metadata.role === 'admin') {
                         document.getElementById('admin-only-block').style.display = 'block';
+                        loadAdminRequests(); // Загружаем заявки для админа
                     } else {
                         document.getElementById('admin-only-block').style.display = 'none';
                     }
@@ -351,49 +382,9 @@
             } catch (e) {}
         }
 
-        // Функция отправки заявки на смену имени
         async function sendNameChangeRequest() {
             const newName = document.getElementById('new-name-input').value.trim();
             if (!newName) return alert('Введите новое имя!');
             if (!currentUserData) return alert('Ошибка авторизации!');
 
-            const currentName = currentUserData.user_metadata?.name || 'Не указано';
-
-            const { data, error } = await nativeSupabase.from('name_change_requests').insert({
-                user_id: currentUserData.id,
-                current_name: currentName,
-                requested_name: newName,
-                status: 'pending'
-            });
-
-            if (error) {
-                alert('Ошибка отправки заявки: ' + error.message);
-            } else {
-                alert('Заявка на смену имени успешно отправлена администратору!');
-                document.getElementById('new-name-input').value = '';
-            }
-        }
-        
-        document.addEventListener('DOMContentLoaded', checkUser);
-    </script>
-
-    <script>
-        const container = document.getElementById('news-container');
-        const loadedLinks = new Set();
-        const keywords = [
-            'СВО', 'спецоперац', 'фронт', 'арми', 'оборон', 'минобороны', 'военкор', 
-            'украин', 'всу', 'наступ', 'удар', 'тыл', 'росс', 'конфликт', 'боев', 
-            'днр', 'лнр', 'донецк', 'луганск', 'херсон', 'запорож', 'харьков', 'бахмут', 
-            'авдеевк', 'крым', 'севастополь', 'белгород', 'курск', 'брянск', 'донбасс',
-            'бпла', 'беспилот', 'дрон', 'артиллери', 'авиаци', 'пво', 'танк', 
-            'снаряд', 'ракет', 'рсзо', 'вертолет', 'самолет', 'техник', 
-            'генштаб', 'мобилизац', 'песков', 'путин', 'шойгу', 'белоусов', 'спецслужб', 
-            'полит', 'санкц', 'переговор', 'гуманитар', 'волонтер', 'безопасн', 
-            'границ', 'обстрел', 'провокац', 'террорист', 'диверс', 'опорник'
-        ];
-
-        async function fetchNews() {
-            try {
-                const cacheBuster = Date.now();
-                const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://ura.news/rss&t=${cacheBuster}`);
-                const data = await r
+            const currentName = currentUserData.user_metadat
