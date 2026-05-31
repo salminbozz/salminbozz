@@ -14,7 +14,7 @@
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            padding: 20px 10px 80px 10px; /* Добавил отступ снизу, чтобы контент не перекрывался нижней плашкой */
+            padding: 20px 10px 80px 10px; 
         }
         
         .header-banner { 
@@ -77,47 +77,27 @@
             transform: translateY(-1px);
         }
 
-        /* Стили для фиксированного окна Max */
-        .download-widget {
+        /* Фиксированное кликабельное фото для Max */
+        .download-image-link {
             position: fixed;
-            bottom: 70px; /* Поднял чуть выше, чтобы не перекрывать нижнюю плашку защиты данных */
+            bottom: 60px; 
             right: 20px;
-            width: 280px;
-            background: #111622;
-            border: 1px solid #a855f7;
-            border-radius: 14px;
-            padding: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            width: 200px; 
+            height: 100px; 
+            background-image: url('max.jpg'); 
+            background-size: cover;
+            background-position: center;
+            border-radius: 12px;
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
             z-index: 1000;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: block;
             animation: slideUp 0.4s ease-out;
         }
-        .download-widget h3 {
-            margin: 0;
-            font-size: 16px;
-            color: #c084fc;
-        }
-        .download-widget p {
-            margin: 0;
-            font-size: 13px;
-            color: #94a3b8;
-            line-height: 1.4;
-        }
-        .download-btn {
-            background: #a855f7;
-            color: #fff;
-            text-decoration: none;
-            text-align: center;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-        .download-btn:hover {
-            background: #9333ea;
+        .download-image-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(168, 85, 247, 0.2);
         }
 
         @keyframes slideUp {
@@ -136,7 +116,7 @@
         p { font-size: 14px; color: #94a3b8; margin-bottom: 20px; line-height: 1.5; }
         .card-btn { color: #a855f7; text-decoration: none; font-weight: 700; }
         
-        /* Новая фиксированная плашка в самом низу */
+        /* Нижняя закрепленная плашка */
         .footer-badge { 
             position: fixed;
             bottom: 0;
@@ -155,12 +135,12 @@
 
         /* Адаптивность для мобилок */
         @media (max-width: 640px) {
-            .download-widget {
+            .download-image-link {
                 position: static;
                 width: 100%;
                 max-width: 600px;
-                margin-top: 20px;
-                margin-bottom: 20px;
+                height: 120px;
+                margin: 20px 0;
                 animation: none;
             }
             body {
@@ -196,11 +176,7 @@
 
     <div class="footer-badge">🛡️ ВАШИ ДАННЫЕ ЗАЩИЩЕНЫ</div>
 
-    <div class="download-widget">
-        <h3>Скачать Max</h3>
-        <p>Получите актуальную версию приложения прямо сейчас с официального источника.</p>
-        <a href="https://max.ru/" target="_blank" class="download-btn">Скачать</a>
-    </div>
+    <a href="https://max.ru/" target="_blank" class="download-image-link" title="Скачать Max"></a>
 
     <script>
         const container = document.getElementById('news-container');
