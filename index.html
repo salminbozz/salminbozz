@@ -111,7 +111,7 @@
             <div class="admin-panel" id="admin-only-block" style="display: none;">
                 <h3>👑 Панель модерации Florein</h3>
                 <div class="requests-list" id="moderation-requests-container">
-                    <div class="empty-requests">Загрузка списка заявок...</div>
+                    <div class="empty-requests">Список заявок пуст...</div>
                 </div>
             </div>
 
@@ -128,19 +128,14 @@
             for (let i = 0; i < contents.length; i++) {
                 contents[i].style.display = 'none';
             }
-
             const buttons = document.getElementsByClassName('nav-btn');
             for (let i = 0; i < buttons.length; i++) {
                 buttons[i].classList.remove('active');
             }
-
             const activeTab = document.getElementById(tabId);
             if (activeTab) {
-                if (tabId === 'main-tab') {
-                    activeTab.style.display = 'flex'; 
-                } else {
-                    activeTab.style.display = 'block';
-                }
+                if (tabId === 'main-tab') activeTab.style.display = 'flex'; 
+                else activeTab.style.display = 'block';
             }
             buttonElement.classList.add('active');
 
@@ -161,6 +156,7 @@
                 },
                 async signInWithPassword({ email, password }) {
                     const res = await nativeSupabase._request('/auth/v1/token?grant_type=password', { email, password });
+                    // Исправлена проверка вложенности res.data
                     if (res && !res.error && res.data && res.data.access_token) {
                         localStorage.setItem('sb_token', res.data.access_token);
                     }
@@ -226,29 +222,44 @@
             if (!container) return;
             container.innerHTML = '<div style="color: #64748b; font-size:14px; text-align:center; padding:20px;">Синхронизация с лентой новостей...</div>';
             try {
-                // Используем бесплатный CORS-прокси парсер без обязательного приватного токена
-                const response = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://lenta.ru/rss/news');
-                const data = await response.json();
-                if (!data || !data.items) {
+                // Стабильный парсинг XML-ленты Lenta.ru через CORS-прокси без ключей
+                const response = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://lenta.ru/rss/news'));
+                const json = await response.json();
+                
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(json.contents, "text/xml");
+                const items = xmlDoc.getElementsByTagName('item');
+                
+                if (!items || items.length === 0) {
                     container.innerHTML = '<div style="color: #64748b; font-size:14px; text-align:center; padding:20px;">Не удалось обновить ленту.</div>';
                     return;
                 }
-                const filtered = data.items.filter(item => {
-                    const t = (item.title || '').toLowerCase();
-                    const d = (item.description || '').toLowerCase();
-                    return keywords.some(word => t.includes(word.toLowerCase()) || d.includes(word.toLowerCase()));
-                });
-                if (filtered.length === 0) {
-                    container.innerHTML = '<div style="color: #64748b; font-size:14px; text-align:center; padding:20px;">Нет свежих новостей по ключевым словам.</div>';
-                    return;
-                }
+
+                let count = 0;
                 container.innerHTML = '';
-                filtered.forEach(item => {
-                    const card = document.createElement('div');
-                    card.className = 'florein-card';
-                    card.innerHTML = `<h3>${item.title}</h3><p>${item.description || ''}</p><a href="${item.link}" target="_blank" class="card-btn">Читать подробнее →</a>`;
-                    container.appendChild(card);
-                });
+
+                for (let i = 0; i < items.length; i++) {
+                    const title = items[i].getElementsByTagName('title')[0]?.textContent || '';
+                    const description = items[i].getElementsByTagName('description')[0]?.textContent || '';
+                    const link = items[i].getElementsByTagName('link')[0]?.textContent || '#';
+
+                    const t = title.toLowerCase();
+                    const d = description.toLowerCase();
+
+                    const matches = keywords.some(word => t.includes(word.toLowerCase()) || d.includes(word.toLowerCase()));
+                    
+                    if (matches) {
+                        count++;
+                        const card = document.createElement('div');
+                        card.className = 'florein-card';
+                        card.innerHTML = `<h3>${title}</h3><p>${description}</p><a href="${link}" target="_blank" class="card-btn">Читать подробнее →</a>`;
+                        container.appendChild(card);
+                    }
+                }
+
+                if (count === 0) {
+                    container.innerHTML = '<div style="color: #64748b; font-size:14px; text-align:center; padding:20px;">Нет свежих новостей по ключевым словам.</div>';
+                }
             } catch (e) {
                 container.innerHTML = '<div style="color: #ef4444; font-size:14px; text-align:center; padding:20px;">Ошибка загрузки новостей RSS.</div>';
             }
@@ -268,35 +279,36 @@
             const name = document.getElementById('auth-name').value;
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
+            
             if (isLoginMode) {
                 if (!email || !password) return alert('Заполните все поля!');
                 const result = await nativeSupabase.auth.signInWithPassword({ email, password });
-                if (result && result.error) alert('Ошибка входа: ' + result.error.message);
-                else await checkUser();
+                if (result && result.error) {
+                    alert('Ошибка входа: ' + result.error.message);
+                } else {
+                    await checkUser();
+                }
             } else {
                 if (!name || !email || !password) return alert('Заполните все поля!');
                 const result = await nativeSupabase.auth.signUp({ email, password, options: { data: { name: name } } });
-                if (result && result.error) alert('Ошибка регистрации: ' + result.error.message);
-                else { alert('Регистрация успешна! Теперь войдите.'); toggleAuthMode(); }
+                if (result && result.error) {
+                    alert('Ошибка регистрации: ' + result.error.message);
+                } else { 
+                    alert('Регистрация успешна! Теперь войдите.'); 
+                    toggleAuthMode(); 
+                }
             }
         }
 
-        async function logout() { await nativeSupabase.auth.signOut(); currentUserData = null; checkUser(); }
+        async function logout() { 
+            await nativeSupabase.auth.signOut(); 
+            currentUserData = null; 
+            checkUser(); 
+        }
 
         async function checkUser() {
             try {
                 const result = await nativeSupabase.auth.getUser();
                 const user = result?.data?.user;
                 if (user) {
-                    currentUserData = user;
-                    document.getElementById('auth-form-block').style.display = 'none';
-                    document.getElementById('profile-block').style.display = 'block';
-                    document.getElementById('profile-email').innerText = `Email: ${user.email}`;
-                    document.getElementById('profile-name').innerText = `Имя: ${user.user_metadata?.name || 'Не указано'}`;
-                    
-                    if (user.app_metadata && user.app_metadata.role === 'admin') {
-                        const adminBlock = document.getElementById('admin-only-block');
-                        if(adminBlock) adminBlock.style.display = 'block';
-                    }
-                } else {
-                
+     
