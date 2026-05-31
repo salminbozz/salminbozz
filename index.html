@@ -99,7 +99,7 @@
         }
         .name-change-block h3 { font-size: 15px; color: #fff; margin-bottom: 10px; }
 
-        /* --- Стили панели модерации --- */
+        /* Панель Модерации */
         .admin-panel {
             margin-top: 25px;
             padding: 20px;
@@ -120,7 +120,6 @@
             padding-right: 4px;
         }
         
-        /* Скроллбар для панели заявок */
         .moderation-container::-webkit-scrollbar { width: 6px; }
         .moderation-container::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 4px; }
         .moderation-container::-webkit-scrollbar-thumb { background: rgba(239, 68, 68, 0.3); border-radius: 4px; }
@@ -154,7 +153,6 @@
         .btn-reject:hover { background: #dc2626; }
         
         .no-requests { text-align: center; color: #64748b; font-size: 13px; padding: 15px 0; }
-        /* ------------------------------ */
 
         .download-image-link {
             position: fixed;
@@ -278,6 +276,7 @@
                         localStorage.removeItem('sb_token');
                         return { data: { user: null }, error: res.error };
                     }
+                    // ИСПРАВЛЕНО: Теперь оборачиваем объект пользователя в свойство user, чтобы деструктуризация работала корректно
                     return { data: { user: res.data }, error: null };
                 },
                 async signOut() {
@@ -285,19 +284,16 @@
                     return { error: null };
                 }
             },
-            // Расширенный метод для работы с таблицами БД (Инсерты, Выборки и Апдейты)
             from(table) {
                 return {
                     insert: async (data) => {
                         return nativeSupabase._request(`/rest/v1/${table}`, data, 'POST');
                     },
                     select: async (queryStr = '*') => {
-                        // По умолчанию вытягиваем только нерассмотренные заявки 'pending'
                         const path = `/rest/v1/${table}?select=${queryStr}&status=eq.pending`;
                         return nativeSupabase._request(path, null, 'GET');
                     },
                     update: async (matchObject, updateData) => {
-                        // matchObject пример: { id: 5 } -> преобразуется в ?id=eq.5
                         const key = Object.keys(matchObject)[0];
                         const value = matchObject[key];
                         const path = `/rest/v1/${table}?${key}=eq.${value}`;
@@ -324,7 +320,8 @@
                     if (!response.ok) return { data: null, error: { message: data.msg || data.error_description || data.message || 'Ошибка запроса' } };
                     return { data, error: null };
                 } catch (e) {
-                    return { data: null, error: { message: 'Нет подключения к серверу.' } };
+                    console.error("Ошибка сети Supabase:", e);
+                    return { data: null, error: { message: 'Нет подключения к серверу или ошибка запроса.' } };
                 }
             }
         };
@@ -388,7 +385,11 @@
 
         async function checkUser() {
             try {
-                const { data: { user } } = await nativeSupabase.auth.getUser();
+                const { data: { user }, error } = await nativeSupabase.auth.getUser();
+                if (error) {
+                    console.error("Ошибка при проверке сессии:", error);
+                }
+                
                 if (user) {
                     currentUserData = user;
                     document.getElementById('auth-form-block').style.display = 'none';
@@ -400,6 +401,7 @@
                     
                     if (user.app_metadata && user.app_metadata.role === 'admin') {
                         document.getElementById('admin-only-block').style.display = 'block';
-                        loadModerationRequests(); // Вызываем загрузку заявок, если вошел Админ
+                        loadModerationRequests();
                     } else {
-                        document.getElementById('a
+                        document.getElementById('admin-only-block').style.display = 'none';
+          
