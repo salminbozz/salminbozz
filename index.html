@@ -86,18 +86,7 @@
         .secondary-btn:hover { background: rgba(148, 163, 184, 0.2); color: #fff; }
         
         .profile-info { text-align: center; }
-        .profile-info p { margin-bottom: 10px; font-size: 16px; color: #cbd5e1; }
-        .profile-name { font-weight: 600; color: #a855f7 !important; margin-bottom: 20px !important; }
-
-        .name-change-block {
-            margin-top: 25px;
-            padding: 20px;
-            background: rgba(168, 85, 247, 0.05);
-            border: 1px solid rgba(168, 85, 247, 0.2);
-            border-radius: 12px;
-            text-align: left;
-        }
-        .name-change-block h3 { font-size: 15px; color: #fff; margin-bottom: 10px; }
+        .profile-info p { margin-bottom: 20px; font-size: 16px; color: #cbd5e1; }
 
         .admin-panel {
             margin-top: 25px;
@@ -110,6 +99,7 @@
         .admin-panel h3 { color: #f87171; margin-bottom: 10px; font-size: 16px; display: flex; align-items: center; gap: 8px;}
         .admin-panel p { color: #fca5a5; font-size: 13px; margin-bottom: 0; }
 
+        /* Оптимизированная кнопка Max — больше не перекрывает важные элементы */
         .download-image-link {
             position: fixed;
             bottom: 70px; right: 20px; width: 55px; height: 55px; 
@@ -168,7 +158,6 @@
         <div class="auth-card" id="auth-form-block">
             <h2 id="auth-title">Войти в аккаунт</h2>
             <div class="auth-form">
-                <input type="text" id="auth-name" placeholder="Ваше Имя" style="display: none;">
                 <input type="email" id="auth-email" placeholder="E-mail">
                 <input type="password" id="auth-password" placeholder="Пароль">
                 <div class="auth-buttons">
@@ -181,16 +170,7 @@
         <div class="auth-card profile-info" id="profile-block" style="display: none;">
             <h2>Личный кабинет</h2>
             <p id="profile-email">Загрузка...</p>
-            <p id="profile-name" class="profile-name"></p>
             
-            <div class="name-change-block">
-                <h3>Заявка на изменение имени</h3>
-                <div class="auth-form">
-                    <input type="text" id="new-name-input" placeholder="Новое имя">
-                    <button class="submit-btn" onclick="sendNameChangeRequest()">Отправить заявку</button>
-                </div>
-            </div>
-
             <div class="admin-panel" id="admin-only-block" style="display: none;">
                 <h3>👑 Доступ разрешен: Администратор</h3>
                 <p>Вы успешно подтвердили права создателя портала Florein. Система управления базой данных работает стабильно.</p>
@@ -208,10 +188,11 @@
         const SUPABASE_URL = 'https://aapkvsfbgbbtxofxmyqn.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhcGt2c2ZiZ2JidHhvZnhteXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMjA1NDgsImV4cCI6MjA5NTc5NjU0OH0.1yPqAnrEMpHnZPXwbR9DoqBNZDRk5C0a3EGwD1tjTGQ';
         
+        // Объект-замена официальной библиотеки, выполняющий прямые HTTP-запросы
         const nativeSupabase = {
             auth: {
-                async signUp({ email, password, options }) {
-                    return nativeSupabase._request('/auth/v1/signup', { email, password, options });
+                async signUp({ email, password }) {
+                    return nativeSupabase._request('/auth/v1/signup', { email, password });
                 },
                 async signInWithPassword({ email, password }) {
                     const res = await nativeSupabase._request('/auth/v1/token?grant_type=password', { email, password });
@@ -235,14 +216,6 @@
                     return { error: null };
                 }
             },
-            // Метод для отправки данных в таблицы (например, для заявок)
-            from(table) {
-                return {
-                    insert: async (data) => {
-                        return nativeSupabase._request(`/rest/v1/${table}`, data, 'POST');
-                    }
-                };
-            },
             async _request(path, body, method = 'POST', token = null) {
                 try {
                     const headers = {
@@ -256,13 +229,12 @@
                     if (body && method !== 'GET') options.body = JSON.stringify(body);
 
                     const response = await fetch(`${SUPABASE_URL}${path}`, options);
-                    if (response.status === 201 || response.status === 204) return { data: true, error: null };
-                    
                     const data = await response.json();
-                    if (!response.ok) return { data: null, error: { message: data.msg || data.error_description || data.message || 'Ошибка запроса' } };
+                    
+                    if (!response.ok) return { data: null, error: { message: data.msg || data.error_description || 'Ошибка запроса' } };
                     return { data, error: null };
                 } catch (e) {
-                    return { data: null, error: { message: 'Нет подключения к серверу.' } };
+                    return { data: null, error: { message: 'Нет подключения к серверу авторизации.' } };
                 }
             }
         };
@@ -286,42 +258,29 @@
             document.getElementById('auth-title').innerText = isLoginMode ? 'Войти в аккаунт' : 'Регистрация нового аккаунта';
             document.getElementById('main-auth-btn').innerText = isLoginMode ? 'Войти' : 'Создать аккаунт';
             document.getElementById('toggle-auth-btn').innerText = isLoginMode ? 'Регистрация' : 'Уже есть аккаунт';
-            // Показываем/скрываем поле Имени
-            document.getElementById('auth-name').style.display = isLoginMode ? 'none' : 'block';
         }
     </script>
 
     <script>
-        let currentUserData = null;
-
         async function handleAuth() {
-            const name = document.getElementById('auth-name').value;
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
 
+            if (!email || !password) return alert('Заполните все поля!');
+
             if (isLoginMode) {
-                if (!email || !password) return alert('Заполните все поля!');
                 const { data, error } = await nativeSupabase.auth.signInWithPassword({ email, password });
                 if (error) alert('Ошибка входа: ' + error.message);
                 else checkUser();
             } else {
-                if (!name || !email || !password) return alert('Заполните все поля, включая Имя!');
-                const { data, error } = await nativeSupabase.auth.signUp({ 
-                    email, 
-                    password,
-                    options: { data: { name: name } } // Передаем имя в метаданные пользователя
-                });
+                const { data, error } = await nativeSupabase.auth.signUp({ email, password });
                 if (error) alert('Ошибка регистрации: ' + error.message);
-                else {
-                    alert('Регистрация успешна! Теперь вы можете войти под своими данными.');
-                    toggleAuthMode();
-                }
+                else alert('Регистрация успешна! Теперь вы можете войти.');
             }
         }
 
         async function logout() {
             await nativeSupabase.auth.signOut();
-            currentUserData = null;
             checkUser();
         }
 
@@ -329,14 +288,9 @@
             try {
                 const { data: { user } } = await nativeSupabase.auth.getUser();
                 if (user) {
-                    currentUserData = user;
                     document.getElementById('auth-form-block').style.display = 'none';
                     document.getElementById('profile-block').style.display = 'block';
-                    document.getElementById('profile-email').innerText = `Email: ${user.email}`;
-                    
-                    // Извлекаем имя из метаданных пользователя
-                    const userName = user.user_metadata?.name || 'Не указано';
-                    document.getElementById('profile-name').innerText = `Имя: ${userName}`;
+                    document.getElementById('profile-email').innerText = `Добро пожаловать, ${user.email}!`;
                     
                     if (user.app_metadata && user.app_metadata.role === 'admin') {
                         document.getElementById('admin-only-block').style.display = 'block';
@@ -350,30 +304,8 @@
                 }
             } catch (e) {}
         }
-
-        // Функция отправки заявки на смену имени
-        async function sendNameChangeRequest() {
-            const newName = document.getElementById('new-name-input').value.trim();
-            if (!newName) return alert('Введите новое имя!');
-            if (!currentUserData) return alert('Ошибка авторизации!');
-
-            const currentName = currentUserData.user_metadata?.name || 'Не указано';
-
-            const { data, error } = await nativeSupabase.from('name_change_requests').insert({
-                user_id: currentUserData.id,
-                current_name: currentName,
-                requested_name: newName,
-                status: 'pending'
-            });
-
-            if (error) {
-                alert('Ошибка отправки заявки: ' + error.message);
-            } else {
-                alert('Заявка на смену имени успешно отправлена администратору!');
-                document.getElementById('new-name-input').value = '';
-            }
-        }
         
+        // Проверяем сессию при загрузке страницы
         document.addEventListener('DOMContentLoaded', checkUser);
     </script>
 
@@ -395,4 +327,34 @@
         async function fetchNews() {
             try {
                 const cacheBuster = Date.now();
-                const res = await fetch(`https://api.rss2json.com/v1/api.json?
+                const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://ura.news/rss&t=${cacheBuster}`);
+                const data = await res.json();
+                if (data.status !== 'ok') return;
+                
+                data.items.filter(item => {
+                    const text = (item.title + item.description).toLowerCase();
+                    return keywords.some(k => text.includes(k.toLowerCase()));
+                }).reverse().forEach(item => {
+                    if (!loadedLinks.has(item.link)) {
+                        loadedLinks.add(item.link);
+                        const d = new Date(item.pubDate.replace(' ', 'T'));
+                        const dateStr = `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear().toString().slice(-2)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                        
+                        const card = document.createElement('div');
+                        card.className = 'florein-card';
+                        card.innerHTML = `
+                            <div class="card-date">${dateStr}</div>
+                            <h3>${item.title}</h3>
+                            <p>${item.description.replace(/<[^>]*>/g, '').substring(0, 150)}...</p>
+                            <a href="${item.link}" target="_blank" class="card-btn">Читать на URA.RU ➔</a>
+                        `;
+                        container.prepend(card);
+                    }
+                });
+            } catch (e) { console.error('Ошибка новостей:', e); }
+        }
+        fetchNews();
+        setInterval(fetchNews, 30000);
+    </script>
+</body>
+</html>
