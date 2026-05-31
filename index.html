@@ -34,7 +34,6 @@
         .nav-btn { background: transparent; border: none; color: #94a3b8; padding: 10px 20px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: 0.3s; font-size: 14px;}
         .nav-btn.active { background: #a855f7; color: #fff; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3); }
         
-        /* Стили вкладок управления отображением */
         .tab-content { display: none; width: 100%; max-width: 600px; }
         .tab-content.active { display: block; }
         
@@ -177,7 +176,7 @@
             <span class="live-badge">● Live</span>
         </div>
         <div class="news-feed" id="news-container">
-            <div style="color: #64748b; font-size:14px; text-align:center; padding:20px;">Загрузка новостей...</div>
+            <div style="color: #64748b; font-size:14px; text-align:center; padding:20px;">Нажмите вкладку «Новости», чтобы загрузить ленту.</div>
         </div>
     </div>
 
@@ -241,14 +240,18 @@
                     return res;
                 },
                 async getUser() {
-                    const token = localStorage.getItem('sb_token');
-                    if (!token) return { data: { user: null }, error: null };
-                    const res = await nativeSupabase._request('/auth/v1/user', null, 'GET', token);
-                    if (res.error) {
-                        localStorage.removeItem('sb_token');
-                        return { data: { user: null }, error: res.error };
+                    try {
+                        const token = localStorage.getItem('sb_token');
+                        if (!token) return { data: { user: null }, error: null };
+                        const res = await nativeSupabase._request('/auth/v1/user', null, 'GET', token);
+                        if (res.error) {
+                            localStorage.removeItem('sb_token');
+                            return { data: { user: null }, error: res.error };
+                        }
+                        return { data: { user: res.data }, error: null };
+                    } catch(e) {
+                        return { data: { user: null }, error: e };
                     }
-                    return { data: { user: res.data }, error: null };
                 },
                 async signOut() {
                     localStorage.removeItem('sb_token');
@@ -293,19 +296,18 @@
                     }
 
                     if (!response.ok) {
-                        const errMsg = data?.error_description || data?.msg || data?.message || 'Ошибка сервера Supabase';
+                        const errMsg = data?.error_description || data?.msg || data?.message || 'Ошибка сервера';
                         return { data: null, error: { message: errMsg } };
                     }
                     return { data, error: null };
                 } catch (e) {
-                    return { data: null, error: { message: 'Нет подключения к сети.' } };
+                    return { data: null, error: { message: 'Нет подключения.' } };
                 }
             }
         };
     </script>
 
     <script>
-        // Список твоих ключевых слов (66 слов)
         const keywords = [
             'СВО', 'спецоперац', 'фронт', 'арми', 'оборон', 'минобороны', 'военкор', 
             'украин', 'всу', 'наступ', 'удар', 'тыл', 'росс', 'конфликт', 'боев', 
@@ -319,17 +321,32 @@
         ];
 
         function openTab(btn, id) {
-            // Прячем все вкладки и сбрасываем подсветку кнопок меню
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            
-            // Активируем нужную вкладку и подсвечиваем кнопку
-            const targetTab = document.getElementById(id);
-            if (targetTab) targetTab.classList.add('active');
-            btn.classList.add('active');
+            try {
+                // Прячем контент всех вкладок
+                const tabs = document.querySelectorAll('.tab-content');
+                for (let i = 0; i < tabs.length; i++) {
+                    tabs[i].classList.remove('active');
+                }
 
-            if (id === 'news-tab') {
-                loadFilteredNews();
+                // Убираем активный класс у всех кнопок навигации
+                const buttons = document.querySelectorAll('.nav-btn');
+                for (let i = 0; i < buttons.length; i++) {
+                    buttons[i].classList.remove('active');
+                }
+                
+                // Показываем текущую выбранную вкладку
+                const targetTab = document.getElementById(id);
+                if (targetTab) {
+                    targetTab.classList.add('active');
+                }
+                btn.classList.add('active');
+
+                // Загружаем новости ТОЛЬКО при прямом клике
+                if (id === 'news-tab') {
+                    loadFilteredNews();
+                }
+            } catch (err) {
+                console.error("Ошибка переключения табов: ", err);
             }
         }
 
@@ -368,17 +385,4 @@
                     card.className = 'florein-card';
                     card.innerHTML = `
                         <div class="card-date">${formattedDate}</div>
-                        <h3>${item.title}</h3>
-                        <p>${item.description || 'Нажмите "Читать подробнее", чтобы ознакомиться со статьей.'}</p>
-                        <a href="${item.link}" target="_blank" class="card-btn">Читать подробнее →</a>
-                    `;
-                    container.appendChild(card);
-                });
-
-            } catch (e) {
-                console.error(e);
-                container.innerHTML = '<div style="color: #ef4444; font-size:14px; text-align:center; padding:20px;">Ошибка при загрузке данных новостей.</div>';
-            }
-        }
-
-       
+        
