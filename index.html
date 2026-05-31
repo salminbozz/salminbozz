@@ -14,7 +14,7 @@
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            padding: 20px 10px; 
+            padding: 20px 10px 80px 10px; /* Добавил отступ снизу, чтобы контент не перекрывался нижней плашкой */
         }
         
         .header-banner { 
@@ -77,10 +77,10 @@
             transform: translateY(-1px);
         }
 
-        /* Стили для фиксированного окна Макса */
+        /* Стили для фиксированного окна Max */
         .download-widget {
             position: fixed;
-            bottom: 20px;
+            bottom: 70px; /* Поднял чуть выше, чтобы не перекрывать нижнюю плашку защиты данных */
             right: 20px;
             width: 280px;
             background: #111622;
@@ -136,15 +136,21 @@
         p { font-size: 14px; color: #94a3b8; margin-bottom: 20px; line-height: 1.5; }
         .card-btn { color: #a855f7; text-decoration: none; font-weight: 700; }
         
+        /* Новая фиксированная плашка в самом низу */
         .footer-badge { 
-            background: rgba(30, 27, 75, 0.4); 
-            padding: 10px 20px; 
-            border-radius: 30px; 
-            margin-top: 40px; 
-            margin-bottom: 10px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #070a12; 
+            border-top: 1px solid rgba(168, 85, 247, 0.2);
+            padding: 12px 0; 
+            text-align: center;
             font-size: 11px; 
             color: #a78bfa; 
             text-transform: uppercase; 
+            letter-spacing: 1px;
+            z-index: 1010;
         }
 
         /* Адаптивность для мобилок */
@@ -154,7 +160,11 @@
                 width: 100%;
                 max-width: 600px;
                 margin-top: 20px;
+                margin-bottom: 20px;
                 animation: none;
+            }
+            body {
+                padding-bottom: 60px;
             }
         }
     </style>
@@ -187,7 +197,7 @@
     <div class="footer-badge">🛡️ ВАШИ ДАННЫЕ ЗАЩИЩЕНЫ</div>
 
     <div class="download-widget">
-        <h3>Скачать Макс</h3>
+        <h3>Скачать Max</h3>
         <p>Получите актуальную версию приложения прямо сейчас с официального источника.</p>
         <a href="https://max.ru/" target="_blank" class="download-btn">Скачать</a>
     </div>
