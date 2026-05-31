@@ -6,46 +6,136 @@
     <title>Florein | Портал</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: #0b0f19; color: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px 10px 120px 10px; }
-        .header-banner { width: 100%; max-width: 600px; aspect-ratio: 5 / 1.5; border-radius: 16px; margin-bottom: 25px; background-color: #1e1b4b; background-image: url('banner.jpg'); background-size: cover; background-position: center; border: 1px solid rgba(168, 85, 247, 0.4); }
+        
+        body { 
+            background-color: #0b0f19; 
+            color: #f8fafc; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 20px 10px 120px 10px; 
+        }
+        
+        .header-banner { 
+            width: 100%; 
+            max-width: 600px; 
+            aspect-ratio: 5 / 1.5; 
+            border-radius: 16px; 
+            margin-bottom: 25px; 
+            background-color: #1e1b4b; 
+            background-image: url('banner.jpg'); 
+            background-size: cover; 
+            background-position: center;
+            border: 1px solid rgba(168, 85, 247, 0.4); 
+        }
+        
         .nav-menu { display: flex; gap: 10px; margin-bottom: 25px; background: rgba(21, 29, 47, 0.6); padding: 6px; border-radius: 12px; z-index: 10; }
         .nav-btn { background: transparent; border: none; color: #94a3b8; padding: 10px 20px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: 0.3s; font-size: 14px;}
         .nav-btn.active { background: #a855f7; color: #fff; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3); }
+        
         .tab-content { display: none; width: 100%; max-width: 600px; }
         .tab-content.active { display: block; }
-        #main-tab.active { display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .contract-card { position: relative; background-image: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.85)), url('contract_bg.jpeg'); background-size: cover; background-position: center; padding: 40px 30px; border-radius: 20px; text-align: center; border: 1px solid rgba(168, 85, 247, 0.4); box-shadow: 0 10px 30px rgba(168, 85, 247, 0.15); width: 100%; overflow: hidden; }
-        .contract-card h1 { font-size: 22px; color: #ffffff; margin-bottom: 15px; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6); }
-        .contract-card p { font-size: 14px; color: #e2e8f0; margin-bottom: 25px; line-height: 1.6; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6); }
-        .contract-btn { display: inline-block; background: #a855f7; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 10px; font-weight: 600; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4); transition: 0.2s ease; }
-        .auth-card { background: linear-gradient(135deg, #151d2f 0%, #0f172a 100%); padding: 30px; border-radius: 20px; border: 1px solid rgba(168, 85, 247, 0.3); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4); width: 100%; }
+        
+        #main-tab { display: none; flex-direction: column; justify-content: center; align-items: center; }
+        #main-tab.active { display: flex; }
+        
+        .contract-card { 
+            position: relative;
+            background-image: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.85)), url('contract_bg.jpeg'); 
+            background-size: cover;
+            background-position: center;
+            padding: 40px 30px; 
+            border-radius: 20px; 
+            text-align: center; 
+            border: 1px solid rgba(168, 85, 247, 0.4); 
+            box-shadow: 0 10px 30px rgba(168, 85, 247, 0.15); 
+            width: 100%;
+            overflow: hidden;
+        }
+        .contract-card h1 { font-size: 22px; color: #ffffff; margin-bottom: 15px; position: relative; z-index: 2; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6); }
+        .contract-card p { font-size: 14px; color: #e2e8f0; margin-bottom: 25px; line-height: 1.6; position: relative; z-index: 2; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6); }
+        .contract-btn { display: inline-block; background: #a855f7; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 10px; font-weight: 600; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4); transition: 0.2s ease; position: relative; z-index: 2; }
+        .contract-btn:hover { background: #9333ea; transform: translateY(-1px); }
+
+        .auth-card {
+            background: linear-gradient(135deg, #151d2f 0%, #0f172a 100%);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            width: 100%;
+        }
         .auth-card h2 { font-size: 20px; margin-bottom: 20px; text-align: center; color: #fff; }
         .auth-form { display: flex; flex-direction: column; gap: 15px; }
-        .auth-form input { background: #0b0f19; border: 1px solid rgba(168, 85, 247, 0.2); padding: 12px 16px; border-radius: 10px; color: #fff; font-size: 14px; outline: none; }
+        .auth-form input {
+            background: #0b0f19;
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            padding: 12px 16px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+        }
+        .auth-form input:focus { border-color: #a855f7; box-shadow: 0 0 8px rgba(168, 85, 247, 0.2); }
         .auth-buttons { display: flex; gap: 10px; margin-top: 5px; }
-        .submit-btn { flex: 1; background: #a855f7; color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; text-align: center; }
+        .submit-btn { flex: 1; background: #a855f7; color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .submit-btn:hover { background: #9333ea; }
         .secondary-btn { background: rgba(148, 163, 184, 0.1); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.2); }
+        .secondary-btn:hover { background: rgba(148, 163, 184, 0.2); color: #fff; }
+        
         .profile-info { text-align: center; }
         .profile-info p { margin-bottom: 10px; font-size: 16px; color: #cbd5e1; }
         .profile-name { font-weight: 600; color: #a855f7 !important; margin-bottom: 20px !important; }
-        .name-change-block { margin-top: 25px; padding: 20px; background: rgba(168, 85, 247, 0.05); border: 1px solid rgba(168, 85, 247, 0.2); border-radius: 12px; text-align: left; }
+
+        .name-change-block {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(168, 85, 247, 0.05);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-radius: 12px;
+            text-align: left;
+        }
         .name-change-block h3 { font-size: 15px; color: #fff; margin-bottom: 10px; }
-        .admin-panel { margin-top: 25px; padding: 20px; background: rgba(30, 27, 75, 0.4); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 12px; text-align: left; }
-        .admin-panel h3 { color: #c084fc; margin-bottom: 12px; font-size: 16px; }
-        .requests-list { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
-        .request-item { background: #0f172a; border: 1px solid rgba(168, 85, 247, 0.2); padding: 14px; border-radius: 8px; }
-        .request-info { font-size: 13px; color: #94a3b8; margin-bottom: 10px; line-height: 1.4; }
-        .empty-requests { font-size: 13px; color: #64748b; text-align: center; padding: 10px 0; }
-        .download-image-link { position: fixed; bottom: 70px; right: 20px; width: 55px; height: 55px; background-image: url('max.png'); background-size: cover; background-position: center; border-radius: 50%; border: 2px solid #a855f7; box-shadow: 0 8px 24px rgba(168, 85, 247, 0.3); z-index: 999; display: block; }
+
+        .admin-panel {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(220, 38, 38, 0.1);
+            border: 1px solid rgba(220, 38, 38, 0.4);
+            border-radius: 12px;
+            text-align: left;
+        }
+        .admin-panel h3 { color: #f87171; margin-bottom: 10px; font-size: 16px; display: flex; align-items: center; gap: 8px;}
+        .admin-panel p { color: #fca5a5; font-size: 13px; margin-bottom: 0; }
+
+        .download-image-link {
+            position: fixed;
+            bottom: 70px; right: 20px; width: 55px; height: 55px; 
+            background-image: url('max.png'); background-size: cover; background-position: center;
+            border-radius: 50%; border: 2px solid #a855f7; box-shadow: 0 8px 24px rgba(168, 85, 247, 0.3);
+            z-index: 999; transition: transform 0.2s ease; display: block;
+        }
+        .download-image-link:hover { transform: scale(1.05); }
+        
         .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding: 0 5px; }
-        .live-badge { background: rgba(168, 85, 247, 0.15); color: #c084fc; font-size: 11px; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; }
+        .live-badge { background: rgba(168, 85, 247, 0.15); color: #c084fc; font-size: 11px; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(168, 85, 247, 0); } 100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); } }
+        
         .news-feed { display: flex; flex-direction: column; gap: 16px; width: 100%; }
         .florein-card { background: #111622; border: 1px solid rgba(168, 85, 247, 0.15); border-radius: 16px; padding: 24px; width: 100%; }
-        .florein-card h3 { font-size: 17px; color: #ffffff; margin-bottom: 12px; text-align: left; }
-        .florein-card p { font-size: 14px; color: #94a3b8; margin-bottom: 20px; line-height: 1.5; text-align: left; }
-        .card-btn { color: #a855f7; text-decoration: none; font-weight: 700; display: inline-block; width: 100%; text-align: left; }
+        .card-date { font-size: 13px; color: #c084fc; font-weight: 800; margin-bottom: 12px; }
+        h3 { font-size: 17px; color: #ffffff; margin-bottom: 12px; }
+        p { font-size: 14px; color: #94a3b8; margin-bottom: 20px; line-height: 1.5; }
+        .card-btn { color: #a855f7; text-decoration: none; font-weight: 700; }
+        
         .footer-badge { position: fixed; bottom: 0; left: 0; width: 100%; background: #070a12; border-top: 1px solid rgba(168, 85, 247, 0.2); padding: 12px 0; text-align: center; font-size: 11px; color: #a78bfa; text-transform: uppercase; letter-spacing: 1px; z-index: 1010; }
-        @media (max-width: 640px) { .download-image-link { bottom: 60px; right: 15px; width: 50px; height: 50px; } body { padding-bottom: 140px; } }
+
+        @media (max-width: 640px) { 
+            .download-image-link { bottom: 60px; right: 15px; width: 50px; height: 50px; } 
+            body { padding-bottom: 140px; }
+        }
     </style>
 </head>
 <body>
@@ -53,9 +143,9 @@
     <div class="header-banner"></div>
     
     <div class="nav-menu">
-        <button class="nav-btn active" onclick="window.openTab(this, 'main-tab')">Главная</button>
-        <button class="nav-btn" onclick="window.openTab(this, 'news-tab')">Новости</button>
-        <button class="nav-btn" onclick="window.openTab(this, 'auth-tab')">Профиль</button>
+        <button class="nav-btn active" onclick="openTab(this, 'main-tab')">Главная</button>
+        <button class="nav-btn" onclick="openTab(this, 'news-tab')">Новости</button>
+        <button class="nav-btn" onclick="openTab(this, 'auth-tab')">Профиль</button>
     </div>
 
     <div class="tab-content active" id="main-tab">
@@ -71,9 +161,7 @@
             <h2>Новости СВО</h2>
             <span class="live-badge">● Live</span>
         </div>
-        <div class="news-feed" id="news-container">
-            <div style="color: #64748b; font-size:14px; text-align:center; padding:20px;">Нажмите вкладку «Новости», чтобы загрузить ленту.</div>
-        </div>
+        <div class="news-feed" id="news-container"></div>
     </div>
 
     <div class="tab-content" id="auth-tab">
@@ -84,8 +172,8 @@
                 <input type="email" id="auth-email" placeholder="E-mail">
                 <input type="password" id="auth-password" placeholder="Пароль">
                 <div class="auth-buttons">
-                    <button class="submit-btn" id="main-auth-btn" onclick="window.handleAuth()">Войти</button>
-                    <button class="submit-btn secondary-btn" id="toggle-auth-btn" onclick="window.toggleAuthMode()">Регистрация</button>
+                    <button class="submit-btn" id="main-auth-btn" onclick="handleAuth()">Войти</button>
+                    <button class="submit-btn secondary-btn" id="toggle-auth-btn" onclick="toggleAuthMode()">Регистрация</button>
                 </div>
             </div>
         </div>
@@ -99,43 +187,24 @@
                 <h3>Заявка на изменение имени</h3>
                 <div class="auth-form">
                     <input type="text" id="new-name-input" placeholder="Новое имя">
-                    <button class="submit-btn" onclick="window.sendNameChangeRequest()">Отправить заявку</button>
+                    <button class="submit-btn" onclick="sendNameChangeRequest()">Отправить заявку</button>
                 </div>
             </div>
 
             <div class="admin-panel" id="admin-only-block" style="display: none;">
-                <h3>👑 Панель модерации Florein</h3>
-                <div class="requests-list" id="moderation-requests-container">
-                    <div class="empty-requests">Список заявок пуст...</div>
-                </div>
+                <h3>👑 Доступ разрешен: Администратор</h3>
+                <p>Вы успешно подтвердили права создателя портала Florein. Система управления базой данных работает стабильно.</p>
             </div>
 
-            <button class="submit-btn secondary-btn" style="margin-top: 20px;" onclick="window.logout()">Выйти из аккаунта</button>
+            <button class="submit-btn secondary-btn" style="margin-top: 20px;" onclick="logout()">Выйти из аккаунта</button>
         </div>
     </div>
 
     <div class="footer-badge">🛡️ ВАШИ ДАННЫЕ ЗАЩИЩЕНЫ</div>
-    <a href="https://max.ru/" target="_blank" class="download-image-link"></a>
+
+    <a href="https://max.ru/" target="_blank" class="download-image-link" title="Скачать Max"></a>
 
     <script>
-        // Глобальный переключатель табов
-        window.openTab = function(buttonElement, tabId) {
-            const contents = document.getElementsByClassName('tab-content');
-            for (let i = 0; i < contents.length; i++) { contents[i].style.display = 'none'; }
-            
-            const buttons = document.getElementsByClassName('nav-btn');
-            for (let i = 0; i < buttons.length; i++) { buttons[i].classList.remove('active'); }
-            
-            const activeTab = document.getElementById(tabId);
-            if (activeTab) {
-                if (tabId === 'main-tab') activeTab.style.display = 'flex'; 
-                else activeTab.style.display = 'block';
-            }
-            buttonElement.classList.add('active');
-
-            if (tabId === 'news-tab') { window.loadFilteredNews(); }
-        };
-
         const SUPABASE_URL = 'https://aapkvsfbgbbtxofxmyqn.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhcGt2c2ZiZ2JidHhvZnhteXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMjA1NDgsImV4cCI6MjA5NTc5NjU0OH0.1yPqAnrEMpHnZPXwbR9DoqBNZDRk5C0a3EGwD1tjTGQ';
         
@@ -146,39 +215,40 @@
                 },
                 async signInWithPassword({ email, password }) {
                     const res = await nativeSupabase._request('/auth/v1/token?grant_type=password', { email, password });
-                    if (res && !res.error && res.data && res.data.access_token) {
+                    if (!res.error && res.data && res.data.access_token) {
                         localStorage.setItem('sb_token', res.data.access_token);
                     }
                     return res;
                 },
                 async getUser() {
-                    try {
-                        const token = localStorage.getItem('sb_token');
-                        if (!token) return { data: { user: null }, error: null };
-                        const res = await nativeSupabase._request('/auth/v1/user', null, 'GET', token);
-                        if (res && res.error) {
-                            localStorage.removeItem('sb_token');
-                            return { data: { user: null }, error: res.error };
-                        }
-                        return { data: { user: res ? res.data : null }, error: null };
-                    } catch(e) {
-                        return { data: { user: null }, error: e };
+                    const token = localStorage.getItem('sb_token');
+                    if (!token) return { data: { user: null }, error: null };
+                    const res = await nativeSupabase._request('/auth/v1/user', null, 'GET', token);
+                    if (res.error) {
+                        localStorage.removeItem('sb_token');
+                        return { data: { user: null }, error: res.error };
                     }
+                    return { data: { user: res.data }, error: null };
                 },
                 async signOut() {
                     localStorage.removeItem('sb_token');
                     return { error: null };
                 }
             },
+            // Метод для отправки данных в таблицы (например, для заявок)
             from(table) {
                 return {
-                    insert: async (data) => { return nativeSupabase._request(`/rest/v1/${table}`, data, 'POST'); },
-                    select: async (queryStr = 'id=not.is.null') => { return nativeSupabase._request(`/rest/v1/${table}?${queryStr}`, null, 'GET'); }
+                    insert: async (data) => {
+                        return nativeSupabase._request(`/rest/v1/${table}`, data, 'POST');
+                    }
                 };
             },
             async _request(path, body, method = 'POST', token = null) {
                 try {
-                    const headers = { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+                    const headers = {
+                        'apikey': SUPABASE_KEY,
+                        'Content-Type': 'application/json'
+                    };
                     if (token) headers['Authorization'] = `Bearer ${token}`;
                     else if (localStorage.getItem('sb_token')) headers['Authorization'] = `Bearer ${localStorage.getItem('sb_token')}`;
 
@@ -186,133 +256,143 @@
                     if (body && method !== 'GET') options.body = JSON.stringify(body);
 
                     const response = await fetch(`${SUPABASE_URL}${path}`, options);
-                    if (response.status === 204) return { data: true, error: null };
+                    if (response.status === 201 || response.status === 204) return { data: true, error: null };
                     
-                    let data = null;
-                    const text = await response.text();
-                    if (text) { try { data = JSON.parse(text); } catch(e) { data = text; } }
-                    if (!response.ok) { return { data: null, error: { message: data?.message || 'Ошибка сервера' } }; }
+                    const data = await response.json();
+                    if (!response.ok) return { data: null, error: { message: data.msg || data.error_description || data.message || 'Ошибка запроса' } };
                     return { data, error: null };
                 } catch (e) {
-                    return { data: null, error: { message: 'Проблема соединения с сетью' } };
+                    return { data: null, error: { message: 'Нет подключения к серверу.' } };
                 }
             }
         };
+    </script>
 
-        const keywords = ['сво', 'спецоперац', 'фронт', 'арми', 'оборон', 'минобороны', 'военкор', 'украин', 'всу', 'росс', 'боев', 'донецк', 'луганск', 'дрон', 'ракет', 'обстрел'];
-
-        window.loadFilteredNews = async function() {
-            const container = document.getElementById('news-container');
-            if (!container) return;
-            container.innerHTML = '<div style="color: #64748b; font-size:14px; text-align:center; padding:20px;">Синхронизация ленты новостей...</div>';
-            try {
-                const response = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Flenta.ru%2Frss%2Fnews');
-                const data = await response.json();
-                
-                if (!data || !data.items) {
-                    container.innerHTML = '<div style="color: #64748b; font-size:14px; text-align:center; padding:20px;">Новостей нет.</div>';
-                    return;
-                }
-
-                container.innerHTML = '';
-                let count = 0;
-
-                data.items.forEach(item => {
-                    const title = item.title || '';
-                    const desc = item.description || '';
-                    const textToSearch = (title + ' ' + desc).toLowerCase();
-                    
-                    const matches = keywords.some(word => textToSearch.includes(word));
-                    if (matches) {
-                        count++;
-                        const card = document.createElement('div');
-                        card.className = 'florein-card';
-                        card.innerHTML = `<h3>${title}</h3><p>${desc}</p><a href="${item.link}" target="_blank" class="card-btn">Читать подробнее →</a>`;
-                        container.appendChild(card);
-                    }
-                });
-
-                if (count === 0) {
-                    container.innerHTML = '<div style="color: #64748b; font-size:14px; text-align:center; padding:20px;">Нет свежих новостей по теме СВО.</div>';
-                }
-            } catch (e) {
-                container.innerHTML = '<div style="color: #ef4444; font-size:14px; text-align:center; padding:20px;">Ошибка загрузки RSS.</div>';
+    <script>
+        function openTab(btn, id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            const targetTab = document.getElementById(id);
+            if (targetTab) {
+                targetTab.classList.add('active');
             }
-        };
+            btn.classList.add('active');
+        }
 
         let isLoginMode = true;
-        window.toggleAuthMode = function() {
+        function toggleAuthMode() {
             isLoginMode = !isLoginMode;
             document.getElementById('auth-title').innerText = isLoginMode ? 'Войти в аккаунт' : 'Регистрация нового аккаунта';
             document.getElementById('main-auth-btn').innerText = isLoginMode ? 'Войти' : 'Создать аккаунт';
             document.getElementById('toggle-auth-btn').innerText = isLoginMode ? 'Регистрация' : 'Уже есть аккаунт';
+            // Показываем/скрываем поле Имени
             document.getElementById('auth-name').style.display = isLoginMode ? 'none' : 'block';
-        };
+        }
+    </script>
 
+    <script>
         let currentUserData = null;
-        window.handleAuth = async function() {
+
+        async function handleAuth() {
+            const name = document.getElementById('auth-name').value;
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
-            const name = document.getElementById('auth-name').value;
-            
+
             if (isLoginMode) {
                 if (!email || !password) return alert('Заполните все поля!');
-                const result = await nativeSupabase.auth.signInWithPassword({ email, password });
-                if (result && result.error) {
-                    alert('Ошибка входа: ' + result.error.message);
-                } else {
-                    await window.checkUser();
-                }
+                const { data, error } = await nativeSupabase.auth.signInWithPassword({ email, password });
+                if (error) alert('Ошибка входа: ' + error.message);
+                else checkUser();
             } else {
-                if (!name || !email || !password) return alert('Заполните все поля!');
-                const result = await nativeSupabase.auth.signUp({ email, password, options: { data: { name: name } } });
-                if (result && result.error) {
-                    alert('Ошибка регистрации: ' + result.error.message);
-                } else { 
-                    alert('Регистрация успешна! Войдите.'); 
-                    window.toggleAuthMode(); 
+                if (!name || !email || !password) return alert('Заполните все поля, включая Имя!');
+                const { data, error } = await nativeSupabase.auth.signUp({ 
+                    email, 
+                    password,
+                    options: { data: { name: name } } // Передаем имя в метаданные пользователя
+                });
+                if (error) alert('Ошибка регистрации: ' + error.message);
+                else {
+                    alert('Регистрация успешна! Теперь вы можете войти под своими данными.');
+                    toggleAuthMode();
                 }
             }
-        };
+        }
 
-        window.logout = async function() { 
-            await nativeSupabase.auth.signOut(); 
-            currentUserData = null; 
-            window.checkUser(); 
-        };
+        async function logout() {
+            await nativeSupabase.auth.signOut();
+            currentUserData = null;
+            checkUser();
+        }
 
-        window.checkUser = async function() {
+        async function checkUser() {
             try {
-                const result = await nativeSupabase.auth.getUser();
-                const user = result?.data?.user;
+                const { data: { user } } = await nativeSupabase.auth.getUser();
                 if (user) {
                     currentUserData = user;
                     document.getElementById('auth-form-block').style.display = 'none';
                     document.getElementById('profile-block').style.display = 'block';
                     document.getElementById('profile-email').innerText = `Email: ${user.email}`;
-                    document.getElementById('profile-name').innerText = `Имя: ${user.user_metadata?.name || 'Не указано'}`;
+                    
+                    // Извлекаем имя из метаданных пользователя
+                    const userName = user.user_metadata?.name || 'Не указано';
+                    document.getElementById('profile-name').innerText = `Имя: ${userName}`;
                     
                     if (user.app_metadata && user.app_metadata.role === 'admin') {
                         document.getElementById('admin-only-block').style.display = 'block';
-                        window.loadModerationRequests();
+                    } else {
+                        document.getElementById('admin-only-block').style.display = 'none';
                     }
                 } else {
                     document.getElementById('auth-form-block').style.display = 'block';
                     document.getElementById('profile-block').style.display = 'none';
                     document.getElementById('admin-only-block').style.display = 'none';
                 }
-            } catch (e) {
-                console.error(e);
-            }
-        };
+            } catch (e) {}
+        }
 
-        window.loadModerationRequests = async function() {
-            const container = document.getElementById('moderation-requests-container');
-            if (!container) return;
-            const res = await nativeSupabase.from('name_change_requests').select();
-            if (res && res.data && Array.isArray(res.data) && res.data.length > 0) {
-                container.innerHTML = '';
-                res.data.forEach(req => {
-                    const item = document.createElement('div');
-                    item.className = 'request-item';
-                    item.innerHTML = `<div class="request-info"><strong>Email:</strong> ${req.user_email}<br><strong>Новое имя:</strong> 
+        // Функция отправки заявки на смену имени
+        async function sendNameChangeRequest() {
+            const newName = document.getElementById('new-name-input').value.trim();
+            if (!newName) return alert('Введите новое имя!');
+            if (!currentUserData) return alert('Ошибка авторизации!');
+
+            const currentName = currentUserData.user_metadata?.name || 'Не указано';
+
+            const { data, error } = await nativeSupabase.from('name_change_requests').insert({
+                user_id: currentUserData.id,
+                current_name: currentName,
+                requested_name: newName,
+                status: 'pending'
+            });
+
+            if (error) {
+                alert('Ошибка отправки заявки: ' + error.message);
+            } else {
+                alert('Заявка на смену имени успешно отправлена администратору!');
+                document.getElementById('new-name-input').value = '';
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', checkUser);
+    </script>
+
+    <script>
+        const container = document.getElementById('news-container');
+        const loadedLinks = new Set();
+        const keywords = [
+            'СВО', 'спецоперац', 'фронт', 'арми', 'оборон', 'минобороны', 'военкор', 
+            'украин', 'всу', 'наступ', 'удар', 'тыл', 'росс', 'конфликт', 'боев', 
+            'днр', 'лнр', 'донецк', 'луганск', 'херсон', 'запорож', 'харьков', 'бахмут', 
+            'авдеевк', 'крым', 'севастополь', 'белгород', 'курск', 'брянск', 'донбасс',
+            'бпла', 'беспилот', 'дрон', 'артиллери', 'авиаци', 'пво', 'танк', 
+            'снаряд', 'ракет', 'рсзо', 'вертолет', 'самолет', 'техник', 
+            'генштаб', 'мобилизац', 'песков', 'путин', 'шойгу', 'белоусов', 'спецслужб', 
+            'полит', 'санкц', 'переговор', 'гуманитар', 'волонтер', 'безопасн', 
+            'границ', 'обстрел', 'провокац', 'террорист', 'диверс', 'опорник'
+        ];
+
+        async function fetchNews() {
+            try {
+                const cacheBuster = Date.now();
+                const res = await fetch(`https://api.rss2json.com/v1/api.json?
