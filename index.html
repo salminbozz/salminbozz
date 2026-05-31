@@ -100,7 +100,6 @@
         .admin-panel h3 { color: #f87171; margin-bottom: 10px; font-size: 16px; display: flex; align-items: center; gap: 8px;}
         .admin-panel p { color: #fca5a5; font-size: 13px; margin-bottom: 0; }
 
-        /* Оптимизированная кнопка Max — больше не перекрывает важные элементы */
         .download-image-link {
             position: fixed;
             bottom: 70px; right: 20px; width: 55px; height: 55px; 
@@ -157,7 +156,7 @@
 
     <div class="tab-content" id="auth-tab">
         <div class="auth-card" id="auth-form-block">
-            <h2 id="auth-title">Войти в аккауйн</h2>
+            <h2 id="auth-title">Войти в аккаунт</h2>
             <div class="auth-form">
                 <input type="text" id="auth-name" placeholder="Имя" style="display: none;">
                 <input type="email" id="auth-email" placeholder="E-mail">
@@ -186,7 +185,6 @@
         const SUPABASE_URL = 'https://aapkvsfbgbbtxofxmyqn.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhcGt2c2ZiZ2JidHhvZnhteXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMjA1NDgsImV4cCI6MjA5NTc5NjU0OH0.1yPqAnrEMpHnZPXwbR9DoqBNZDRk5C0a3EGwD1tjTGQ';
         
-        // Объект-замена официальной библиотеки, выполняющий прямые HTTP-запросы
         const nativeSupabase = {
             auth: {
                 async signUp({ email, password, options }) {
@@ -281,7 +279,7 @@
                     }
                 });
                 if (error) alert('Ошибка регистрации: ' + error.message);
-                else alert('Регистрация успешна! Теперь вы можете войти. И не забудьте подтвердить свой Email письмом которое пришло вам на указанный адрес');
+                else alert('Регистрация успешна! Теперь вы можете войти.');
             }
         }
 
@@ -297,13 +295,13 @@
                     document.getElementById('auth-form-block').style.display = 'none';
                     document.getElementById('profile-block').style.display = 'block';
                     
-                    document.getElementById('profile-email').innerText = `моя почта: ${user.email}`;
-                    
                     if (user.user_metadata && user.user_metadata.name) {
                         document.getElementById('profile-name').innerText = user.user_metadata.name;
                     } else {
                         document.getElementById('profile-name').innerText = 'имя пользователя не заданно';
                     }
+                    
+                    document.getElementById('profile-email').innerText = `моя почта: ${user.email}`;
                     
                     const oldBadge = document.getElementById('user-role-badge');
                     if (oldBadge) oldBadge.remove();
@@ -326,17 +324,16 @@
                     
                     const logoutBtn = document.querySelector('button[onclick="logout()"]');
                     logoutBtn.parentNode.insertBefore(roleBadge, logoutBtn);
+
                 } else {
                     document.getElementById('auth-form-block').style.display = 'block';
                     document.getElementById('profile-block').style.display = 'none';
-                    
                     const oldBadge = document.getElementById('user-role-badge');
                     if (oldBadge) oldBadge.remove();
                 }
             } catch (e) {}
         }
         
-        // Проверяем сессию при загрузке страницы
         document.addEventListener('DOMContentLoaded', checkUser);
     </script>
 
@@ -358,44 +355,31 @@
         async function fetchNews() {
             try {
                 const cacheBuster = Date.now();
-                // Используем надежный прокси allorigins для обхода блокировок CORS
-                const rssUrl = encodeURIComponent(`https://ura.news/rss?t=${cacheBuster}`);
-                const res = await fetch(`https://api.allorigins.win/get?url=${rssUrl}`);
+                const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://ura.news/rss&t=${cacheBuster}`);
                 const data = await res.json();
+                if (data.status !== 'ok') return;
                 
-                // Парсим полученную XML строку в понятный для JS вид
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(data.contents, "text/xml");
-                const items = xmlDoc.getElementsByTagName("item");
-                
-                Array.from(items).filter(item => {
-                    const title = item.getElementsByTagName("title")[0]?.textContent || "";
-                    const description = item.getElementsByTagName("description")[0]?.textContent || "";
-                    const text = (title + description).toLowerCase();
+                data.items.filter(item => {
+                    const text = (item.title + item.description).toLowerCase();
                     return keywords.some(k => text.includes(k.toLowerCase()));
                 }).reverse().forEach(item => {
-                    const link = item.getElementsByTagName("link")[0]?.textContent || "";
-                    
-                    if (!loadedLinks.has(link)) {
-                        loadedLinks.add(link);
-                        
-                        const title = item.getElementsByTagName("title")[0]?.textContent || "";
-                        let description = item.getElementsByTagName("description")[0]?.textContent || "";
-                        const pubDate = item.getElementsByTagName("pubDate")[0]?.textContent || "";
-                        
-                        const d = new Date(pubDate);
+                    if (!loadedLinks.has(item.link)) {
+                        loadedLinks.add(item.link);
+                        const d = new Date(item.pubDate.replace(' ', 'T'));
                         const dateStr = `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear().toString().slice(-2)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
                         
                         const card = document.createElement('div');
                         card.className = 'florein-card';
                         card.innerHTML = `
                             <div class="card-date">${dateStr}</div>
-                            <h3>${title}</h3>
-                            <p>${description.replace(/<[^>]*>/g, '').substring(0, 150)}...</p>
-                            <a href="${link}" target="_blank" class="card-btn">Читать на URA.RU ➔</a>
+                            <h3>${item.title}</h3>
+                            <p>${item.description.replace(/<[^>]*>/g, '').substring(0, 150)}...</p>
+                            <a href="${item.link}" target="_blank" class="card-btn">Читать на URA.RU ➔</a>
                         `;
                         container.prepend(card);
                     }
                 });
             } catch (e) { console.error('Ошибка новостей:', e); }
         }
+        fetchNews();
+  
