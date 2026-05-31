@@ -146,12 +146,39 @@
         </div>
     </div>
 
+    <!-- Вкладка Новостей с готовыми окнами (карточками) -->
     <div class="tab-content" id="news-tab">
         <div class="section-header">
             <h2>Новости СВО</h2>
             <span class="live-badge">● Live</span>
         </div>
-        <div class="news-feed" id="news-container"></div>
+        <div class="news-feed" id="news-container">
+            
+            <!-- Окно новости 1 -->
+            <div class="florein-card">
+                <div class="card-date">31.05.26 21:15</div>
+                <h3>Российские системы ПВО отразили массированную атаку БПЛА в приграничных районах</h3>
+                <p>Дежурными средствами противовоздушной обороны за прошедший час перехвачены и уничтожены несколько десятков беспилотных летательных аппаратов самолетного типа. Ситуация на границе находится под полным контролем подразделений обеспечения безопасности.</p>
+                <a href="https://ura.news/" target="_blank" class="card-btn">Читать на URA.RU ➔</a>
+            </div>
+
+            <!-- Окно новости 2 -->
+            <div class="florein-card">
+                <div class="card-date">31.05.26 18:40</div>
+                <h3>Группировка войск «Центр» улучшила тактическое положение и нанесла удар по резервам ВСУ</h3>
+                <p>В ходе активных действий штурмовые отряды продвинулись вглубь обороны противника. Огнем артиллерии и ударами тяжелых огнеметных систем были поражены опорные пункты и скопления живой силы резервных бригад ВСУ на данном направлении.</p>
+                <a href="https://ura.news/" target="_blank" class="card-btn">Читать на URA.RU ➔</a>
+            </div>
+
+            <!-- Окно новости 3 -->
+            <div class="florein-card">
+                <div class="card-date">31.05.26 15:20</div>
+                <h3>Волонтеры доставили крупную партию гуманитарной помощи и спецсредств на Донецкое направление</h3>
+                <p>Бойцам на передовой передали новые комплекты технического снаряжения, средства радиоэлектронной борьбы (РЭБ), медикаменты и продуктовые наборы. Гуманитарный груз собирали силами неравнодушных граждан и общественных организаций.</p>
+                <a href="https://ura.news/" target="_blank" class="card-btn">Читать на URA.RU ➔</a>
+            </div>
+
+        </div>
     </div>
 
     <div class="tab-content" id="auth-tab">
@@ -230,7 +257,7 @@
                     if (!response.ok) return { data: null, error: { message: data.msg || data.error_description || 'Ошибка запроса' } };
                     return { data, error: null };
                 } catch (e) {
-                    return { data: null, error: { message: 'Нет подключения к serveru авторизации.' } };
+                    return { data: null, error: { message: 'Нет подключения к серверу авторизации.' } };
                 }
             }
         };
@@ -336,47 +363,5 @@
         
         document.addEventListener('DOMContentLoaded', checkUser);
     </script>
-
-    <script>
-        const container = document.getElementById('news-container');
-        const loadedLinks = new Set();
-        const keywords = [
-            'СВО', 'спецоперац', 'фронт', 'арми', 'оборон', 'минобороны', 'военкор', 
-            'украин', 'всу', 'наступ', 'удар', 'тыл', 'росс', 'конфликт', 'боев', 
-            'днр', 'лнр', 'донецк', 'луганск', 'херсон', 'запорож', 'харьков', 'бахмут', 
-            'авдеевк', 'крым', 'севастополь', 'белгород', 'курск', 'брянск', 'донбасс',
-            'бпла', 'беспилот', 'дрон', 'артиллери', 'авиаци', 'пво', 'танк', 
-            'снаряд', 'ракет', 'рсзо', 'вертолет', 'самолет', 'техник', 
-            'генштаб', 'мобилизац', 'песков', 'путин', 'шойгу', 'белоусов', 'спецслужб', 
-            'полит', 'санкц', 'переговор', 'гуманитар', 'волонтер', 'безопасн', 
-            'границ', 'обстрел', 'провокац', 'террорист', 'диверс', 'опорник'
-        ];
-
-        async function fetchNews() {
-            try {
-                const cacheBuster = Date.now();
-                // Используем стабильный CORS-прокси allorigins, преобразуя данные в XML-формат штатными средствами браузера
-                const targetUrl = encodeURIComponent(`https://ura.news/rss?t=${cacheBuster}`);
-                const res = await fetch(`https://api.allorigins.win/get?url=${targetUrl}`);
-                const responseData = await res.json();
-                
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(responseData.contents, "text/xml");
-                const items = xmlDoc.getElementsByTagName("item");
-                
-                Array.from(items).filter(item => {
-                    const title = item.getElementsByTagName("title")[0]?.textContent || "";
-                    const description = item.getElementsByTagName("description")[0]?.textContent || "";
-                    const text = (title + description).toLowerCase();
-                    return keywords.some(k => text.includes(k.toLowerCase()));
-                }).reverse().forEach(item => {
-                    const link = item.getElementsByTagName("link")[0]?.textContent || "";
-                    
-                    if (!loadedLinks.has(link)) {
-                        loadedLinks.add(link);
-                        
-                        const title = item.getElementsByTagName("title")[0]?.textContent || "";
-                        let description = item.getElementsByTagName("description")[0]?.textContent || "";
-                        const pubDate = item.getElementsByTagName("pubDate")[0]?.textContent || "";
-                        
-                        const d = new Date(pubD
+</body>
+</html>
