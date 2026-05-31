@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Florein | Portal</title>
+    <title>Florein | Портал</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         
@@ -30,8 +31,8 @@
             border: 1px solid rgba(168, 85, 247, 0.4); 
         }
         
-        .nav-menu { display: flex; gap: 15px; margin-bottom: 25px; background: rgba(21, 29, 47, 0.6); padding: 6px; border-radius: 12px; }
-        .nav-btn { background: transparent; border: none; color: #94a3b8; padding: 10px 24px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+        .nav-menu { display: flex; gap: 10px; margin-bottom: 25px; background: rgba(21, 29, 47, 0.6); padding: 6px; border-radius: 12px; }
+        .nav-btn { background: transparent; border: none; color: #94a3b8; padding: 10px 20px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: 0.3s; font-size: 14px;}
         .nav-btn.active { background: #a855f7; color: #fff; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3); }
         
         .tab-content { display: none; width: 100%; max-width: 600px; }
@@ -40,7 +41,6 @@
         #main-tab { display: none; flex-direction: column; justify-content: center; align-items: center; }
         #main-tab.active { display: flex; }
         
-        /* Блок Минобороны с фоном contract_bg.jpeg */
         .contract-card { 
             position: relative;
             background-image: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.85)), url('contract_bg.jpeg'); 
@@ -54,68 +54,53 @@
             width: 100%;
             overflow: hidden;
         }
-        .contract-card h1 {
-            font-size: 22px;
-            color: #ffffff;
-            margin-bottom: 15px;
-            position: relative;
-            z-index: 2;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+        .contract-card h1 { font-size: 22px; color: #ffffff; margin-bottom: 15px; position: relative; z-index: 2; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6); }
+        .contract-card p { font-size: 14px; color: #e2e8f0; margin-bottom: 25px; line-height: 1.6; position: relative; z-index: 2; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6); }
+        .contract-btn { display: inline-block; background: #a855f7; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 10px; font-weight: 600; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4); transition: 0.2s ease; position: relative; z-index: 2; }
+        .contract-btn:hover { background: #9333ea; transform: translateY(-1px); }
+
+        /* Стили для формы авторизации и профиля */
+        .auth-card {
+            background: linear-gradient(135deg, #151d2f 0%, #0f172a 100%);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            width: 100%;
         }
-        .contract-card p {
-            font-size: 14px;
-            color: #e2e8f0;
-            margin-bottom: 25px;
-            line-height: 1.6;
-            position: relative;
-            z-index: 2;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
-        }
-        .contract-btn {
-            display: inline-block;
-            background: #a855f7;
-            color: #ffffff;
-            text-decoration: none;
-            padding: 12px 28px;
+        .auth-card h2 { font-size: 20px; margin-bottom: 20px; text-align: center; color: #fff; }
+        .auth-form { display: flex; flex-direction: column; gap: 15px; }
+        .auth-form input {
+            background: #0b0f19;
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            padding: 12px 16px;
             border-radius: 10px;
-            font-weight: semibold;
-            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
-            transition: 0.2s ease;
-            position: relative;
-            z-index: 2;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
         }
-        .contract-btn:hover {
-            background: #9333ea;
-            transform: translateY(-1px);
-        }
+        .auth-form input:focus { border-color: #a855f7; box-shadow: 0 0 8px rgba(168, 85, 247, 0.2); }
+        .auth-buttons { display: flex; gap: 10px; margin-top: 5px; }
+        .submit-btn { flex: 1; background: #a855f7; color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .submit-btn:hover { background: #9333ea; }
+        .secondary-btn { background: rgba(148, 163, 184, 0.1); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.2); }
+        .secondary-btn:hover { background: rgba(148, 163, 184, 0.2); color: #fff; }
+        
+        .profile-info { text-align: center; }
+        .profile-info p { margin-bottom: 20px; font-size: 16px; color: #cbd5e1; }
 
         /* Фиксированная кнопка-логотип Max */
         .download-image-link {
             position: fixed;
-            bottom: 55px; 
-            right: 20px;
-            width: 60px; 
-            height: 60px; 
-            background-image: url('max.png'); 
-            background-size: cover;
-            background-position: center;
-            border-radius: 50%; 
-            border: 2px solid #a855f7;
-            box-shadow: 0 8px 24px rgba(168, 85, 247, 0.3);
-            z-index: 1000;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            display: block;
-            animation: slideUp 0.4s ease-out;
+            bottom: 55px; right: 20px; width: 60px; height: 60px; 
+            background-image: url('max.png'); background-size: cover; background-position: center;
+            border-radius: 50%; border: 2px solid #a855f7; box-shadow: 0 8px 24px rgba(168, 85, 247, 0.3);
+            z-index: 1000; transition: transform 0.2s ease, box-shadow 0.2s ease; display: block; animation: slideUp 0.4s ease-out;
         }
-        .download-image-link:hover {
-            transform: scale(1.08) translateY(-2px);
-            box-shadow: 0 12px 28px rgba(168, 85, 247, 0.5);
-        }
+        .download-image-link:hover { transform: scale(1.08) translateY(-2px); box-shadow: 0 12px 28px rgba(168, 85, 247, 0.5); }
 
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
         .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding: 0 5px; }
         .live-badge { background: rgba(168, 85, 247, 0.15); color: #c084fc; font-size: 11px; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; animation: pulse 2s infinite; }
@@ -128,31 +113,9 @@
         p { font-size: 14px; color: #94a3b8; margin-bottom: 20px; line-height: 1.5; }
         .card-btn { color: #a855f7; text-decoration: none; font-weight: 700; }
         
-        /* Нижняя закрепленная плашка защиты данных */
-        .footer-badge { 
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: #070a12; 
-            border-top: 1px solid rgba(168, 85, 247, 0.2);
-            padding: 12px 0; 
-            text-align: center;
-            font-size: 11px; 
-            color: #a78bfa; 
-            text-transform: uppercase; 
-            letter-spacing: 1px;
-            z-index: 1010;
-        }
+        .footer-badge { position: fixed; bottom: 0; left: 0; width: 100%; background: #070a12; border-top: 1px solid rgba(168, 85, 247, 0.2); padding: 12px 0; text-align: center; font-size: 11px; color: #a78bfa; text-transform: uppercase; letter-spacing: 1px; z-index: 1010; }
 
-        @media (max-width: 640px) {
-            .download-image-link {
-                bottom: 50px;
-                right: 15px;
-                width: 55px;
-                height: 55px;
-            }
-        }
+        @media (max-width: 640px) { .download-image-link { bottom: 50px; right: 15px; width: 55px; height: 55px; } }
     </style>
 </head>
 <body>
@@ -162,6 +125,7 @@
     <div class="nav-menu">
         <button class="nav-btn active" onclick="openTab(this, 'main-tab')">Главная</button>
         <button class="nav-btn" onclick="openTab(this, 'news-tab')">Новости</button>
+        <button class="nav-btn" onclick="openTab(this, 'auth-tab')">Профиль</button>
     </div>
 
     <div class="tab-content active" id="main-tab">
@@ -180,11 +144,92 @@
         <div class="news-feed" id="news-container"></div>
     </div>
 
+    <div class="tab-content" id="auth-tab">
+        <div class="auth-card" id="auth-form-block">
+            <h2 id="auth-title">Войти в аккаунт</h2>
+            <div class="auth-form">
+                <input type="email" id="auth-email" placeholder="E-mail">
+                <input type="password" id="auth-password" placeholder="Пароль">
+                <div class="auth-buttons">
+                    <button class="submit-btn" id="main-auth-btn" onclick="handleAuth()">Войти</button>
+                    <button class="submit-btn secondary-btn" id="toggle-auth-btn" onclick="toggleAuthMode()">Регистрация</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-card profile-info" id="profile-block" style="display: none;">
+            <h2>Личный кабинет</h2>
+            <p id="profile-email">Загрузка...</p>
+            <button class="submit-btn secondary-btn" onclick="logout()">Выйти из аккаунта</button>
+        </div>
+    </div>
+
     <div class="footer-badge">🛡️ ВАШИ ДАННЫЕ ЗАЩИЩЕНЫ</div>
 
     <a href="https://max.ru/" target="_blank" class="download-image-link" title="Скачать Max"></a>
 
     <script>
+        // --- ПОДКЛЮЧЕНИЕ SUPABASE С ТВОИМИ ДАННЫМИ ---
+        const SUPABASE_URL = 'https://aapkvsfbgbbtxofxmyqn.supabase.co'; 
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhcGt2c2ZiZ2JidHhvZnhteXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMjA1NDgsImV4cCI6MjA5NTc5NjU0OH0.1yPqAnrEMpHnZPXwbR9DoqBNZDRk5C0a3EGwD1tjTGQ';
+        
+        const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
+        let isLoginMode = true;
+
+        // Переключение Регистрация / Вход
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            document.getElementById('auth-title').innerText = isLoginMode ? 'Войти в аккаунт' : 'Регистрация нового аккаунта';
+            document.getElementById('main-auth-btn').innerText = isLoginMode ? 'Войти' : 'Создать аккаунт';
+            document.getElementById('toggle-auth-btn').innerText = isLoginMode ? 'Регистрация' : 'Уже есть аккаунт';
+        }
+
+        // Логика отправки формы
+        async function handleAuth() {
+            if (!supabase) return alert('Supabase не настроен!');
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+
+            if (!email || !password) return alert('Заполните все поля!');
+
+            if (isLoginMode) {
+                // Вход
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) alert('Ошибка входа: ' + error.message);
+                else checkUser();
+            } else {
+                // Регистрация
+                const { data, error } = await supabase.auth.signUp({ email, password });
+                if (error) alert('Ошибка регистрации: ' + error.message);
+                else alert('Регистрация успешна! Если вы отключили подтверждение в Supabase — можете сразу входить, если нет — проверьте почту.');
+            }
+        }
+
+        // Выход
+        async function logout() {
+            await supabase.auth.signOut();
+            checkUser();
+        }
+
+        // Проверка авторизации при загрузке
+        async function checkUser() {
+            if (!supabase) return;
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (user) {
+                document.getElementById('auth-form-block').style.display = 'none';
+                document.getElementById('profile-block').style.display = 'block';
+                document.getElementById('profile-email').innerText = `Добро пожаловать, ${user.email}!`;
+            } else {
+                document.getElementById('auth-form-block').style.display = 'block';
+                document.getElementById('profile-block').style.display = 'none';
+            }
+        }
+        
+        if (supabase) checkUser();
+
+        // --- НОВОСТНОЙ КОД ---
         const container = document.getElementById('news-container');
         const loadedLinks = new Set();
         
@@ -213,10 +258,7 @@
                 const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://ura.news/rss&t=${cacheBuster}`);
                 const data = await res.json();
                 
-                if (data.status !== 'ok') {
-                    console.log("Ошибка API:", data.message);
-                    return;
-                }
+                if (data.status !== 'ok') return;
                 
                 data.items.filter(item => {
                     const text = (item.title + item.description).toLowerCase();
