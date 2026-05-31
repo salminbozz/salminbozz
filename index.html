@@ -99,16 +99,62 @@
         }
         .name-change-block h3 { font-size: 15px; color: #fff; margin-bottom: 10px; }
 
+        /* --- Стили панели модерации --- */
         .admin-panel {
             margin-top: 25px;
             padding: 20px;
-            background: rgba(220, 38, 38, 0.1);
-            border: 1px solid rgba(220, 38, 38, 0.4);
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(239, 68, 68, 0.3);
             border-radius: 12px;
             text-align: left;
         }
-        .admin-panel h3 { color: #f87171; margin-bottom: 10px; font-size: 16px; display: flex; align-items: center; gap: 8px;}
-        .admin-panel p { color: #fca5a5; font-size: 13px; margin-bottom: 0; }
+        .admin-panel h3 { color: #f87171; margin-bottom: 5px; font-size: 16px; display: flex; align-items: center; gap: 8px;}
+        .admin-panel .admin-subtitle { color: #94a3b8; font-size: 13px; margin-bottom: 15px; }
+        
+        .moderation-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 350px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        
+        /* Скроллбар для панели заявок */
+        .moderation-container::-webkit-scrollbar { width: 6px; }
+        .moderation-container::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 4px; }
+        .moderation-container::-webkit-scrollbar-thumb { background: rgba(239, 68, 68, 0.3); border-radius: 4px; }
+
+        .request-card {
+            background: #0b0f19;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        .request-info { margin-bottom: 10px; line-height: 1.4; color: #cbd5e1; }
+        .request-info strong { color: #fff; }
+        .request-info .arrow { color: #ef4444; margin: 0 4px; }
+        .request-actions { display: flex; gap: 8px; }
+        
+        .action-btn {
+            flex: 1;
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            transition: 0.2s;
+            color: #fff;
+        }
+        .btn-approve { background: #10b981; }
+        .btn-approve:hover { background: #059669; }
+        .btn-reject { background: #ef4444; }
+        .btn-reject:hover { background: #dc2626; }
+        
+        .no-requests { text-align: center; color: #64748b; font-size: 13px; padding: 15px 0; }
+        /* ------------------------------ */
 
         .download-image-link {
             position: fixed;
@@ -192,8 +238,12 @@
             </div>
 
             <div class="admin-panel" id="admin-only-block" style="display: none;">
-                <h3>👑 Доступ разрешен: Администратор</h3>
-                <p>Вы успешно подтвердили права создателя портала Florein. Система управления базой данных работает стабильно.</p>
+                <h3>👑 Модерация: Администратор</h3>
+                <p class="admin-subtitle">Управление входящими заявками на смену никнеймов пользователей.</p>
+                
+                <div class="moderation-container" id="moderation-list">
+                    <div class="no-requests">Загрузка списка заявок...</div>
+                </div>
             </div>
 
             <button class="submit-btn secondary-btn" style="margin-top: 20px;" onclick="logout()">Выйти из аккаунта</button>
@@ -235,11 +285,23 @@
                     return { error: null };
                 }
             },
-            // Метод для отправки данных в таблицы (например, для заявок)
+            // Расширенный метод для работы с таблицами БД (Инсерты, Выборки и Апдейты)
             from(table) {
                 return {
                     insert: async (data) => {
                         return nativeSupabase._request(`/rest/v1/${table}`, data, 'POST');
+                    },
+                    select: async (queryStr = '*') => {
+                        // По умолчанию вытягиваем только нерассмотренные заявки 'pending'
+                        const path = `/rest/v1/${table}?select=${queryStr}&status=eq.pending`;
+                        return nativeSupabase._request(path, null, 'GET');
+                    },
+                    update: async (matchObject, updateData) => {
+                        // matchObject пример: { id: 5 } -> преобразуется в ?id=eq.5
+                        const key = Object.keys(matchObject)[0];
+                        const value = matchObject[key];
+                        const path = `/rest/v1/${table}?${key}=eq.${value}`;
+                        return nativeSupabase._request(path, updateData, 'PATCH');
                     }
                 };
             },
@@ -286,7 +348,6 @@
             document.getElementById('auth-title').innerText = isLoginMode ? 'Войти в аккаунт' : 'Регистрация нового аккаунта';
             document.getElementById('main-auth-btn').innerText = isLoginMode ? 'Войти' : 'Создать аккаунт';
             document.getElementById('toggle-auth-btn').innerText = isLoginMode ? 'Регистрация' : 'Уже есть аккаунт';
-            // Показываем/скрываем поле Имени
             document.getElementById('auth-name').style.display = isLoginMode ? 'none' : 'block';
         }
     </script>
@@ -309,7 +370,7 @@
                 const { data, error } = await nativeSupabase.auth.signUp({ 
                     email, 
                     password,
-                    options: { data: { name: name } } // Передаем имя в метаданные пользователя
+                    options: { data: { name: name } }
                 });
                 if (error) alert('Ошибка регистрации: ' + error.message);
                 else {
@@ -334,65 +395,11 @@
                     document.getElementById('profile-block').style.display = 'block';
                     document.getElementById('profile-email').innerText = `Email: ${user.email}`;
                     
-                    // Извлекаем имя из метаданных пользователя
                     const userName = user.user_metadata?.name || 'Не указано';
                     document.getElementById('profile-name').innerText = `Имя: ${userName}`;
                     
                     if (user.app_metadata && user.app_metadata.role === 'admin') {
                         document.getElementById('admin-only-block').style.display = 'block';
+                        loadModerationRequests(); // Вызываем загрузку заявок, если вошел Админ
                     } else {
-                        document.getElementById('admin-only-block').style.display = 'none';
-                    }
-                } else {
-                    document.getElementById('auth-form-block').style.display = 'block';
-                    document.getElementById('profile-block').style.display = 'none';
-                    document.getElementById('admin-only-block').style.display = 'none';
-                }
-            } catch (e) {}
-        }
-
-        // Функция отправки заявки на смену имени
-        async function sendNameChangeRequest() {
-            const newName = document.getElementById('new-name-input').value.trim();
-            if (!newName) return alert('Введите новое имя!');
-            if (!currentUserData) return alert('Ошибка авторизации!');
-
-            const currentName = currentUserData.user_metadata?.name || 'Не указано';
-
-            const { data, error } = await nativeSupabase.from('name_change_requests').insert({
-                user_id: currentUserData.id,
-                current_name: currentName,
-                requested_name: newName,
-                status: 'pending'
-            });
-
-            if (error) {
-                alert('Ошибка отправки заявки: ' + error.message);
-            } else {
-                alert('Заявка на смену имени успешно отправлена администратору!');
-                document.getElementById('new-name-input').value = '';
-            }
-        }
-        
-        document.addEventListener('DOMContentLoaded', checkUser);
-    </script>
-
-    <script>
-        const container = document.getElementById('news-container');
-        const loadedLinks = new Set();
-        const keywords = [
-            'СВО', 'спецоперац', 'фронт', 'арми', 'оборон', 'минобороны', 'военкор', 
-            'украин', 'всу', 'наступ', 'удар', 'тыл', 'росс', 'конфликт', 'боев', 
-            'днр', 'лнр', 'донецк', 'луганск', 'херсон', 'запорож', 'харьков', 'бахмут', 
-            'авдеевк', 'крым', 'севастополь', 'белгород', 'курск', 'брянск', 'донбасс',
-            'бпла', 'беспилот', 'дрон', 'артиллери', 'авиаци', 'пво', 'танк', 
-            'снаряд', 'ракет', 'рсзо', 'вертолет', 'самолет', 'техник', 
-            'генштаб', 'мобилизац', 'песков', 'путин', 'шойгу', 'белоусов', 'спецслужб', 
-            'полит', 'санкц', 'переговор', 'гуманитар', 'волонтер', 'безопасн', 
-            'границ', 'обстрел', 'провокац', 'террорист', 'диверс', 'опорник'
-        ];
-
-        async function fetchNews() {
-            try {
-                const cacheBuster = Date.now();
-                const res = await fetch(`https://api.rss2json.com/v1/api.json?
+                        document.getElementById('a
