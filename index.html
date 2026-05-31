@@ -86,7 +86,8 @@
         .secondary-btn:hover { background: rgba(148, 163, 184, 0.2); color: #fff; }
         
         .profile-info { text-align: center; }
-        .profile-info p { margin-bottom: 20px; font-size: 16px; color: #cbd5e1; }
+        .profile-info p { margin-bottom: 10px; font-size: 16px; color: #cbd5e1; }
+        .profile-info #profile-name { margin-bottom: 20px; font-size: 16px; color: #a855f7; font-weight: 600; }
 
         .admin-panel {
             margin-top: 25px;
@@ -158,6 +159,7 @@
         <div class="auth-card" id="auth-form-block">
             <h2 id="auth-title">Войти в аккаунт</h2>
             <div class="auth-form">
+                <input type="text" id="auth-name" placeholder="Имя" style="display: none;">
                 <input type="email" id="auth-email" placeholder="E-mail">
                 <input type="password" id="auth-password" placeholder="Пароль">
                 <div class="auth-buttons">
@@ -170,6 +172,7 @@
         <div class="auth-card profile-info" id="profile-block" style="display: none;">
             <h2>Личный кабинет</h2>
             <p id="profile-email">Загрузка...</p>
+            <p id="profile-name"></p>
             
             <div class="admin-panel" id="admin-only-block" style="display: none;">
                 <h3>👑 Доступ разрешен: Администратор</h3>
@@ -191,8 +194,8 @@
         // Объект-замена официальной библиотеки, выполняющий прямые HTTP-запросы
         const nativeSupabase = {
             auth: {
-                async signUp({ email, password }) {
-                    return nativeSupabase._request('/auth/v1/signup', { email, password });
+                async signUp({ email, password, options }) {
+                    return nativeSupabase._request('/auth/v1/signup', { email, password, options });
                 },
                 async signInWithPassword({ email, password }) {
                     const res = await nativeSupabase._request('/auth/v1/token?grant_type=password', { email, password });
@@ -258,6 +261,7 @@
             document.getElementById('auth-title').innerText = isLoginMode ? 'Войти в аккаунт' : 'Регистрация нового аккаунта';
             document.getElementById('main-auth-btn').innerText = isLoginMode ? 'Войти' : 'Создать аккаунт';
             document.getElementById('toggle-auth-btn').innerText = isLoginMode ? 'Регистрация' : 'Уже есть аккаунт';
+            document.getElementById('auth-name').style.display = isLoginMode ? 'none' : 'block';
         }
     </script>
 
@@ -265,15 +269,22 @@
         async function handleAuth() {
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
+            const name = document.getElementById('auth-name').value;
 
-            if (!email || !password) return alert('Заполните все поля!');
+            if (!email || !password || (!isLoginMode && !name)) return alert('Заполните все поля!');
 
             if (isLoginMode) {
                 const { data, error } = await nativeSupabase.auth.signInWithPassword({ email, password });
                 if (error) alert('Ошибка входа: ' + error.message);
                 else checkUser();
             } else {
-                const { data, error } = await nativeSupabase.auth.signUp({ email, password });
+                const { data, error } = await nativeSupabase.auth.signUp({ 
+                    email, 
+                    password,
+                    options: {
+                        data: { name: name }
+                    }
+                });
                 if (error) alert('Ошибка регистрации: ' + error.message);
                 else alert('Регистрация успешна! Теперь вы можете войти. И не забудьте подтвердить свой Email письмом которое пришло вам на указанный адрес');
             }
@@ -291,6 +302,12 @@
                     document.getElementById('auth-form-block').style.display = 'none';
                     document.getElementById('profile-block').style.display = 'block';
                     document.getElementById('profile-email').innerText = `Добро пожаловать, ${user.email}!`;
+                    
+                    if (user.user_metadata && user.user_metadata.name) {
+                        document.getElementById('profile-name').innerText = `Имя: ${user.user_metadata.name}`;
+                    } else {
+                        document.getElementById('profile-name').innerText = 'Имя: Не указано';
+                    }
                     
                     if (user.app_metadata && user.app_metadata.role === 'admin') {
                         document.getElementById('admin-only-block').style.display = 'block';
