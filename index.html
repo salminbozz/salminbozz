@@ -212,8 +212,9 @@
             <p id="profile-name">Загрузка...</p>
             <p id="profile-email"></p>
 
-            <!-- Блок кастомизации темы -->
-            <div class="theme-select-block">
+            <div id="role-badge-container"></div>
+
+            <div class="theme-select-block" style="margin-bottom: 20px;">
                 <label for="theme-selector">🎨 Персонализация темы:</label>
                 <select id="theme-selector" class="theme-select" onchange="changeTheme(this.value)">
                     <option value="purple">Фиолетовый неон (Стандарт)</option>
@@ -222,7 +223,7 @@
                 </select>
             </div>
 
-            <button class="submit-btn secondary-btn" style="margin-top: 20px;" onclick="logout()">Выйти из аккаунта</button>
+            <button class="submit-btn secondary-btn" onclick="logout()">Выйти из аккаунта</button>
         </div>
     </div>
 
@@ -362,7 +363,7 @@
                 if (error) {
                     alert('Ошибка входа: ' + error.message);
                 } else {
-                    checkUser();
+                    await checkUser();
                 }
             } else {
                 const { data, error } = await nativeSupabase.auth.signUp({ 
@@ -383,12 +384,15 @@
 
         async function logout() {
             await nativeSupabase.auth.signOut();
-            checkUser();
+            await checkUser();
         }
 
         async function checkUser() {
             try {
                 const { data: { user } } = await nativeSupabase.auth.getUser();
+                const container = document.getElementById('role-badge-container');
+                if (container) container.innerHTML = ''; 
+
                 if (user) {
                     document.getElementById('auth-form-block').style.display = 'none';
                     document.getElementById('profile-block').style.display = 'block';
@@ -401,14 +405,11 @@
                     
                     document.getElementById('profile-email').innerText = `моя почта: ${user.email}`;
                     
-                    const oldBadge = document.getElementById('user-role-badge');
-                    if (oldBadge) oldBadge.remove();
-
                     const roleBadge = document.createElement('div');
-                    roleBadge.id = 'user-role-badge';
                     roleBadge.className = 'admin-panel';
                     roleBadge.style.textAlign = 'center';
-                    roleBadge.style.marginTop = '20px';
+                    roleBadge.style.marginTop = '0px';
+                    roleBadge.style.marginBottom = '20px';
                     
                     if (user.app_metadata && user.app_metadata.role === 'admin') {
                         roleBadge.innerHTML = `<h3>👑 Роль: Администратор</h3>`;
@@ -416,7 +417,6 @@
                         roleBadge.innerHTML = `<h3>👤 Роль: Пользователь</h3>`;
                     }
                     
-                    const themeBlock = document.querySelector('.theme-select-block');
-                    themeBlock.parentNode.insertBefore(roleBadge, themeBlock);
+                    if (container) container.appendChild(roleBadge);
 
-     
+                    const currentTheme = localStorage.getItem('site_
