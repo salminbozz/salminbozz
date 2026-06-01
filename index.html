@@ -80,7 +80,7 @@
         }
         .auth-form input:focus { border-color: #a855f7; box-shadow: 0 0 8px rgba(168, 85, 247, 0.2); }
         .auth-buttons { display: flex; gap: 10px; margin-top: 5px; }
-        .submit-btn { flex: 1; background: #a855f7; color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .submit-btn { flex: 1; background: #a855f7; color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; }
         .submit-btn:hover { background: #9333ea; }
         .secondary-btn { background: rgba(148, 163, 184, 0.1); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.2); }
         .secondary-btn:hover { background: rgba(148, 163, 184, 0.2); color: #fff; }
@@ -92,13 +92,11 @@
         .admin-panel {
             margin-top: 25px;
             padding: 20px;
-            background: rgba(220, 38, 38, 0.1);
-            border: 1px solid rgba(220, 38, 38, 0.4);
             border-radius: 12px;
             text-align: left;
+            margin-bottom: 20px;
         }
-        .admin-panel h3 { color: #f87171; margin-bottom: 10px; font-size: 16px; display: flex; align-items: center; gap: 8px;}
-        .admin-panel p { color: #fca5a5; font-size: 13px; margin-bottom: 0; }
+        .admin-panel h3 { margin-bottom: 0; font-size: 16px; display: flex; align-items: center; gap: 8px;}
 
         .download-image-link {
             position: fixed;
@@ -216,6 +214,8 @@
             <p id="profile-name">Загрузка...</p>
             <p id="profile-email"></p>
 
+            <div id="role-container"></div>
+
             <div class="theme-box">
                 <label for="theme-selector">🎨 Персонализация темы:</label>
                 <select id="theme-selector" class="theme-select" onchange="applySiteTheme(this.value)">
@@ -312,12 +312,15 @@
 
     <script>
         async function handleAuth() {
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
-            const name = document.getElementById('auth-name').value;
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value.trim();
+            const name = document.getElementById('auth-name').value.trim();
             const btn = document.getElementById('main-auth-btn');
 
-            if (!email || !password || (!isLoginMode && !name)) return alert('Заполните все поля!');
+            // Защита от пустых полей
+            if (!email || !password || (!isLoginMode && !name)) {
+                return alert('Пожалуйста, заполните все поля ввода!');
+            }
 
             const originalText = btn.innerText;
             btn.innerText = isLoginMode ? 'Вход...' : 'Регистрация...';
@@ -328,8 +331,11 @@
                 btn.innerText = originalText;
                 btn.disabled = false;
                 
-                if (error) alert('Ошибка входа: ' + error.message);
-                else await checkUser();
+                if (error) {
+                    alert('Ошибка входа: ' + error.message);
+                } else {
+                    await checkUser();
+                }
             } else {
                 const { data, error } = await nativeSupabase.auth.signUp({ 
                     email, 
@@ -341,9 +347,10 @@
                 btn.innerText = originalText;
                 btn.disabled = false;
                 
-                if (error) alert('Ошибка регистрации: ' + error.message);
-                else {
-                    alert('Регистрация успешна! Теперь вы можете войти.');
+                if (error) {
+                    alert('Ошибка регистрации: ' + error.message);
+                } else {
+                    alert('Регистрация успешна! Теперь вы можете войти в свой аккаунт.');
                     toggleAuthMode();
                 }
             }
@@ -357,6 +364,8 @@
         async function checkUser() {
             try {
                 const { data: { user } } = await nativeSupabase.auth.getUser();
+                const roleContainer = document.getElementById('role-container');
+                
                 if (user) {
                     document.getElementById('auth-form-block').style.display = 'none';
                     document.getElementById('profile-block').style.display = 'block';
@@ -364,21 +373,17 @@
                     if (user.user_metadata && user.user_metadata.name) {
                         document.getElementById('profile-name').innerText = user.user_metadata.name;
                     } else {
-                        document.getElementById('profile-name').innerText = 'имя пользователя не заданно';
+                        document.getElementById('profile-name').innerText = 'Имя пользователя не задано';
                     }
                     
-                    document.getElementById('profile-email').innerText = `моя почта: ${user.email}`;
+                    document.getElementById('profile-email').innerText = `Моя почта: ${user.email}`;
                     
-                    const oldBadge = document.getElementById('user-role-badge');
-                    if (oldBadge) oldBadge.remove();
-
-                    const roleBadge = document.createElement('div');
-                    roleBadge.id = 'user-role-badge';
-                    roleBadge.className = 'admin-panel';
-                    roleBadge.style.textAlign = 'center';
-                    roleBadge.style.marginTop = '20px';
-                    
-                    if (user.app_metadata && user.app_metadata.role === 'admin') {
-                        roleBadge.style.background = 'rgba(220, 38, 38, 0.1)';
-                        roleBadge.style.borderColor = 'rgba(220, 38, 38, 0.4)';
-                        roleBadge.innerHTML = `<h3 style="color: #f87171; 
+                    // Безопасное обновление плашки роли без затирания кнопок сайта
+                    if (roleContainer) {
+                        roleContainer.innerHTML = ''; 
+                        const roleBadge = document.createElement('div');
+                        roleBadge.className = 'admin-panel';
+                        roleBadge.style.textAlign = 'center';
+                        
+                        if (user.app_metadata && user.app_metadata.role === 'admin') {
+                            roleBadge.style.background = 'rgba(220, 38
