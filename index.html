@@ -278,11 +278,11 @@
                     const data = await response.json();
                     
                     if (!response.ok) {
-                        return { data: null, error: { message: data.msg || data.error_description || data.message || 'Ошибка запроса' } };
+                        return { data: null, error: { message: data.msg || data.error_description || data.message || 'Ошибка запроса API Supabase' } };
                     }
                     return { data, error: null };
                 } catch (e) {
-                    return { data: null, error: { message: 'Нет подключения к серверу авторизации.' } };
+                    return { data: null, error: { message: 'Нет подключения к интернету или серверу Supabase.' } };
                 }
             }
         };
@@ -355,13 +355,22 @@
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
             const name = document.getElementById('auth-name').value;
+            const btn = document.getElementById('main-auth-btn');
 
-            if (!email || !password || (!isLoginMode && !name)) return alert('Заполните все поля!');
+            if (!email || !password || (!isLoginMode && !name)) return alert('Заполните все обязательные поля!');
+
+            // Визуальный отклик, что кнопка нажата и работает
+            const originalText = btn.innerText;
+            btn.innerText = isLoginMode ? 'Вход...' : 'Регистрация...';
+            btn.disabled = true;
 
             if (isLoginMode) {
                 const { data, error } = await nativeSupabase.auth.signInWithPassword({ email, password });
+                btn.innerText = originalText;
+                btn.disabled = false;
+
                 if (error) {
-                    alert('Ошибка входа: ' + error.message);
+                    alert('Ошибка авторизации: ' + error.message);
                 } else {
                     await checkUser();
                 }
@@ -369,14 +378,15 @@
                 const { data, error } = await nativeSupabase.auth.signUp({ 
                     email, 
                     password,
-                    options: {
-                        data: { name: name }
-                    }
+                    options: { data: { name: name } }
                 });
+                btn.innerText = originalText;
+                btn.disabled = false;
+
                 if (error) {
                     alert('Ошибка регистрации: ' + error.message);
                 } else {
-                    alert('Регистрация успешна! Теперь вы можете войти.');
+                    alert('Регистрация успешна! Теперь вы можете переключиться на вкладку "Войти" и авторизоваться.');
                     toggleAuthMode();
                 }
             }
@@ -409,14 +419,4 @@
                     roleBadge.className = 'admin-panel';
                     roleBadge.style.textAlign = 'center';
                     roleBadge.style.marginTop = '0px';
-                    roleBadge.style.marginBottom = '20px';
-                    
-                    if (user.app_metadata && user.app_metadata.role === 'admin') {
-                        roleBadge.innerHTML = `<h3>👑 Роль: Администратор</h3>`;
-                    } else {
-                        roleBadge.innerHTML = `<h3>👤 Роль: Пользователь</h3>`;
-                    }
-                    
-                    if (container) container.appendChild(roleBadge);
-
-                    const currentTheme = localStorage.getItem('site_
+                    roleBadge.style.ma
