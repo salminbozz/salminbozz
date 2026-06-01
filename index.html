@@ -100,7 +100,6 @@
         .profile-info p { margin-bottom: 10px; font-size: 16px; color: #cbd5e1; }
         .profile-info #profile-name { margin-bottom: 10px; font-size: 16px; color: var(--main-color); font-weight: 600; transition: color 0.3s ease; }
 
-        /* Стили блока выбора темы в профиле */
         .theme-select-block {
             margin-top: 20px;
             padding: 15px;
@@ -147,10 +146,10 @@
         .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding: 0 5px; }
         
         .news-feed { display: flex; flex-direction: column; gap: 16px; width: 100%; }
-        .florein-card { background: #111622; border: 1px solid var(--main-color-rgba-light); border-radius: 16px; padding: 24px; width: 100%; transition: border 0.3s ease; }
+        .florein-card { background: #111622; border: 1px solid var(--main-color-rgba-light); border-radius: 16px; padding: 24px; width: 100%; transition: border 0.3s ease; text-align: left; }
         .card-date { font-size: 13px; color: var(--main-color); font-weight: 800; margin-bottom: 12px; transition: color 0.3s ease; }
-        h3 { font-size: 17px; color: #ffffff; margin-bottom: 12px; }
-        p { font-size: 14px; color: #94a3b8; line-height: 1.5; }
+        .florein-card h3 { font-size: 17px; color: #ffffff; margin-bottom: 12px; }
+        .florein-card p { font-size: 14px; color: #94a3b8; line-height: 1.5; }
         
         .footer-badge { position: fixed; bottom: 0; left: 0; width: 100%; background: #070a12; border-top: 1px solid var(--main-color-rgba); padding: 12px 0; text-align: center; font-size: 11px; color: var(--main-color); text-transform: uppercase; letter-spacing: 1px; z-index: 1010; transition: border 0.3s ease, color 0.3s ease; }
 
@@ -165,12 +164,12 @@
     <div class="header-banner"></div>
     
     <div class="nav-menu">
-        <button class="nav-btn active" onclick="openTab(this, 'main-tab')">Главная</button>
-        <button class="nav-btn" onclick="openTab(this, 'news-tab')">Новости</button>
+        <button class="nav-btn" onclick="openTab(this, 'main-tab')">Главная</button>
+        <button class="nav-btn active" onclick="openTab(this, 'news-tab')">Новости</button>
         <button class="nav-btn" onclick="openTab(this, 'auth-tab')">Профиль</button>
     </div>
 
-    <div class="tab-content active" id="main-tab">
+    <div class="tab-content" id="main-tab">
         <div class="contract-card">
             <h1>Служба по контракту выбор достойных</h1>
             <p>Узнайте ключевые условия, актуальные требования к кандидатам, подробную информацию о выплатах, льготах и социальных гарантиях для военнослужащих по контракту.</p>
@@ -178,7 +177,7 @@
         </div>
     </div>
 
-    <div class="tab-content" id="news-tab">
+    <div class="tab-content active" id="news-tab">
         <div class="section-header">
             <h2>Лента новостей</h2>
         </div>
@@ -278,11 +277,11 @@
                     const data = await response.json();
                     
                     if (!response.ok) {
-                        return { data: null, error: { message: data.msg || data.error_description || data.message || 'Ошибка запроса API Supabase' } };
+                        return { data: null, error: { message: data.msg || data.error_description || data.message || 'Ошибка запроса к Supabase' } };
                     }
                     return { data, error: null };
                 } catch (e) {
-                    return { data: null, error: { message: 'Нет подключения к интернету или серверу Supabase.' } };
+                    return { data: null, error: { message: 'Нет подключения к серверу авторизации.' } };
                 }
             }
         };
@@ -323,9 +322,6 @@
             const selector = document.getElementById('theme-selector');
             if(selector) selector.value = themeName;
         }
-
-        const savedTheme = localStorage.getItem('site_theme') || 'purple';
-        changeTheme(savedTheme);
     </script>
 
     <script>
@@ -348,18 +344,17 @@
             document.getElementById('toggle-auth-btn').innerText = isLoginMode ? 'Регистрация' : 'Уже есть аккаунт';
             document.getElementById('auth-name').style.display = isLoginMode ? 'none' : 'block';
         }
-    </script>
 
-    <script>
         async function handleAuth() {
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
             const name = document.getElementById('auth-name').value;
             const btn = document.getElementById('main-auth-btn');
 
-            if (!email || !password || (!isLoginMode && !name)) return alert('Заполните все обязательные поля!');
+            if (!email || !password || (!isLoginMode && !name)) {
+                return alert('Заполните все обязательные поля!');
+            }
 
-            // Визуальный отклик, что кнопка нажата и работает
             const originalText = btn.innerText;
             btn.innerText = isLoginMode ? 'Вход...' : 'Регистрация...';
             btn.disabled = true;
@@ -386,7 +381,7 @@
                 if (error) {
                     alert('Ошибка регистрации: ' + error.message);
                 } else {
-                    alert('Регистрация успешна! Теперь вы можете переключиться на вкладку "Войти" и авторизоваться.');
+                    alert('Регистрация успешна! Теперь вы можете войти в аккаунт.');
                     toggleAuthMode();
                 }
             }
@@ -410,7 +405,7 @@
                     if (user.user_metadata && user.user_metadata.name) {
                         document.getElementById('profile-name').innerText = user.user_metadata.name;
                     } else {
-                        document.getElementById('profile-name').innerText = 'имя пользователя не заданно';
+                        document.getElementById('profile-name').innerText = 'имя пользователя не задано';
                     }
                     
                     document.getElementById('profile-email').innerText = `моя почта: ${user.email}`;
@@ -419,4 +414,8 @@
                     roleBadge.className = 'admin-panel';
                     roleBadge.style.textAlign = 'center';
                     roleBadge.style.marginTop = '0px';
-                    roleBadge.style.ma
+                    roleBadge.style.marginBottom = '20px';
+                    
+                    if (user.app_metadata && user.app_metadata.role === 'admin') {
+                        roleBadge.innerHTML = `<h3>👑 Роль: Администратор</h3>`;
+           
