@@ -124,8 +124,8 @@
             body { padding-bottom: 140px; }
         }
 
-        /* --- СТИЛИ ДЛЯ СМЕНЫ ТЕМ ОФОРМЛЕНИЯ --- */
-        /* Зеленая тема */
+        /* --- ДИНАМИЧЕСКИЕ СТИЛИ ДЛЯ СМЕНЫ ТЕМ ОФОРМЛЕНИЯ --- */
+        /* Зеленая тема (Киберпанк) */
         body.theme-green .nav-btn.active,
         body.theme-green .contract-btn,
         body.theme-green .submit-btn:not(.secondary-btn) { background: #00ff66 !important; color: #000 !important; box-shadow: 0 4px 12px rgba(0, 255, 102, 0.3) !important; }
@@ -142,7 +142,7 @@
         body.theme-green .footer-badge { border-top-color: rgba(0, 255, 102, 0.3) !important; }
         body.theme-green .download-image-link { border-color: #00ff66 !important; box-shadow: 0 8px 24px rgba(0, 255, 102, 0.3) !important; }
 
-        /* Красная тема */
+        /* Красная тема (Огонь) */
         body.theme-red .nav-btn.active,
         body.theme-red .contract-btn,
         body.theme-red .submit-btn:not(.secondary-btn) { background: #ff3333 !important; color: #fff !important; box-shadow: 0 4px 12px rgba(255, 51, 51, 0.3) !important; }
@@ -158,7 +158,7 @@
         body.theme-red .footer-badge { border-top-color: rgba(255, 51, 51, 0.3) !important; }
         body.theme-red .download-image-link { border-color: #ff3333 !important; box-shadow: 0 8px 24px rgba(255, 51, 51, 0.3) !important; }
 
-        /* Выпадающий список */
+        /* Оформление выпадающего списка тем */
         .theme-box { margin-top: 20px; padding: 15px; background: rgba(21, 29, 47, 0.6); border: 1px solid rgba(148, 163, 184, 0.15); border-radius: 12px; text-align: left; }
         .theme-box label { display: block; font-size: 14px; color: #94a3b8; margin-bottom: 8px; font-weight: 600; }
         .theme-select { width: 100%; background: #0b0f19; border: 1px solid rgba(148, 163, 184, 0.2); padding: 10px; border-radius: 8px; color: #fff; font-size: 14px; outline: none; cursor: pointer; }
@@ -282,7 +282,7 @@
                     if (!response.ok) return { data: null, error: { message: data.msg || data.error_description || 'Ошибка запроса' } };
                     return { data, error: null };
                 } catch (e) {
-                    return { data: null, error: { message: 'Нет подключения к serveru авторизации.' } };
+                    return { data: null, error: { message: 'Нет подключения к серверу авторизации.' } };
                 }
             }
         };
@@ -315,13 +315,21 @@
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
             const name = document.getElementById('auth-name').value;
+            const btn = document.getElementById('main-auth-btn');
 
             if (!email || !password || (!isLoginMode && !name)) return alert('Заполните все поля!');
 
+            const originalText = btn.innerText;
+            btn.innerText = isLoginMode ? 'Вход...' : 'Регистрация...';
+            btn.disabled = true;
+
             if (isLoginMode) {
                 const { data, error } = await nativeSupabase.auth.signInWithPassword({ email, password });
+                btn.innerText = originalText;
+                btn.disabled = false;
+                
                 if (error) alert('Ошибка входа: ' + error.message);
-                else checkUser();
+                else await checkUser();
             } else {
                 const { data, error } = await nativeSupabase.auth.signUp({ 
                     email, 
@@ -330,14 +338,20 @@
                         data: { name: name }
                     }
                 });
+                btn.innerText = originalText;
+                btn.disabled = false;
+                
                 if (error) alert('Ошибка регистрации: ' + error.message);
-                else alert('Регистрация успешна! Теперь вы можете войти.');
+                else {
+                    alert('Регистрация успешна! Теперь вы можете войти.');
+                    toggleAuthMode();
+                }
             }
         }
 
         async function logout() {
             await nativeSupabase.auth.signOut();
-            checkUser();
+            await checkUser();
         }
 
         async function checkUser() {
@@ -367,11 +381,4 @@
                     if (user.app_metadata && user.app_metadata.role === 'admin') {
                         roleBadge.style.background = 'rgba(220, 38, 38, 0.1)';
                         roleBadge.style.borderColor = 'rgba(220, 38, 38, 0.4)';
-                        roleBadge.innerHTML = `<h3 style="color: #f87171; margin:0; display: inline-flex; align-items: center; gap: 8px;">👑 Роль: Администратор</h3>`;
-                    } else {
-                        roleBadge.style.background = 'rgba(168, 85, 247, 0.1)';
-                        roleBadge.style.borderColor = 'rgba(168, 85, 247, 0.4)';
-                        roleBadge.innerHTML = `<h3 style="color: #c084fc; margin:0; display: inline-flex; align-items: center; gap: 8px;">👤 Роль: Пользователь</h3>`;
-                    }
-                    
-                    const logoutBtn = document.querySelector('butto
+                        roleBadge.innerHTML = `<h3 style="color: #f87171; 
