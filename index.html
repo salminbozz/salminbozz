@@ -115,7 +115,7 @@
         .florein-card { background: #111622; border: 1px solid rgba(168, 85, 247, 0.15); border-radius: 16px; padding: 24px; width: 100%; }
         .card-date { font-size: 13px; color: #c084fc; font-weight: 800; margin-bottom: 12px; }
         h3 { font-size: 17px; color: #ffffff; margin-bottom: 12px; }
-        p { font-size: 14px; color: #94a3b8; margin-bottom: 20px; line-height: 1.5; }
+        p { font-size: 14px; color: #94a3b8; line-height: 1.5; }
         
         .footer-badge { position: fixed; bottom: 0; left: 0; width: 100%; background: #070a12; border-top: 1px solid rgba(168, 85, 247, 0.2); padding: 12px 0; text-align: center; font-size: 11px; color: #a78bfa; text-transform: uppercase; letter-spacing: 1px; z-index: 1010; }
 
@@ -143,19 +143,19 @@
         </div>
     </div>
 
+    <!-- Вкладка Новостей полностью под твоим контролем -->
     <div class="tab-content" id="news-tab">
         <div class="section-header">
             <h2>Лента новостей</h2>
         </div>
         <div class="news-feed" id="news-container">
             
-            <!-- Вот тут ты можешь добавлять свои новости -->
+            <!-- Твоя новость -->
             <div class="florein-card">
                 <div class="card-date">01.06.26 10:20</div>
                 <h3>Открыта регистрация новых пользователей</h3>
-                <p>Теперь на сайте доступна система регистрации. Создайте свой аккаунт, чтобы получить доступ к закрытым разделам и персонализированным настройкам.</p>
+                <p>Теперь на сайте доступна система регистрации. Создайте свой аккаунт во вкладке «Профиль», чтобы получить доступ к закрытым разделам и персонализированным настройкам.</p>
             </div>
-            <!-- Добавляй новые блоки ниже -->
 
         </div>
     </div>
@@ -188,8 +188,159 @@
     <a href="https://max.ru/" target="_blank" class="download-image-link" title="Скачать Max"></a>
 
     <script>
-        // Твой существующий JavaScript для Supabase и вкладок остается без изменений...
-        // Я сократил его здесь для краткости, чтобы ты мог просто скопировать этот код
+        const SUPABASE_URL = 'https://aapkvsfbgbbtxofxmyqn.supabase.co'; 
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhcGt2c2ZiZ2JidHhvZnhteXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMjA1NDgsImV4cCI6MjA5NTc5NjU0OH0.1yPqAnrEMpHnZPXwbR9DoqBNZDRk5C0a3EGwD1tjTGQ';
+        
+        const nativeSupabase = {
+            auth: {
+                async signUp({ email, password, options }) {
+                    return nativeSupabase._request('/auth/v1/signup', { email, password, options });
+                },
+                async signInWithPassword({ email, password }) {
+                    const res = await nativeSupabase._request('/auth/v1/token?grant_type=password', { email, password });
+                    if (!res.error && res.data && res.data.access_token) {
+                        localStorage.setItem('sb_token', res.data.access_token);
+                    }
+                    return res;
+                },
+                async getUser() {
+                    const token = localStorage.getItem('sb_token');
+                    if (!token) return { data: { user: null }, error: null };
+                    const res = await nativeSupabase._request('/auth/v1/user', null, 'GET', token);
+                    if (res.error) {
+                        localStorage.removeItem('sb_token');
+                        return { data: { user: null }, error: res.error };
+                    }
+                    return { data: { user: res.data }, error: null };
+                },
+                async signOut() {
+                    localStorage.removeItem('sb_token');
+                    return { error: null };
+                }
+            },
+            async _request(path, body, method = 'POST', token = null) {
+                try {
+                    const headers = {
+                        'apikey': SUPABASE_KEY,
+                        'Content-Type': 'application/json'
+                    };
+                    if (token) headers['Authorization'] = `Bearer ${token}`;
+                    else if (localStorage.getItem('sb_token')) headers['Authorization'] = `Bearer ${localStorage.getItem('sb_token')}`;
+
+                    const options = { method, headers };
+                    if (body && method !== 'GET') options.body = JSON.stringify(body);
+
+                    const response = await fetch(`${SUPABASE_URL}${path}`, options);
+                    const data = await response.json();
+                    
+                    if (!response.ok) return { data: null, error: { message: data.msg || data.error_description || 'Ошибка запроса' } };
+                    return { data, error: null };
+                } catch (e) {
+                    return { data: null, error: { message: 'Нет подключения к серверу авторизации.' } };
+                }
+            }
+        };
+    </script>
+
+    <script>
+        function openTab(btn, id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            const targetTab = document.getElementById(id);
+            if (targetTab) {
+                targetTab.classList.add('active');
+            }
+            btn.classList.add('active');
+        }
+
+        let isLoginMode = true;
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            document.getElementById('auth-title').innerText = isLoginMode ? 'Войти в аккаунт' : 'Регистрация нового аккаунта';
+            document.getElementById('main-auth-btn').innerText = isLoginMode ? 'Войти' : 'Создать аккаунт';
+            document.getElementById('toggle-auth-btn').innerText = isLoginMode ? 'Регистрация' : 'Уже есть аккаунт';
+            document.getElementById('auth-name').style.display = isLoginMode ? 'none' : 'block';
+        }
+    </script>
+
+    <script>
+        async function handleAuth() {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const name = document.getElementById('auth-name').value;
+
+            if (!email || !password || (!isLoginMode && !name)) return alert('Заполните все поля!');
+
+            if (isLoginMode) {
+                const { data, error } = await nativeSupabase.auth.signInWithPassword({ email, password });
+                if (error) alert('Ошибка входа: ' + error.message);
+                else checkUser();
+            } else {
+                const { data, error } = await nativeSupabase.auth.signUp({ 
+                    email, 
+                    password,
+                    options: {
+                        data: { name: name }
+                    }
+                });
+                if (error) alert('Ошибка регистрации: ' + error.message);
+                else alert('Регистрация успешна! Теперь вы можете войти.');
+            }
+        }
+
+        async function logout() {
+            await nativeSupabase.auth.signOut();
+            checkUser();
+        }
+
+        async function checkUser() {
+            try {
+                const { data: { user } } = await nativeSupabase.auth.getUser();
+                if (user) {
+                    document.getElementById('auth-form-block').style.display = 'none';
+                    document.getElementById('profile-block').style.display = 'block';
+                    
+                    if (user.user_metadata && user.user_metadata.name) {
+                        document.getElementById('profile-name').innerText = user.user_metadata.name;
+                    } else {
+                        document.getElementById('profile-name').innerText = 'имя пользователя не заданно';
+                    }
+                    
+                    document.getElementById('profile-email').innerText = `моя почта: ${user.email}`;
+                    
+                    const oldBadge = document.getElementById('user-role-badge');
+                    if (oldBadge) oldBadge.remove();
+
+                    const roleBadge = document.createElement('div');
+                    roleBadge.id = 'user-role-badge';
+                    roleBadge.className = 'admin-panel';
+                    roleBadge.style.textAlign = 'center';
+                    roleBadge.style.marginTop = '20px';
+                    
+                    if (user.app_metadata && user.app_metadata.role === 'admin') {
+                        roleBadge.style.background = 'rgba(220, 38, 38, 0.1)';
+                        roleBadge.style.borderColor = 'rgba(220, 38, 38, 0.4)';
+                        roleBadge.innerHTML = `<h3 style="color: #f87171; margin:0; display: inline-flex; align-items: center; gap: 8px;">👑 Роль: Администратор</h3>`;
+                    } else {
+                        roleBadge.style.background = 'rgba(168, 85, 247, 0.1)';
+                        roleBadge.style.borderColor = 'rgba(168, 85, 247, 0.4)';
+                        roleBadge.innerHTML = `<h3 style="color: #c084fc; margin:0; display: inline-flex; align-items: center; gap: 8px;">👤 Роль: Пользователь</h3>`;
+                    }
+                    
+                    const logoutBtn = document.querySelector('button[onclick="logout()"]');
+                    logoutBtn.parentNode.insertBefore(roleBadge, logoutBtn);
+
+                } else {
+                    document.getElementById('auth-form-block').style.display = 'block';
+                    document.getElementById('profile-block').style.display = 'none';
+                    const oldBadge = document.getElementById('user-role-badge');
+                    if (oldBadge) oldBadge.remove();
+                }
+            } catch (e) {}
+        }
+        
+        document.addEventListener('DOMContentLoaded', checkUser);
     </script>
 </body>
 </html>
