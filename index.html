@@ -212,6 +212,7 @@
             <p id="profile-name">Загрузка...</p>
             <p id="profile-email"></p>
 
+            <!-- Блок кастомизации темы -->
             <div class="theme-select-block">
                 <label for="theme-selector">🎨 Персонализация темы:</label>
                 <select id="theme-selector" class="theme-select" onchange="changeTheme(this.value)">
@@ -275,10 +276,12 @@
                     const response = await fetch(`${SUPABASE_URL}${path}`, options);
                     const data = await response.json();
                     
-                    if (!response.ok) return { data: null, error: { message: data.msg || data.error_description || 'Ошибка запроса' } };
+                    if (!response.ok) {
+                        return { data: null, error: { message: data.msg || data.error_description || data.message || 'Ошибка запроса' } };
+                    }
                     return { data, error: null };
                 } catch (e) {
-                    return { data: null, error: { message: 'Нет подключения к serverу авторизации.' } };
+                    return { data: null, error: { message: 'Нет подключения к серверу авторизации.' } };
                 }
             }
         };
@@ -309,21 +312,17 @@
         function changeTheme(themeName) {
             const selectedTheme = themes[themeName] || themes.purple;
             
-            // Применяем CSS переменные к документу
             document.documentElement.style.setProperty('--main-color', selectedTheme.color);
             document.documentElement.style.setProperty('--main-color-hover', selectedTheme.hover);
             document.documentElement.style.setProperty('--main-color-rgba', selectedTheme.rgba);
             document.documentElement.style.setProperty('--main-color-rgba-light', selectedTheme.light);
             
-            // Сохраняем выбор в память смартфона
             localStorage.setItem('site_theme', themeName);
             
-            // Синхронизируем значение селектора
             const selector = document.getElementById('theme-selector');
             if(selector) selector.value = themeName;
         }
 
-        // Загружаем сохраненную тему сразу при открытии страницы
         const savedTheme = localStorage.getItem('site_theme') || 'purple';
         changeTheme(savedTheme);
     </script>
@@ -360,8 +359,11 @@
 
             if (isLoginMode) {
                 const { data, error } = await nativeSupabase.auth.signInWithPassword({ email, password });
-                if (error) alert('Ошибка входа: ' + error.message);
-                else checkUser();
+                if (error) {
+                    alert('Ошибка входа: ' + error.message);
+                } else {
+                    checkUser();
+                }
             } else {
                 const { data, error } = await nativeSupabase.auth.signUp({ 
                     email, 
@@ -370,8 +372,12 @@
                         data: { name: name }
                     }
                 });
-                if (error) alert('Ошибка регистрации: ' + error.message);
-                else alert('Регистрация успешна! Теперь вы можете войти.');
+                if (error) {
+                    alert('Ошибка регистрации: ' + error.message);
+                } else {
+                    alert('Регистрация успешна! Теперь вы можете войти.');
+                    toggleAuthMode();
+                }
             }
         }
 
@@ -413,4 +419,4 @@
                     const themeBlock = document.querySelector('.theme-select-block');
                     themeBlock.parentNode.insertBefore(roleBadge, themeBlock);
 
-                    // Убеждаемся, что селектор темы отображае
+     
