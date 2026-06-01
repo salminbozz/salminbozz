@@ -5,14 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ты еще вернёшься к нам</title>
     <style>
-        /* Базовые переменные цвета, которые будут меняться через JavaScript */
-        :root {
-            --main-color: #a855f7;
-            --main-color-hover: #9333ea;
-            --main-color-rgba: rgba(168, 85, 247, 0.4);
-            --main-color-rgba-light: rgba(168, 85, 247, 0.15);
-        }
-
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         
         body { 
@@ -35,13 +27,12 @@
             background-image: url('banner.jpg'); 
             background-size: cover; 
             background-position: center;
-            border: 1px solid var(--main-color-rgba); 
-            transition: border 0.3s ease;
+            border: 1px solid rgba(168, 85, 247, 0.4); 
         }
         
         .nav-menu { display: flex; gap: 10px; margin-bottom: 25px; background: rgba(21, 29, 47, 0.6); padding: 6px; border-radius: 12px; z-index: 10; }
         .nav-btn { background: transparent; border: none; color: #94a3b8; padding: 10px 20px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: 0.3s; font-size: 14px;}
-        .nav-btn.active { background: var(--main-color); color: #fff; box-shadow: 0 4px 12px var(--main-color-rgba); }
+        .nav-btn.active { background: #a855f7; color: #fff; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3); }
         
         .tab-content { display: none; width: 100%; max-width: 600px; }
         .tab-content.active { display: block; }
@@ -57,31 +48,29 @@
             padding: 40px 30px; 
             border-radius: 20px; 
             text-align: center; 
-            border: 1px solid var(--main-color-rgba); 
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); 
+            border: 1px solid rgba(168, 85, 247, 0.4); 
+            box-shadow: 0 10px 30px rgba(168, 85, 247, 0.15); 
             width: 100%;
             overflow: hidden;
-            transition: border 0.3s ease;
         }
         .contract-card h1 { font-size: 22px; color: #ffffff; margin-bottom: 15px; position: relative; z-index: 2; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6); }
         .contract-card p { font-size: 14px; color: #e2e8f0; margin-bottom: 25px; line-height: 1.6; position: relative; z-index: 2; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6); }
-        .contract-btn { display: inline-block; background: var(--main-color); color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 10px; font-weight: 600; box-shadow: 0 4px 12px var(--main-color-rgba); transition: 0.2s ease; position: relative; z-index: 2; }
-        .contract-btn:hover { background: var(--main-color-hover); transform: translateY(-1px); }
+        .contract-btn { display: inline-block; background: #a855f7; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 10px; font-weight: 600; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4); transition: 0.2s ease; position: relative; z-index: 2; }
+        .contract-btn:hover { background: #9333ea; transform: translateY(-1px); }
 
         .auth-card {
             background: linear-gradient(135deg, #151d2f 0%, #0f172a 100%);
             padding: 30px;
             border-radius: 20px;
-            border: 1px solid var(--main-color-rgba);
+            border: 1px solid rgba(168, 85, 247, 0.3);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
             width: 100%;
-            transition: border 0.3s ease;
         }
         .auth-card h2 { font-size: 20px; margin-bottom: 20px; text-align: center; color: #fff; }
         .auth-form { display: flex; flex-direction: column; gap: 15px; }
         .auth-form input {
             background: #0b0f19;
-            border: 1px solid rgba(148, 163, 184, 0.2);
+            border: 1px solid rgba(168, 85, 247, 0.2);
             padding: 12px 16px;
             border-radius: 10px;
             color: #fff;
@@ -89,69 +78,46 @@
             outline: none;
             transition: 0.3s;
         }
-        .auth-form input:focus { border-color: var(--main-color); box-shadow: 0 0 8px var(--main-color-rgba); }
+        .auth-form input:focus { border-color: #a855f7; box-shadow: 0 0 8px rgba(168, 85, 247, 0.2); }
         .auth-buttons { display: flex; gap: 10px; margin-top: 5px; }
-        .submit-btn { flex: 1; background: var(--main-color); color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .submit-btn:hover { background: var(--main-color-hover); }
+        .submit-btn { flex: 1; background: #a855f7; color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .submit-btn:hover { background: #9333ea; }
         .secondary-btn { background: rgba(148, 163, 184, 0.1); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.2); }
         .secondary-btn:hover { background: rgba(148, 163, 184, 0.2); color: #fff; }
         
         .profile-info { text-align: center; }
         .profile-info p { margin-bottom: 10px; font-size: 16px; color: #cbd5e1; }
-        .profile-info #profile-name { margin-bottom: 10px; font-size: 16px; color: var(--main-color); font-weight: 600; transition: color 0.3s ease; }
-
-        .theme-select-block {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(21, 29, 47, 0.6);
-            border: 1px solid rgba(148, 163, 184, 0.1);
-            border-radius: 12px;
-            text-align: left;
-        }
-        .theme-select-block label { display: block; font-size: 14px; color: #94a3b8; margin-bottom: 8px; font-weight: 600; }
-        .theme-select {
-            width: 100%;
-            background: #0b0f19;
-            border: 1px solid var(--main-color-rgba);
-            padding: 10px;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 14px;
-            outline: none;
-            cursor: pointer;
-            transition: border 0.3s ease;
-        }
+        .profile-info #profile-name { margin-bottom: 10px; font-size: 16px; color: #a855f7; font-weight: 600; }
 
         .admin-panel {
             margin-top: 25px;
             padding: 20px;
+            background: rgba(220, 38, 38, 0.1);
+            border: 1px solid rgba(220, 38, 38, 0.4);
             border-radius: 12px;
             text-align: left;
-            border: 1px solid var(--main-color-rgba);
-            background: var(--main-color-rgba-light);
-            transition: all 0.3s ease;
         }
-        .admin-panel h3 { color: #fff; margin-bottom: 10px; font-size: 16px; display: flex; align-items: center; gap: 8px;}
-        .admin-panel p { color: #cbd5e1; font-size: 13px; margin-bottom: 0; }
+        .admin-panel h3 { color: #f87171; margin-bottom: 10px; font-size: 16px; display: flex; align-items: center; gap: 8px;}
+        .admin-panel p { color: #fca5a5; font-size: 13px; margin-bottom: 0; }
 
         .download-image-link {
             position: fixed;
             bottom: 70px; right: 20px; width: 55px; height: 55px; 
             background-image: url('max.png'); background-size: cover; background-position: center;
-            border-radius: 50%; border: 2px solid var(--main-color); box-shadow: 0 8px 24px var(--main-color-rgba);
-            z-index: 999; transition: all 0.2s ease; display: block;
+            border-radius: 50%; border: 2px solid #a855f7; box-shadow: 0 8px 24px rgba(168, 85, 247, 0.3);
+            z-index: 999; transition: transform 0.2s ease; display: block;
         }
         .download-image-link:hover { transform: scale(1.05); }
         
         .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding: 0 5px; }
         
         .news-feed { display: flex; flex-direction: column; gap: 16px; width: 100%; }
-        .florein-card { background: #111622; border: 1px solid var(--main-color-rgba-light); border-radius: 16px; padding: 24px; width: 100%; transition: border 0.3s ease; text-align: left; }
-        .card-date { font-size: 13px; color: var(--main-color); font-weight: 800; margin-bottom: 12px; transition: color 0.3s ease; }
-        .florein-card h3 { font-size: 17px; color: #ffffff; margin-bottom: 12px; }
-        .florein-card p { font-size: 14px; color: #94a3b8; line-height: 1.5; }
+        .florein-card { background: #111622; border: 1px solid rgba(168, 85, 247, 0.15); border-radius: 16px; padding: 24px; width: 100%; }
+        .card-date { font-size: 13px; color: #c084fc; font-weight: 800; margin-bottom: 12px; }
+        h3 { font-size: 17px; color: #ffffff; margin-bottom: 12px; }
+        p { font-size: 14px; color: #94a3b8; line-height: 1.5; }
         
-        .footer-badge { position: fixed; bottom: 0; left: 0; width: 100%; background: #070a12; border-top: 1px solid var(--main-color-rgba); padding: 12px 0; text-align: center; font-size: 11px; color: var(--main-color); text-transform: uppercase; letter-spacing: 1px; z-index: 1010; transition: border 0.3s ease, color 0.3s ease; }
+        .footer-badge { position: fixed; bottom: 0; left: 0; width: 100%; background: #070a12; border-top: 1px solid rgba(168, 85, 247, 0.2); padding: 12px 0; text-align: center; font-size: 11px; color: #a78bfa; text-transform: uppercase; letter-spacing: 1px; z-index: 1010; }
 
         @media (max-width: 640px) { 
             .download-image-link { bottom: 60px; right: 15px; width: 50px; height: 50px; } 
@@ -164,12 +130,12 @@
     <div class="header-banner"></div>
     
     <div class="nav-menu">
-        <button class="nav-btn" onclick="openTab(this, 'main-tab')">Главная</button>
-        <button class="nav-btn active" onclick="openTab(this, 'news-tab')">Новости</button>
+        <button class="nav-btn active" onclick="openTab(this, 'main-tab')">Главная</button>
+        <button class="nav-btn" onclick="openTab(this, 'news-tab')">Новости</button>
         <button class="nav-btn" onclick="openTab(this, 'auth-tab')">Профиль</button>
     </div>
 
-    <div class="tab-content" id="main-tab">
+    <div class="tab-content active" id="main-tab">
         <div class="contract-card">
             <h1>Служба по контракту выбор достойных</h1>
             <p>Узнайте ключевые условия, актуальные требования к кандидатам, подробную информацию о выплатах, льготах и социальных гарантиях для военнослужащих по контракту.</p>
@@ -177,12 +143,14 @@
         </div>
     </div>
 
-    <div class="tab-content active" id="news-tab">
+    <!-- Вкладка Новостей полностью под твоим контролем -->
+    <div class="tab-content" id="news-tab">
         <div class="section-header">
             <h2>Лента новостей</h2>
         </div>
         <div class="news-feed" id="news-container">
             
+            <!-- Твоя новость -->
             <div class="florein-card">
                 <div class="card-date">01.06.26 10:20</div>
                 <h3>Открыта регистрация новых пользователей</h3>
@@ -211,18 +179,7 @@
             <p id="profile-name">Загрузка...</p>
             <p id="profile-email"></p>
 
-            <div id="role-badge-container"></div>
-
-            <div class="theme-select-block" style="margin-bottom: 20px;">
-                <label for="theme-selector">🎨 Персонализация темы:</label>
-                <select id="theme-selector" class="theme-select" onchange="changeTheme(this.value)">
-                    <option value="purple">Фиолетовый неон (Стандарт)</option>
-                    <option value="green">Киберпанк (Зеленый)</option>
-                    <option value="red">Огонь (Красный)</option>
-                </select>
-            </div>
-
-            <button class="submit-btn secondary-btn" onclick="logout()">Выйти из аккаунта</button>
+            <button class="submit-btn secondary-btn" style="margin-top: 20px;" onclick="logout()">Выйти из аккаунта</button>
         </div>
     </div>
 
@@ -276,52 +233,13 @@
                     const response = await fetch(`${SUPABASE_URL}${path}`, options);
                     const data = await response.json();
                     
-                    if (!response.ok) {
-                        return { data: null, error: { message: data.msg || data.error_description || data.message || 'Ошибка запроса к Supabase' } };
-                    }
+                    if (!response.ok) return { data: null, error: { message: data.msg || data.error_description || 'Ошибка запроса' } };
                     return { data, error: null };
                 } catch (e) {
                     return { data: null, error: { message: 'Нет подключения к серверу авторизации.' } };
                 }
             }
         };
-    </script>
-
-    <script>
-        const themes = {
-            purple: {
-                color: '#a855f7',
-                hover: '#9333ea',
-                rgba: 'rgba(168, 85, 247, 0.4)',
-                light: 'rgba(168, 85, 247, 0.15)'
-            },
-            green: {
-                color: '#00ff66',
-                hover: '#00cc52',
-                rgba: 'rgba(0, 255, 102, 0.4)',
-                light: 'rgba(0, 255, 102, 0.15)'
-            },
-            red: {
-                color: '#ff3333',
-                hover: '#cc0000',
-                rgba: 'rgba(255, 51, 51, 0.4)',
-                light: 'rgba(255, 51, 51, 0.15)'
-            }
-        };
-
-        function changeTheme(themeName) {
-            const selectedTheme = themes[themeName] || themes.purple;
-            
-            document.documentElement.style.setProperty('--main-color', selectedTheme.color);
-            document.documentElement.style.setProperty('--main-color-hover', selectedTheme.hover);
-            document.documentElement.style.setProperty('--main-color-rgba', selectedTheme.rgba);
-            document.documentElement.style.setProperty('--main-color-rgba-light', selectedTheme.light);
-            
-            localStorage.setItem('site_theme', themeName);
-            
-            const selector = document.getElementById('theme-selector');
-            if(selector) selector.value = themeName;
-        }
     </script>
 
     <script>
@@ -344,60 +262,41 @@
             document.getElementById('toggle-auth-btn').innerText = isLoginMode ? 'Регистрация' : 'Уже есть аккаунт';
             document.getElementById('auth-name').style.display = isLoginMode ? 'none' : 'block';
         }
+    </script>
 
+    <script>
         async function handleAuth() {
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
             const name = document.getElementById('auth-name').value;
-            const btn = document.getElementById('main-auth-btn');
 
-            if (!email || !password || (!isLoginMode && !name)) {
-                return alert('Заполните все обязательные поля!');
-            }
-
-            const originalText = btn.innerText;
-            btn.innerText = isLoginMode ? 'Вход...' : 'Регистрация...';
-            btn.disabled = true;
+            if (!email || !password || (!isLoginMode && !name)) return alert('Заполните все поля!');
 
             if (isLoginMode) {
                 const { data, error } = await nativeSupabase.auth.signInWithPassword({ email, password });
-                btn.innerText = originalText;
-                btn.disabled = false;
-
-                if (error) {
-                    alert('Ошибка авторизации: ' + error.message);
-                } else {
-                    await checkUser();
-                }
+                if (error) alert('Ошибка входа: ' + error.message);
+                else checkUser();
             } else {
                 const { data, error } = await nativeSupabase.auth.signUp({ 
                     email, 
                     password,
-                    options: { data: { name: name } }
+                    options: {
+                        data: { name: name }
+                    }
                 });
-                btn.innerText = originalText;
-                btn.disabled = false;
-
-                if (error) {
-                    alert('Ошибка регистрации: ' + error.message);
-                } else {
-                    alert('Регистрация успешна! Теперь вы можете войти в аккаунт.');
-                    toggleAuthMode();
-                }
+                if (error) alert('Ошибка регистрации: ' + error.message);
+                else alert('Регистрация успешна! Теперь вы можете войти.');
             }
         }
 
         async function logout() {
             await nativeSupabase.auth.signOut();
-            await checkUser();
+            checkUser();
         }
 
         async function checkUser() {
             try {
                 const { data: { user } } = await nativeSupabase.auth.getUser();
-                const container = document.getElementById('role-badge-container');
-                if (container) container.innerHTML = ''; 
-
                 if (user) {
                     document.getElementById('auth-form-block').style.display = 'none';
                     document.getElementById('profile-block').style.display = 'block';
@@ -405,17 +304,43 @@
                     if (user.user_metadata && user.user_metadata.name) {
                         document.getElementById('profile-name').innerText = user.user_metadata.name;
                     } else {
-                        document.getElementById('profile-name').innerText = 'имя пользователя не задано';
+                        document.getElementById('profile-name').innerText = 'имя пользователя не заданно';
                     }
                     
                     document.getElementById('profile-email').innerText = `моя почта: ${user.email}`;
                     
+                    const oldBadge = document.getElementById('user-role-badge');
+                    if (oldBadge) oldBadge.remove();
+
                     const roleBadge = document.createElement('div');
+                    roleBadge.id = 'user-role-badge';
                     roleBadge.className = 'admin-panel';
                     roleBadge.style.textAlign = 'center';
-                    roleBadge.style.marginTop = '0px';
-                    roleBadge.style.marginBottom = '20px';
+                    roleBadge.style.marginTop = '20px';
                     
                     if (user.app_metadata && user.app_metadata.role === 'admin') {
-                        roleBadge.innerHTML = `<h3>👑 Роль: Администратор</h3>`;
-           
+                        roleBadge.style.background = 'rgba(220, 38, 38, 0.1)';
+                        roleBadge.style.borderColor = 'rgba(220, 38, 38, 0.4)';
+                        roleBadge.innerHTML = `<h3 style="color: #f87171; margin:0; display: inline-flex; align-items: center; gap: 8px;">👑 Роль: Администратор</h3>`;
+                    } else {
+                        roleBadge.style.background = 'rgba(168, 85, 247, 0.1)';
+                        roleBadge.style.borderColor = 'rgba(168, 85, 247, 0.4)';
+                        roleBadge.innerHTML = `<h3 style="color: #c084fc; margin:0; display: inline-flex; align-items: center; gap: 8px;">👤 Роль: Пользователь</h3>`;
+                    }
+                    
+                    const logoutBtn = document.querySelector('button[onclick="logout()"]');
+                    logoutBtn.parentNode.insertBefore(roleBadge, logoutBtn);
+
+                } else {
+                    document.getElementById('auth-form-block').style.display = 'block';
+                    document.getElementById('profile-block').style.display = 'none';
+                    const oldBadge = document.getElementById('user-role-badge');
+                    if (oldBadge) oldBadge.remove();
+                }
+            } catch (e) {}
+        }
+        
+        document.addEventListener('DOMContentLoaded', checkUser);
+    </script>
+</body>
+</html>
