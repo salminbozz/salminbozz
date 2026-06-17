@@ -1,1 +1,35 @@
+<?php
+$data = [
+    'category' => [
+        'one'   => ['priority' => '3', 'views' => ['user_count' => 345, 'bot_count' => 9392]],
+        'two'   => ['priority' => '1', 'views' => ['user_count' => 123222, 'bot_count' => 99]],
+        'three' => ['priority' => '2', 'views' => ['user_count' => 23, 'bot_count' => 1]],
+    ]
+];
 
+function processCategoryArray($data) {
+    if (!isset($data['category']) || empty($data['category'])) return;
+
+    $categories = $data['category'];
+    
+    $botCounts = [];
+    foreach ($categories as $cat) {
+        if (isset($cat['views']['bot_count'])) {
+            $botCounts[] = $cat['views']['bot_count'];
+        }
+    }
+    
+    echo "Максимальный bot_count: " . max($botCounts) . "\n";
+    echo "Минимальный bot_count: " . min($botCounts) . "\n";
+
+    uasort($categories, function($a, $b) {
+        return (int)$a['priority'] <=> (int)$b['priority'];
+    });
+
+    foreach ($categories as $key => $cat) {
+        echo "Категория: {$key} | user_count: {$cat['views']['user_count']}, bot_count: {$cat['views']['bot_count']}\n";
+    }
+}
+
+processCategoryArray($data);
+?>
