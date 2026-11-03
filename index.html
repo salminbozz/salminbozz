@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Приватный Чат</title>
-    <!-- Подключаем клиент Supabase для работы с базой данных -->
+    <title>Приватный Мессенджер</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
@@ -15,37 +14,99 @@
         }
 
         body {
-            background-color: #1e1e24;
-            color: #e0e0e6;
+            background-color: #0f172a;
+            color: #e2e8f0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
         }
 
-        .chat-container {
+        .app-container {
             width: 100%;
-            max-width: 600px;
+            max-width: 900px;
             height: 90vh;
-            background-color: #2b2b36;
+            background-color: #1e293b;
             border-radius: 12px;
             display: flex;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid #334155;
+            overflow: hidden;
+        }
+
+        /* Левая панель - список чатов */
+        .sidebar {
+            width: 320px;
+            background-color: #0f172a;
+            border-right: 1px solid #334155;
+            display: flex;
             flex-direction: column;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-            border: 1px solid #3a3a4c;
+        }
+
+        .user-profile {
+            padding: 16px;
+            border-bottom: 1px solid #334155;
+            background-color: #1e293b;
+        }
+
+        .my-id-badge {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            background-color: #0f172a;
+            padding: 6px 10px;
+            border-radius: 6px;
+            margin-top: 6px;
+            word-break: break-all;
+            user-select: all;
+        }
+
+        .new-chat-box {
+            padding: 12px;
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .chat-item {
+            padding: 14px 16px;
+            border-bottom: 1px solid #1e293b;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .chat-item:hover, .chat-item.active {
+            background-color: #334155;
+        }
+
+        .chat-item-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #f8fafc;
+        }
+
+        .chat-item-sub {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        /* Правая панель - окно диалога */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #1e293b;
         }
 
         .chat-header {
             padding: 16px 20px;
-            background-color: #23232d;
-            border-bottom: 1px solid #3a3a4c;
-            border-radius: 12px 12px 0 0;
-        }
-
-        .chat-header h2 {
-            font-size: 1.1rem;
-            color: #a0a0b2;
-            font-weight: 500;
+            background-color: #0f172a;
+            border-bottom: 1px solid #334155;
+            font-weight: 600;
         }
 
         .messages-list {
@@ -54,55 +115,56 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .message-item {
-            background-color: #353545;
+            max-width: 70%;
             padding: 10px 14px;
-            border-radius: 8px;
-            max-width: 80%;
-            word-wrap: break-word;
-            border-left: 3px solid #6c5ce7;
-        }
-
-        .message-author {
-            font-size: 0.8rem;
-            color: #8a8aa3;
-            margin-bottom: 4px;
-        }
-
-        .message-text {
+            border-radius: 12px;
             font-size: 0.95rem;
             line-height: 1.4;
-            color: #eeeeee;
+            word-wrap: break-word;
+        }
+
+        .message-item.outgoing {
+            align-self: flex-end;
+            background-color: #3b82f6;
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+
+        .message-item.incoming {
+            align-self: flex-start;
+            background-color: #334155;
+            color: #f8fafc;
+            border-bottom-left-radius: 2px;
         }
 
         .chat-input-area {
             padding: 16px;
-            background-color: #23232d;
-            border-top: 1px solid #3a3a4c;
+            background-color: #0f172a;
+            border-top: 1px solid #334155;
             display: flex;
             gap: 10px;
-            border-radius: 0 0 12px 12px;
         }
 
         input[type="text"] {
-            background-color: #1e1e24;
-            border: 1px solid #3a3a4c;
-            border-radius: 6px;
-            color: #e0e0e6;
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #e2e8f0;
             padding: 10px 14px;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             outline: none;
         }
 
         input[type="text"]:focus {
-            border-color: #6c5ce7;
+            border-color: #3b82f6;
         }
 
-        #username-input {
-            width: 30%;
+        #new-contact-id {
+            flex: 1;
         }
 
         #message-input {
@@ -110,114 +172,185 @@
         }
 
         button {
-            background-color: #4a47a3;
+            background-color: #2563eb;
             color: white;
             border: none;
-            padding: 10px 18px;
-            border-radius: 6px;
+            padding: 10px 16px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
             transition: background 0.2s;
         }
 
         button:hover {
-            background-color: #5b58c6;
+            background-color: #1d4ed8;
+        }
+
+        .placeholder-text {
+            display: flex;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+            color: #64748b;
         }
     </style>
 </head>
 <body>
 
-<div class="chat-container">
-    <div class="chat-header">
-        <h2>Общий чат</h2>
+<div class="app-container">
+    <!-- Боковая панель -->
+    <div class="sidebar">
+        <div class="user-profile">
+            <div style="font-size: 0.85rem; color: #94a3b8;">Ваш ID для связи:</div>
+            <div class="my-id-badge" id="my-id-display">Загрузка...</div>
+        </div>
+
+        <div class="new-chat-box">
+            <input type="text" id="new-contact-id" placeholder="Вставьте ID собеседника">
+            <button onclick="startNewChat()">Написать</button>
+        </div>
+
+        <div class="chat-list" id="chat-list">
+            <!-- Список чатов загружается здесь -->
+        </div>
     </div>
-    <div class="messages-list" id="messages-list">
-        <!-- Сообщения будут появляться здесь -->
-    </div>
-    <div class="chat-input-area">
-        <input type="text" id="username-input" placeholder="Имя" value="Гость">
-        <input type="text" id="message-input" placeholder="Введите сообщение...">
-        <button onclick="sendMessage()">Отправить</button>
+
+    <!-- Область переписки -->
+    <div class="chat-area">
+        <div class="chat-header" id="chat-header">Выберите диалог</div>
+        <div class="messages-list" id="messages-list">
+            <div class="placeholder-text">Выберите чат слева, чтобы начать переписку</div>
+        </div>
+        <div class="chat-input-area" id="input-area" style="display: none;">
+            <input type="text" id="message-input" placeholder="Напишите сообщение...">
+            <button onclick="sendMessage()">Отправить</button>
+        </div>
     </div>
 </div>
 
 <script>
-    // 1. Вставьте сюда данные из вашего проекта Supabase
+    // 1. Укажите ваши ключи Supabase
     const SUPABASE_URL = 'ВАШ_SUPABASE_URL';
     const SUPABASE_KEY = 'ВАШ_SUPABASE_ANON_KEY';
     
     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const messagesList = document.getElementById('messages-list');
-    const messageInput = document.getElementById('message-input');
-    const usernameInput = document.getElementById('username-input');
+    // Генерация или получение постоянного ID пользователя для этого браузера
+    let myUserId = localStorage.getItem('chat_user_id');
+    if (!myUserId) {
+        myUserId = 'user_' + Math.random().toString(36).substring(2, 9);
+        localStorage.setItem('chat_user_id', myUserId);
+    }
+    document.getElementById('my-id-display').innerText = myUserId;
 
-    // Загрузка старых сообщений при входе
-    async function fetchMessages() {
+    let activeChatPartnerId = null;
+
+    // Генерация уникального ID чата между двумя пользователями (независимо от того, кто первый написал)
+    function getRoomId(userA, userB) {
+        return [userA, userB].sort().join('_');
+    }
+
+    // Начать новый чат
+    function startNewChat() {
+        const targetId = document.getElementById('new-contact-id').value.trim();
+        if (!targetId || targetId === myUserId) {
+            alert('Введите корректный ID собеседника');
+            return;
+        }
+        openChat(targetId);
+        document.getElementById('new-contact-id').value = '';
+    }
+
+    // Открыть диалог
+    async function openChat(partnerId) {
+        activeChatPartnerId = partnerId;
+        document.getElementById('chat-header').innerText = `Чат с ${partnerId}`;
+        document.getElementById('input-area').style.display = 'flex';
+        
+        loadMessages();
+    }
+
+    // Загрузка сообщений личного чата
+    async function loadMessages() {
+        if (!activeChatPartnerId) return;
+
+        const roomId = getRoomId(myUserId, activeChatPartnerId);
+
         const { data, error } = await supabase
-            .from('messages')
+            .from('private_messages')
             .select('*')
+            .eq('room_id', roomId)
             .order('created_at', { ascending: true });
 
-        if (error) console.error('Ошибка загрузки:', error);
-        else {
-            messagesList.innerHTML = '';
-            data.forEach(renderMessage);
-            scrollToBottom();
+        const messagesList = document.getElementById('messages-list');
+        messagesList.innerHTML = '';
+
+        if (error) {
+            console.error('Ошибка загрузки:', error);
+            return;
+        }
+
+        data.forEach(renderMessage);
+        scrollToBottom();
+    }
+
+    // Отправка приватного сообщения
+    async function sendMessage() {
+        const input = document.getElementById('message-input');
+        const text = input.value.trim();
+        if (!text || !activeChatPartnerId) return;
+
+        const roomId = getRoomId(myUserId, activeChatPartnerId);
+
+        const { error } = await supabase
+            .from('private_messages')
+            .insert([{
+                room_id: roomId,
+                sender_id: myUserId,
+                receiver_id: activeChatPartnerId,
+                text: text
+            }]);
+
+        if (error) {
+            console.error('Ошибка отправки:', error);
+        } else {
+            input.value = '';
         }
     }
 
-    // Отправка нового сообщения
-    async function sendMessage() {
-        const text = messageInput.value.trim();
-        const username = usernameInput.value.trim() || 'Аноним';
-
-        if (!text) return;
-
-        const { error } = await supabase
-            .from('messages')
-            .insert([{ username: username, text: text }]);
-
-        if (error) console.error('Ошибка отправки:', error);
-        else messageInput.value = '';
-    }
-
-    // Отображение сообщения в списке
+    // Отображение сообщения на экране
     function renderMessage(msg) {
+        const messagesList = document.getElementById('messages-list');
         const msgElement = document.createElement('div');
-        msgElement.className = 'message-item';
-        msgElement.innerHTML = `
-            <div class="message-author">${escapeHtml(msg.username)}</div>
-            <div class="message-text">${escapeHtml(msg.text)}</div>
-        `;
+        
+        const isMyMessage = msg.sender_id === myUserId;
+        msgElement.className = `message-item ${isMyMessage ? 'outgoing' : 'incoming'}`;
+        msgElement.innerText = msg.text;
+
         messagesList.appendChild(msgElement);
         scrollToBottom();
     }
 
-    // Подписка на новые сообщения в реальном времени (Realtime)
+    // Режим Realtime: получаем сообщения только для текущей комнаты
     supabase
-        .channel('public:messages')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
-            renderMessage(payload.new);
+        .channel('public:private_messages')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'private_messages' }, payload => {
+            const newMsg = payload.new;
+            // Показываем сообщение только если оно относится к активному диалогу
+            if (activeChatPartnerId && newMsg.room_id === getRoomId(myUserId, activeChatPartnerId)) {
+                renderMessage(newMsg);
+            }
         })
         .subscribe();
 
     function scrollToBottom() {
+        const messagesList = document.getElementById('messages-list');
         messagesList.scrollTop = messagesList.scrollHeight;
     }
 
-    function escapeHtml(text) {
-        return text.replace(/[&<>"']/g, function(m) {
-            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
-        });
-    }
-
-    // Разрешаем отправку по клавише Enter
-    messageInput.addEventListener('keypress', (e) => {
+    document.getElementById('message-input').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
     });
-
-    fetchMessages();
 </script>
 
 </body>
