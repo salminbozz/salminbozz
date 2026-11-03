@@ -20,67 +20,90 @@
         <button onclick="registerUser()" class="btn-secondary">Регистрация</button>
         <button onclick="loginUser()" class="btn-primary">Войти</button>
     </div>
-    <div id="error-msg" class="error-text"></div>
+    <div id="error-msg" class="error-text" style="color: #f87171; margin-top: 10px; word-break: break-all;"></div>
 </div>
 
 <script>
     const SUPABASE_URL = 'https://agwwnngvrtemktkfedwx.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_sS_4EgOUfQme_LDMK8WxAQ_v9_O_1L3';
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
+    // Проверка загрузки библиотеки
+    const errorDiv = document.getElementById('error-msg');
+    if (typeof supabase === 'undefined') {
+        errorDiv.innerText = 'Ошибка: библиотека Supabase не загрузилась!';
+    }
+
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     async function registerUser() {
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value.trim();
-        const errorDiv = document.getElementById('error-msg');
-        errorDiv.innerText = '';
+        errorDiv.innerText = 'Запрос регистрации...';
 
         if (!username || !password) {
             errorDiv.innerText = 'Заполните все поля!';
             return;
         }
 
-        // Проверяем, не занят ли логин
-        const { data: existing, error: searchError } = await supabase.from('users').select('*').eq('username', username).maybeSingle();
-        
-        if (existing) {
-            errorDiv.innerText = 'Такой логин уже занят!';
-            return;
-        }
+        try {
+            // Проверяем, не занят ли логин
+            const { data: existing, error: searchError } = await client.from('users').select('*').eq('username', username).maybeSingle();
+            
+            if (searchError) {
+                errorDiv.innerText = 'Ошибка поиска: ' + searchError.message;
+                return;
+            }
 
-        // Регистрируем нового пользователя
-        const { error } = await supabase.from('users').insert([{ username, password }]);
-        if (error) {
-            errorDiv.innerText = 'Ошибка регистрации: ' + error.message;
-        } else {
-            alert('Регистрация успешна! Теперь войдите.');
+            if (existing) {
+                errorDiv.innerText = 'Такой логин уже занят!';
+                return;
+            }
+
+            // Регистрируем нового пользователя
+            const { error } = await client.from('users').insert([{ username, password }]);
+            if (error) {
+                errorDiv.innerText = 'Ошибка вставки: ' + error.message;
+            } else {
+                errorDiv.style.color = '#4ade80';
+                errorDiv.innerText = 'Регистрация успешна! Теперь нажмите Войти.';
+            }
+        } catch (err) {
+            errorDiv.innerText = 'Сбой кода: ' + err.message;
         }
     }
 
     async function loginUser() {
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value.trim();
-        const errorDiv = document.getElementById('error-msg');
-        errorDiv.innerText = '';
+        errorDiv.innerText = 'Вход в систему...';
 
         if (!username || !password) {
             errorDiv.innerText = 'Заполните все поля!';
             return;
         }
 
-        // Ищем пользователя в базе
-        const { data, error } = await supabase
-            .from('users')
-            .select('*')
-            .eq('username', username)
-            .eq('password', password)
-            .maybeSingle();
+        try {
+            // Ищем пользователя в базе
+            const { data, error } = await client
+                .from('users')
+                .select('*')
+                .eq('username', username)
+                .eq('password', password)
+                .maybeSingle();
 
-        if (error || !data) {
-            errorDiv.innerText = 'Неверный логин или пароль!';
-        } else {
-            // Сохраняем имя текущего пользователя в память браузера и перенаправляем в чат
-            localStorage.setItem('current_user', username);
-            window.location.href = 'chat.html';
+            if (error) {
+                errorDiv.innerText = 'Ошибка входа: ' + error.message;
+                return;
+            }
+
+            if (!data) {
+                errorDiv.innerText = 'Неверный логин или пароль!';
+            } else {
+                localStorage.setItem('current_user', username);
+                window.location.href = 'chat.html';
+            }
+        } catch (err) {
+            errorDiv.innerText = 'Сбой кода: ' + err.message;
         }
     }
 </script>
