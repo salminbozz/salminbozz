@@ -3,344 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ты еще вернёшься к нам</title>
+    <title>Приватный Чат</title>
+    <!-- Подключаем клиент Supabase для работы с базой данных -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        
-        body { 
-            background-color: #0b0f19; 
-            color: #f8fafc; 
-            min-height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            padding: 20px 10px 120px 10px; 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
-        
-        .header-banner { 
-            width: 100%; 
-            max-width: 600px; 
-            aspect-ratio: 5 / 1.5; 
-            border-radius: 16px; 
-            margin-bottom: 25px; 
-            background-color: #1e1b4b; 
-            background-image: url('banner.jpg'); 
-            background-size: cover; 
-            background-position: center;
-            border: 1px solid rgba(168, 85, 247, 0.4); 
-        }
-        
-        .nav-menu { display: flex; gap: 10px; margin-bottom: 25px; background: rgba(21, 29, 47, 0.6); padding: 6px; border-radius: 12px; z-index: 10; }
-        .nav-btn { background: transparent; border: none; color: #94a3b8; padding: 10px 20px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: 0.3s; font-size: 14px;}
-        .nav-btn.active { background: #a855f7; color: #fff; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3); }
-        
-        .tab-content { display: none; width: 100%; max-width: 600px; }
-        .tab-content.active { display: block; }
-        
-        #main-tab { display: none; flex-direction: column; justify-content: center; align-items: center; }
-        #main-tab.active { display: flex; }
-        
-        .contract-card { 
-            position: relative;
-            background-image: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.85)), url('contract_bg.jpeg'); 
-            background-size: cover;
-            background-position: center;
-            padding: 40px 30px; 
-            border-radius: 20px; 
-            text-align: center; 
-            border: 1px solid rgba(168, 85, 247, 0.4); 
-            box-shadow: 0 10px 30px rgba(168, 85, 247, 0.15); 
-            width: 100%;
-            overflow: hidden;
-        }
-        .contract-card h1 { font-size: 22px; color: #ffffff; margin-bottom: 15px; position: relative; z-index: 2; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6); }
-        .contract-card p { font-size: 14px; color: #e2e8f0; margin-bottom: 25px; line-height: 1.6; position: relative; z-index: 2; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6); }
-        .contract-btn { display: inline-block; background: #a855f7; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 10px; font-weight: 600; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4); transition: 0.2s ease; position: relative; z-index: 2; }
-        .contract-btn:hover { background: #9333ea; transform: translateY(-1px); }
 
-        .auth-card {
-            background: linear-gradient(135deg, #151d2f 0%, #0f172a 100%);
-            padding: 30px;
-            border-radius: 20px;
-            border: 1px solid rgba(168, 85, 247, 0.3);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-            width: 100%;
+        body {
+            background-color: #1e1e24;
+            color: #e0e0e6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
-        .auth-card h2 { font-size: 20px; margin-bottom: 20px; text-align: center; color: #fff; }
-        .auth-form { display: flex; flex-direction: column; gap: 15px; }
-        .auth-form input {
-            background: #0b0f19;
-            border: 1px solid rgba(168, 85, 247, 0.2);
-            padding: 12px 16px;
-            border-radius: 10px;
-            color: #fff;
-            font-size: 14px;
-            outline: none;
-            transition: 0.3s;
-        }
-        .auth-form input:focus { border-color: #a855f7; box-shadow: 0 0 8px rgba(168, 85, 247, 0.2); }
-        .auth-buttons { display: flex; gap: 10px; margin-top: 5px; }
-        .submit-btn { flex: 1; background: #a855f7; color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .submit-btn:hover { background: #9333ea; }
-        .secondary-btn { background: rgba(148, 163, 184, 0.1); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.2); }
-        .secondary-btn:hover { background: rgba(148, 163, 184, 0.2); color: #fff; }
-        
-        .profile-info { text-align: center; }
-        .profile-info p { margin-bottom: 10px; font-size: 16px; color: #cbd5e1; }
-        .profile-info #profile-name { margin-bottom: 10px; font-size: 16px; color: #a855f7; font-weight: 600; }
 
-        .admin-panel {
-            margin-top: 25px;
-            padding: 20px;
-            background: rgba(220, 38, 38, 0.1);
-            border: 1px solid rgba(220, 38, 38, 0.4);
+        .chat-container {
+            width: 100%;
+            max-width: 600px;
+            height: 90vh;
+            background-color: #2b2b36;
             border-radius: 12px;
-            text-align: left;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            border: 1px solid #3a3a4c;
         }
-        .admin-panel h3 { color: #f87171; margin-bottom: 10px; font-size: 16px; display: flex; align-items: center; gap: 8px;}
-        .admin-panel p { color: #fca5a5; font-size: 13px; margin-bottom: 0; }
 
-        .download-image-link {
-            position: fixed;
-            bottom: 70px; right: 20px; width: 55px; height: 55px; 
-            background-image: url('max.png'); background-size: cover; background-position: center;
-            border-radius: 50%; border: 2px solid #a855f7; box-shadow: 0 8px 24px rgba(168, 85, 247, 0.3);
-            z-index: 999; transition: transform 0.2s ease; display: block;
+        .chat-header {
+            padding: 16px 20px;
+            background-color: #23232d;
+            border-bottom: 1px solid #3a3a4c;
+            border-radius: 12px 12px 0 0;
         }
-        .download-image-link:hover { transform: scale(1.05); }
-        
-        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding: 0 5px; }
-        
-        .news-feed { display: flex; flex-direction: column; gap: 16px; width: 100%; }
-        .florein-card { background: #111622; border: 1px solid rgba(168, 85, 247, 0.15); border-radius: 16px; padding: 24px; width: 100%; }
-        .card-date { font-size: 13px; color: #c084fc; font-weight: 800; margin-bottom: 12px; }
-        h3 { font-size: 17px; color: #ffffff; margin-bottom: 12px; }
-        p { font-size: 14px; color: #94a3b8; line-height: 1.5; }
-        
-        .footer-badge { position: fixed; bottom: 0; left: 0; width: 100%; background: #070a12; border-top: 1px solid rgba(168, 85, 247, 0.2); padding: 12px 0; text-align: center; font-size: 11px; color: #a78bfa; text-transform: uppercase; letter-spacing: 1px; z-index: 1010; }
 
-        @media (max-width: 640px) { 
-            .download-image-link { bottom: 60px; right: 15px; width: 50px; height: 50px; } 
-            body { padding-bottom: 140px; }
+        .chat-header h2 {
+            font-size: 1.1rem;
+            color: #a0a0b2;
+            font-weight: 500;
+        }
+
+        .messages-list {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message-item {
+            background-color: #353545;
+            padding: 10px 14px;
+            border-radius: 8px;
+            max-width: 80%;
+            word-wrap: break-word;
+            border-left: 3px solid #6c5ce7;
+        }
+
+        .message-author {
+            font-size: 0.8rem;
+            color: #8a8aa3;
+            margin-bottom: 4px;
+        }
+
+        .message-text {
+            font-size: 0.95rem;
+            line-height: 1.4;
+            color: #eeeeee;
+        }
+
+        .chat-input-area {
+            padding: 16px;
+            background-color: #23232d;
+            border-top: 1px solid #3a3a4c;
+            display: flex;
+            gap: 10px;
+            border-radius: 0 0 12px 12px;
+        }
+
+        input[type="text"] {
+            background-color: #1e1e24;
+            border: 1px solid #3a3a4c;
+            border-radius: 6px;
+            color: #e0e0e6;
+            padding: 10px 14px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: #6c5ce7;
+        }
+
+        #username-input {
+            width: 30%;
+        }
+
+        #message-input {
+            flex: 1;
+        }
+
+        button {
+            background-color: #4a47a3;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #5b58c6;
         }
     </style>
 </head>
 <body>
 
-    <div class="header-banner"></div>
+<div class="chat-container">
+    <div class="chat-header">
+        <h2>Общий чат</h2>
+    </div>
+    <div class="messages-list" id="messages-list">
+        <!-- Сообщения будут появляться здесь -->
+    </div>
+    <div class="chat-input-area">
+        <input type="text" id="username-input" placeholder="Имя" value="Гость">
+        <input type="text" id="message-input" placeholder="Введите сообщение...">
+        <button onclick="sendMessage()">Отправить</button>
+    </div>
+</div>
+
+<script>
+    // 1. Вставьте сюда данные из вашего проекта Supabase
+    const SUPABASE_URL = 'ВАШ_SUPABASE_URL';
+    const SUPABASE_KEY = 'ВАШ_SUPABASE_ANON_KEY';
     
-    <div class="nav-menu">
-        <button class="nav-btn active" onclick="openTab(this, 'main-tab')">Главная</button>
-        <button class="nav-btn" onclick="openTab(this, 'news-tab')">Новости</button>
-        <button class="nav-btn" onclick="openTab(this, 'auth-tab')">Профиль</button>
-    </div>
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    <div class="tab-content active" id="main-tab">
-        <div class="contract-card">
-            <h1>Служба по контракту выбор достойных</h1>
-            <p>Узнайте ключевые условия, актуальные требования к кандидатам, подробную информацию о выплатах, льготах и социальных гарантиях для военнослужащих по контракту.</p>
-            <a href="https://contract.gosuslugi.ru/" target="_blank" class="contract-btn">Подробнее о контракте</a>
-        </div>
-    </div>
+    const messagesList = document.getElementById('messages-list');
+    const messageInput = document.getElementById('message-input');
+    const usernameInput = document.getElementById('username-input');
 
-    <!-- Вкладка Новостей полностью под твоим контролем -->
-    <div class="tab-content" id="news-tab">
-        <div class="section-header">
-            <h2>Лента новостей</h2>
-        </div>
-        <div class="news-feed" id="news-container">
-            
-            <!-- Твоя новость -->
-            <div class="florein-card">
-                <div class="card-date">01.06.26 10:20</div>
-                <h3>Открыта регистрация новых пользователей</h3>
-                <p>Теперь на сайте доступна система регистрации. Создайте свой аккаунт во вкладке «Профиль», чтобы получить доступ к закрытым разделам и персонализированным настройкам.</p>
-            </div>
+    // Загрузка старых сообщений при входе
+    async function fetchMessages() {
+        const { data, error } = await supabase
+            .from('messages')
+            .select('*')
+            .order('created_at', { ascending: true });
 
-        </div>
-    </div>
-
-    <div class="tab-content" id="auth-tab">
-        <div class="auth-card" id="auth-form-block">
-            <h2 id="auth-title">Войти в аккаунт</h2>
-            <div class="auth-form">
-                <input type="text" id="auth-name" placeholder="Имя" style="display: none;">
-                <input type="email" id="auth-email" placeholder="E-mail">
-                <input type="password" id="auth-password" placeholder="Пароль">
-                <div class="auth-buttons">
-                    <button class="submit-btn" id="main-auth-btn" onclick="handleAuth()">Войти</button>
-                    <button class="submit-btn secondary-btn" id="toggle-auth-btn" onclick="toggleAuthMode()">Регистрация</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="auth-card profile-info" id="profile-block" style="display: none;">
-            <h2>Личный кабинет</h2>
-            <p id="profile-name">Загрузка...</p>
-            <p id="profile-email"></p>
-
-            <button class="submit-btn secondary-btn" style="margin-top: 20px;" onclick="logout()">Выйти из аккаунта</button>
-        </div>
-    </div>
-
-    <div class="footer-badge">🤡Ваши данные уже на даркнете🤡</div>
-
-    <a href="https://max.ru/" target="_blank" class="download-image-link" title="Скачать Max"></a>
-
-    <script>
-        const SUPABASE_URL = 'https://aapkvsfbgbbtxofxmyqn.supabase.co'; 
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhcGt2c2ZiZ2JidHhvZnhteXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMjA1NDgsImV4cCI6MjA5NTc5NjU0OH0.1yPqAnrEMpHnZPXwbR9DoqBNZDRk5C0a3EGwD1tjTGQ';
-        
-        const nativeSupabase = {
-            auth: {
-                async signUp({ email, password, options }) {
-                    return nativeSupabase._request('/auth/v1/signup', { email, password, options });
-                },
-                async signInWithPassword({ email, password }) {
-                    const res = await nativeSupabase._request('/auth/v1/token?grant_type=password', { email, password });
-                    if (!res.error && res.data && res.data.access_token) {
-                        localStorage.setItem('sb_token', res.data.access_token);
-                    }
-                    return res;
-                },
-                async getUser() {
-                    const token = localStorage.getItem('sb_token');
-                    if (!token) return { data: { user: null }, error: null };
-                    const res = await nativeSupabase._request('/auth/v1/user', null, 'GET', token);
-                    if (res.error) {
-                        localStorage.removeItem('sb_token');
-                        return { data: { user: null }, error: res.error };
-                    }
-                    return { data: { user: res.data }, error: null };
-                },
-                async signOut() {
-                    localStorage.removeItem('sb_token');
-                    return { error: null };
-                }
-            },
-            async _request(path, body, method = 'POST', token = null) {
-                try {
-                    const headers = {
-                        'apikey': SUPABASE_KEY,
-                        'Content-Type': 'application/json'
-                    };
-                    if (token) headers['Authorization'] = `Bearer ${token}`;
-                    else if (localStorage.getItem('sb_token')) headers['Authorization'] = `Bearer ${localStorage.getItem('sb_token')}`;
-
-                    const options = { method, headers };
-                    if (body && method !== 'GET') options.body = JSON.stringify(body);
-
-                    const response = await fetch(`${SUPABASE_URL}${path}`, options);
-                    const data = await response.json();
-                    
-                    if (!response.ok) return { data: null, error: { message: data.msg || data.error_description || 'Ошибка запроса' } };
-                    return { data, error: null };
-                } catch (e) {
-                    return { data: null, error: { message: 'Нет подключения к серверу авторизации.' } };
-                }
-            }
-        };
-    </script>
-
-    <script>
-        function openTab(btn, id) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            
-            const targetTab = document.getElementById(id);
-            if (targetTab) {
-                targetTab.classList.add('active');
-            }
-            btn.classList.add('active');
+        if (error) console.error('Ошибка загрузки:', error);
+        else {
+            messagesList.innerHTML = '';
+            data.forEach(renderMessage);
+            scrollToBottom();
         }
+    }
 
-        let isLoginMode = true;
-        function toggleAuthMode() {
-            isLoginMode = !isLoginMode;
-            document.getElementById('auth-title').innerText = isLoginMode ? 'Войти в аккаунт' : 'Регистрация нового аккаунта';
-            document.getElementById('main-auth-btn').innerText = isLoginMode ? 'Войти' : 'Создать аккаунт';
-            document.getElementById('toggle-auth-btn').innerText = isLoginMode ? 'Регистрация' : 'Уже есть аккаунт';
-            document.getElementById('auth-name').style.display = isLoginMode ? 'none' : 'block';
-        }
-    </script>
+    // Отправка нового сообщения
+    async function sendMessage() {
+        const text = messageInput.value.trim();
+        const username = usernameInput.value.trim() || 'Аноним';
 
-    <script>
-        async function handleAuth() {
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
-            const name = document.getElementById('auth-name').value;
+        if (!text) return;
 
-            if (!email || !password || (!isLoginMode && !name)) return alert('Заполните все поля!');
+        const { error } = await supabase
+            .from('messages')
+            .insert([{ username: username, text: text }]);
 
-            if (isLoginMode) {
-                const { data, error } = await nativeSupabase.auth.signInWithPassword({ email, password });
-                if (error) alert('Ошибка входа: ' + error.message);
-                else checkUser();
-            } else {
-                const { data, error } = await nativeSupabase.auth.signUp({ 
-                    email, 
-                    password,
-                    options: {
-                        data: { name: name }
-                    }
-                });
-                if (error) alert('Ошибка регистрации: ' + error.message);
-                else alert('Регистрация успешна! Теперь вы можете войти.');
-            }
-        }
+        if (error) console.error('Ошибка отправки:', error);
+        else messageInput.value = '';
+    }
 
-        async function logout() {
-            await nativeSupabase.auth.signOut();
-            checkUser();
-        }
+    // Отображение сообщения в списке
+    function renderMessage(msg) {
+        const msgElement = document.createElement('div');
+        msgElement.className = 'message-item';
+        msgElement.innerHTML = `
+            <div class="message-author">${escapeHtml(msg.username)}</div>
+            <div class="message-text">${escapeHtml(msg.text)}</div>
+        `;
+        messagesList.appendChild(msgElement);
+        scrollToBottom();
+    }
 
-        async function checkUser() {
-            try {
-                const { data: { user } } = await nativeSupabase.auth.getUser();
-                if (user) {
-                    document.getElementById('auth-form-block').style.display = 'none';
-                    document.getElementById('profile-block').style.display = 'block';
-                    
-                    if (user.user_metadata && user.user_metadata.name) {
-                        document.getElementById('profile-name').innerText = user.user_metadata.name;
-                    } else {
-                        document.getElementById('profile-name').innerText = 'имя пользователя не заданно';
-                    }
-                    
-                    document.getElementById('profile-email').innerText = `моя почта: ${user.email}`;
-                    
-                    const oldBadge = document.getElementById('user-role-badge');
-                    if (oldBadge) oldBadge.remove();
+    // Подписка на новые сообщения в реальном времени (Realtime)
+    supabase
+        .channel('public:messages')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+            renderMessage(payload.new);
+        })
+        .subscribe();
 
-                    const roleBadge = document.createElement('div');
-                    roleBadge.id = 'user-role-badge';
-                    roleBadge.className = 'admin-panel';
-                    roleBadge.style.textAlign = 'center';
-                    roleBadge.style.marginTop = '20px';
-                    
-                    if (user.app_metadata && user.app_metadata.role === 'admin') {
-                        roleBadge.style.background = 'rgba(220, 38, 38, 0.1)';
-                        roleBadge.style.borderColor = 'rgba(220, 38, 38, 0.4)';
-                        roleBadge.innerHTML = `<h3 style="color: #f87171; margin:0; display: inline-flex; align-items: center; gap: 8px;">👑 Роль: Администратор</h3>`;
-                    } else {
-                        roleBadge.style.background = 'rgba(168, 85, 247, 0.1)';
-                        roleBadge.style.borderColor = 'rgba(168, 85, 247, 0.4)';
-                        roleBadge.innerHTML = `<h3 style="color: #c084fc; margin:0; display: inline-flex; align-items: center; gap: 8px;">👤 Роль: Пользователь</h3>`;
-                    }
-                    
-                    const logoutBtn = document.querySelector('button[onclick="logout()"]');
-                    logoutBtn.parentNode.insertBefore(roleBadge, logoutBtn);
+    function scrollToBottom() {
+        messagesList.scrollTop = messagesList.scrollHeight;
+    }
 
-                } else {
-                    document.getElementById('auth-form-block').style.display = 'block';
-                    document.getElementById('profile-block').style.display = 'none';
-                    const oldBadge = document.getElementById('user-role-badge');
-                    if (oldBadge) oldBadge.remove();
-                }
-            } catch (e) {}
-        }
-        
-        document.addEventListener('DOMContentLoaded', checkUser);
-    </script>
+    function escapeHtml(text) {
+        return text.replace(/[&<>"']/g, function(m) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+        });
+    }
+
+    // Разрешаем отправку по клавише Enter
+    messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    fetchMessages();
+</script>
+
 </body>
 </html>
