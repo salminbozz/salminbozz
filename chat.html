@@ -9,26 +9,22 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background-color: #0f172a; color: #e2e8f0; display: flex; flex-direction: column; min-height: 100vh; padding: 12px; }
 
-        /* Верхняя панель (Профиль) */
         .top-bar { background: #1e293b; padding: 12px 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155; margin-bottom: 12px; }
         .user-info { font-weight: 600; color: #38bdf8; font-size: 0.95rem; }
         .btn-logout { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem; }
 
-        /* Блок поиска нового собеседника */
         .search-box { background: #1e293b; padding: 10px; border-radius: 12px; display: flex; gap: 8px; border: 1px solid #334155; margin-bottom: 12px; }
         input { background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; padding: 10px; outline: none; flex: 1; font-size: 0.9rem; }
         input:focus { border-color: #3b82f6; }
         button.btn-primary { background: #2563eb; color: white; border: none; border-radius: 8px; padding: 10px 14px; font-weight: 600; cursor: pointer; }
 
-        /* Список существующих диалогов */
         .recent-chats { margin-bottom: 12px; }
         .section-title { font-size: 0.8rem; text-transform: uppercase; color: #94a3b8; margin-bottom: 6px; padding-left: 4px; font-weight: 700; }
         .chats-list { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
         .chat-chip { background: #1e293b; border: 1px solid #334155; padding: 8px 14px; border-radius: 20px; font-size: 0.9rem; cursor: pointer; white-space: nowrap; transition: 0.2s; }
         .chat-chip.active { background: #2563eb; border-color: #3b82f6; color: white; }
 
-        /* Область открытого чата */
-        .chat-container { background: #1e293b; border-radius: 12px; border: 1px solid #334155; display: flex; flex-direction: column; height: 55vh; overflow: hidden; }
+        .chat-container { background: #1e293b; border-radius: 12px; border: 1px solid #334155; display: flex; flex-direction: column; height: 50vh; overflow: hidden; }
         .chat-header { background: #0f172a; padding: 12px 16px; font-weight: 600; border-bottom: 1px solid #334155; font-size: 0.95rem; }
         .messages-list { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
         .message-item { max-width: 80%; padding: 8px 12px; border-radius: 10px; font-size: 0.9rem; word-break: break-word; }
@@ -36,25 +32,21 @@
         .message-item.incoming { align-self: flex-start; background: #334155; color: #e2e8f0; }
         .placeholder { margin: auto; color: #64748b; font-size: 0.85rem; text-align: center; }
 
-        /* Поле ввода сообщения */
         .chat-input-bar { padding: 10px; background: #0f172a; border-top: 1px solid #334155; display: flex; gap: 8px; }
     </style>
 </head>
 <body>
 
-    <!-- 1. Верхний блок: Имя пользователя -->
     <div class="top-bar">
         <span class="user-info" id="my-username">Вы: Загрузка...</span>
         <button onclick="logout()" class="btn-logout">Выйти</button>
     </div>
 
-    <!-- 2. Блок: Поиск и создание нового чата -->
     <div class="search-box">
         <input type="text" id="target-user" placeholder="Имя собеседника...">
         <button onclick="startNewChat()" class="btn-primary">Написать</button>
     </div>
 
-    <!-- 3. Список чатов (Личка с теми, кому уже писали) -->
     <div class="recent-chats">
         <div class="section-title">Ваши диалоги:</div>
         <div class="chats-list" id="recent-chats-list">
@@ -62,7 +54,6 @@
         </div>
     </div>
 
-    <!-- 4. Окно сообщений -->
     <div class="chat-container">
         <div class="chat-header" id="chat-header">Выберите собеседника выше</div>
         <div class="messages-list" id="messages-list">
@@ -92,7 +83,6 @@
         return [userA, userB].sort().join('_');
     }
 
-    // Загрузка списка пользователей, с кем есть сообщения
     async function loadRecentChats() {
         const { data, error } = await client
             .from('private_messages')
@@ -107,7 +97,6 @@
             return;
         }
 
-        // Собираем уникальные имена собеседников
         const partners = new Set();
         data.forEach(msg => {
             if (msg.sender !== currentUser) partners.add(msg.sender);
@@ -132,7 +121,7 @@
         activePartner = partner;
         document.getElementById('chat-header').innerText = `Чат с: ${partner}`;
         document.getElementById('input-area').style.display = 'flex';
-        loadRecentChats(); // обновить активную подсветку
+        loadRecentChats();
         loadMessages();
     }
 
@@ -154,7 +143,7 @@
             .from('private_messages')
             .select('*')
             .eq('room_id', roomId)
-            .order('created_at', { ascending: true });
+            .order('id', { ascending: true });
         
         const list = document.getElementById('messages-list');
         list.innerHTML = '';
@@ -194,10 +183,8 @@
         }
     }
 
-    // Автоматическое обновление списка диалогов при открытии
     loadRecentChats();
 
-    // Подписка на сообщения в реальном времени
     client.channel('realtime_chat')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'private_messages' }, payload => {
             loadRecentChats();
